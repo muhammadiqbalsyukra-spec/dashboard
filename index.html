@@ -21,7 +21,7 @@ body{
 
 /* SIDEBAR */
 .sidebar{
-  width:220px;
+  width:200px;
   background:#020617;
   padding:20px;
   display:flex;
@@ -35,24 +35,40 @@ body{
   margin-bottom:5px;
   cursor:pointer;
 }
+.menu:hover{background:#3b82f6;}
 
-.menu:hover{
-  background:#3b82f6;
-}
-
-/* MAIN */
+/* MAIN CENTER */
 .main{
   flex:1;
   padding:30px;
+  max-width:1200px;
+  margin:auto;
+}
+
+/* GRID */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+  gap:20px;
+}
+
+.double{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:20px;
+}
+
+.full{
+  grid-column:1 / -1;
 }
 
 /* CARD */
 .card{
   background:linear-gradient(145deg,#1e293b,#0f172a);
   padding:20px;
-  border-radius:16px;
+  border-radius:18px;
   margin-bottom:15px;
-  box-shadow:0 10px 25px rgba(0,0,0,0.4);
+  box-shadow:0 10px 25px rgba(0,0,0,0.5);
 }
 
 /* INPUT */
@@ -63,33 +79,19 @@ input,select,button{
   border-radius:8px;
   border:none;
 }
-
 input,select{
   background:#020617;
   color:white;
   border:1px solid #334155;
 }
+button{background:#3b82f6;color:white;}
+button:disabled{background:#555;}
 
-button{
-  background:#3b82f6;
-  color:white;
-}
-
-button:disabled{
-  background:#555;
-}
-
-/* STATS */
-.stats{
-  display:flex;
-  gap:15px;
-}
-
+/* STAT */
 .stat{
-  flex:1;
   text-align:center;
-  padding:20px;
-  border-radius:14px;
+  padding:25px;
+  border-radius:16px;
   background:linear-gradient(135deg,#3b82f6,#06b6d4);
 }
 
@@ -100,6 +102,10 @@ button:disabled{
 }
 
 .hidden{display:none;}
+
+@media(max-width:768px){
+  .double{grid-template-columns:1fr;}
+}
 </style>
 </head>
 
@@ -126,7 +132,6 @@ button:disabled{
     <div class="menu" onclick="show('input')">Input</div>
     <div class="menu" onclick="show('laporan')">Laporan</div>
   </div>
-
   <div>
     <div class="menu" onclick="logout()">Logout</div>
   </div>
@@ -143,7 +148,6 @@ button:disabled{
     <h3>Filter</h3>
     <input type="date" id="start" onchange="render()">
     <input type="date" id="end" onchange="render()">
-
     <select id="filterCabang" onchange="render()">
       <option value="">Semua Cabang</option>
       <option>Cabang A</option>
@@ -151,7 +155,8 @@ button:disabled{
     </select>
   </div>
 
-  <div class="stats">
+  <!-- STATS -->
+  <div class="grid">
     <div class="stat">
       <h2 id="total">Rp 0</h2>
       <p>Total Omset</p>
@@ -166,19 +171,25 @@ button:disabled{
     </div>
   </div>
 
-  <div class="card">
+  <!-- CHART -->
+  <div class="card full">
     <h3>📊 Grafik Omset</h3>
     <canvas id="chart" height="120"></canvas>
   </div>
 
-  <div class="card">
-    <h3>🏆 Top Toko</h3>
-    <div id="topToko"></div>
-  </div>
+  <!-- BOTTOM -->
+  <div class="double">
 
-  <div class="card">
-    <h3>📌 Insight</h3>
-    <div id="insight"></div>
+    <div class="card">
+      <h3>🏆 Top Toko</h3>
+      <div id="topToko"></div>
+    </div>
+
+    <div class="card">
+      <h3>📌 Insight</h3>
+      <div id="insight"></div>
+    </div>
+
   </div>
 
 </div>
