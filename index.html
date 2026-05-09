@@ -11,18 +11,95 @@
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 
 <style>
-body{margin:0;background:#020617;color:white;font-family:sans-serif;display:flex;}
-.sidebar{width:220px;background:#0f172a;padding:20px;display:flex;flex-direction:column;justify-content:space-between;}
-.menu{padding:10px;border-radius:6px;cursor:pointer;}
-.menu:hover{background:#3b82f6;}
-.main{flex:1;padding:20px;}
-.card{background:#1e293b;padding:15px;border-radius:10px;margin-bottom:10px;}
-input,button,select{width:100%;padding:10px;margin-top:5px;}
-button{background:#3b82f6;color:white;border:none;}
-button:disabled{background:#555;}
+body{
+  margin:0;
+  background:linear-gradient(135deg,#020617,#0f172a);
+  color:white;
+  font-family:sans-serif;
+  display:flex;
+}
+
+/* SIDEBAR */
+.sidebar{
+  width:220px;
+  background:#020617;
+  padding:20px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+}
+
+.menu{
+  padding:12px;
+  border-radius:8px;
+  margin-bottom:5px;
+  cursor:pointer;
+}
+
+.menu:hover{
+  background:#3b82f6;
+}
+
+/* MAIN */
+.main{
+  flex:1;
+  padding:30px;
+}
+
+/* CARD */
+.card{
+  background:linear-gradient(145deg,#1e293b,#0f172a);
+  padding:20px;
+  border-radius:16px;
+  margin-bottom:15px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.4);
+}
+
+/* INPUT */
+input,select,button{
+  width:100%;
+  padding:10px;
+  margin-top:5px;
+  border-radius:8px;
+  border:none;
+}
+
+input,select{
+  background:#020617;
+  color:white;
+  border:1px solid #334155;
+}
+
+button{
+  background:#3b82f6;
+  color:white;
+}
+
+button:disabled{
+  background:#555;
+}
+
+/* STATS */
+.stats{
+  display:flex;
+  gap:15px;
+}
+
+.stat{
+  flex:1;
+  text-align:center;
+  padding:20px;
+  border-radius:14px;
+  background:linear-gradient(135deg,#3b82f6,#06b6d4);
+}
+
+/* LOGIN */
+.login-box{
+  max-width:300px;
+  margin:100px auto;
+}
+
 .hidden{display:none;}
-.stats{display:flex;gap:10px;}
-.stat{flex:1;text-align:center;}
 </style>
 </head>
 
@@ -30,7 +107,7 @@ button:disabled{background:#555;}
 
 <!-- LOGIN -->
 <div id="loginPage" class="main">
-  <div class="card" style="max-width:300px;margin:100px auto;">
+  <div class="card login-box">
     <h3>Login</h3>
     <input id="email" placeholder="Email">
     <input id="password" type="password" placeholder="Password">
@@ -61,11 +138,12 @@ button:disabled{background:#555;}
 
 <!-- DASHBOARD -->
 <div id="dashboard">
+
   <div class="card">
+    <h3>Filter</h3>
     <input type="date" id="start" onchange="render()">
     <input type="date" id="end" onchange="render()">
 
-    <!-- 🔥 Tambahan filter cabang -->
     <select id="filterCabang" onchange="render()">
       <option value="">Semua Cabang</option>
       <option>Cabang A</option>
@@ -74,34 +152,35 @@ button:disabled{background:#555;}
   </div>
 
   <div class="stats">
-    <div class="card stat">
-      <h3 id="total">Rp 0</h3>
+    <div class="stat">
+      <h2 id="total">Rp 0</h2>
       <p>Total Omset</p>
     </div>
-    <div class="card stat">
-      <h3 id="trx">0</h3>
+    <div class="stat">
+      <h2 id="trx">0</h2>
       <p>Transaksi</p>
     </div>
-    <div class="card stat">
-      <h3 id="avg">Rp 0</h3>
+    <div class="stat">
+      <h2 id="avg">Rp 0</h2>
       <p>Avg</p>
     </div>
   </div>
 
   <div class="card">
-    <h4>Top Toko</h4>
+    <h3>📊 Grafik Omset</h3>
+    <canvas id="chart" height="120"></canvas>
+  </div>
+
+  <div class="card">
+    <h3>🏆 Top Toko</h3>
     <div id="topToko"></div>
   </div>
 
-  <!-- 🔥 Insight -->
   <div class="card">
-    <h4>Insight</h4>
+    <h3>📌 Insight</h3>
     <div id="insight"></div>
   </div>
 
-  <div class="card">
-    <canvas id="chart"></canvas>
-  </div>
 </div>
 
 <!-- INPUT -->
@@ -148,7 +227,6 @@ const firebaseConfig = {
   messagingSenderId: "795043382766",
   appId: "1:795043382766:web:9d908c909fb6a2774dfaff"
 };
-
 firebase.initializeApp(firebaseConfig);
 const db=firebase.firestore();
 const auth=firebase.auth();
@@ -158,13 +236,11 @@ let data=[];
 let isLogin=false;
 let chartInstance;
 
-// ✅ AMAN: tunggu DOM siap
-window.onload = () => {
-  document.getElementById("tanggal").value =
+window.onload=()=>{
+  document.getElementById("tanggal").value=
     new Date().toISOString().split("T")[0];
 };
 
-// AUTH
 async function login(){
   await auth.signInWithEmailAndPassword(email.value,password.value);
 }
@@ -190,13 +266,11 @@ auth.onAuthStateChanged(async user=>{
     userInfo.innerText=user.email+" ("+role+")";
     btnSimpan.disabled=false;
   }else{
-    isLogin=false;
     loginPage.classList.remove("hidden");
     app.classList.add("hidden");
   }
 });
 
-// NAV
 function show(id){
   dashboard.classList.add("hidden");
   input.classList.add("hidden");
@@ -204,7 +278,6 @@ function show(id){
   document.getElementById(id).classList.remove("hidden");
 }
 
-// SIMPAN
 async function simpan(){
   if(!isLogin) return alert("Login dulu");
 
@@ -219,22 +292,18 @@ async function simpan(){
   omset.value="";
 }
 
-// DELETE
 async function del(id){
   if(role!=="admin") return alert("Admin only");
   await db.collection("sales").doc(id).delete();
 }
 
-// LOAD
 db.collection("sales").onSnapshot(snap=>{
   data=snap.docs.map(d=>({...d.data(),id:d.id}));
   render();
 });
 
-// FORMAT
 function rp(a){return "Rp "+Number(a||0).toLocaleString("id-ID");}
 
-// RENDER
 function render(){
 
   let s=start.value;
@@ -248,7 +317,6 @@ function render(){
     return true;
   });
 
-  // SUMMARY
   let totalVal=f.reduce((a,b)=>a+(b.omset||0),0);
   let trxVal=f.length;
   let avgVal=trxVal?Math.round(totalVal/trxVal):0;
@@ -257,11 +325,9 @@ function render(){
   trx.innerText=trxVal;
   avg.innerText=rp(avgVal);
 
-  // TOP TOKO
   let perToko={};
   f.forEach(d=>{
-    let t=d.toko||"Unknown";
-    perToko[t]=(perToko[t]||0)+(d.omset||0);
+    perToko[d.toko]=(perToko[d.toko]||0)+d.omset;
   });
 
   let sorted=Object.entries(perToko).sort((a,b)=>b[1]-a[1]);
@@ -269,19 +335,14 @@ function render(){
   topToko.innerHTML=sorted.slice(0,3)
     .map(x=>`${x[0]} (${rp(x[1])})`).join("<br>");
 
-  // 🔥 INSIGHT
-  let best=sorted[0];
-  let worst=sorted[sorted.length-1];
+  insight.innerHTML = sorted.length ? `
+    🔥 Terbaik: ${sorted[0][0]}<br>
+    ⚠️ Terlemah: ${sorted[sorted.length-1][0]}
+  ` : "Belum ada data";
 
-  insight.innerHTML = `
-    🔥 Terbaik: ${best?best[0]:"-"} <br>
-    ⚠️ Terlemah: ${worst?worst[0]:"-"}
-  `;
-
-  // CHART
   let perHari={};
   f.forEach(d=>{
-    perHari[d.tanggal]=(perHari[d.tanggal]||0)+(d.omset||0);
+    perHari[d.tanggal]=(perHari[d.tanggal]||0)+d.omset;
   });
 
   let labels=Object.keys(perHari);
@@ -291,10 +352,18 @@ function render(){
 
   chartInstance=new Chart(chart,{
     type:'line',
-    data:{labels,datasets:[{label:"Omset",data:values}]}
+    data:{
+      labels: labels.length?labels:["Tidak ada data"],
+      datasets:[{
+        label:"Omset",
+        data: values.length?values:[0],
+        borderWidth:3,
+        tension:0.4,
+        fill:true
+      }]
+    }
   });
 
-  // TABLE
   table.innerHTML=f.map(d=>`
   <tr>
     <td>${d.tanggal}</td>
