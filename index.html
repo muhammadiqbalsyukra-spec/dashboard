@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard Sales PRO</title>
+<title>Sales Monitor PRO</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -15,11 +15,10 @@ body {
 }
 
 header {
-  background: linear-gradient(135deg,#1e3a8a,#2563eb);
+  background: linear-gradient(135deg,#0f172a,#1e293b);
   color: white;
   padding: 20px;
   text-align: center;
-  font-size: 20px;
 }
 
 .container {
@@ -43,10 +42,9 @@ input, button {
 }
 
 button {
-  background: #2563eb;
+  background: #0f172a;
   color: white;
   border: none;
-  cursor: pointer;
 }
 
 .stats {
@@ -56,7 +54,7 @@ button {
 
 .stat {
   flex: 1;
-  background: linear-gradient(135deg,#2563eb,#3b82f6);
+  background: linear-gradient(135deg,#0f172a,#334155);
   color: white;
   padding: 20px;
   border-radius: 15px;
@@ -64,17 +62,13 @@ button {
 }
 
 .stat h3 {
-  font-size: 28px;
   margin: 0;
+  font-size: 24px;
 }
 
 .filter {
   display: flex;
   gap: 10px;
-}
-
-ul {
-  padding-left: 20px;
 }
 </style>
 </head>
@@ -82,25 +76,30 @@ ul {
 <body>
 
 <header>
-  Dashboard Sales
+  Sales Monitoring Harian
 </header>
 
 <div class="container">
 
   <div class="card">
-    <h3>Input Kunjungan</h3>
+    <h3>Input Penjualan</h3>
     <input type="text" id="toko" placeholder="Nama Toko">
+    <input type="number" id="omset" placeholder="Omset (Rp)">
     <button onclick="simpan()">Simpan</button>
   </div>
 
   <div class="stats">
     <div class="stat">
+      <h3 id="totalOmset">0</h3>
+      <p>Omset Hari Ini</p>
+    </div>
+    <div class="stat">
       <h3 id="ec">0</h3>
       <p>EC Hari Ini</p>
     </div>
     <div class="stat">
-      <h3 id="oa">0</h3>
-      <p>OA Bulan Ini</p>
+      <h3 id="avg">0</h3>
+      <p>Avg / Toko</p>
     </div>
   </div>
 
@@ -110,11 +109,11 @@ ul {
       <input type="date" id="start">
       <input type="date" id="end">
     </div>
-    <button onclick="render()">Terapkan Filter</button>
+    <button onclick="render()">Terapkan</button>
   </div>
 
   <div class="card">
-    <h3>Grafik EC Harian</h3>
+    <h3>Grafik Omset Harian</h3>
     <canvas id="chart"></canvas>
   </div>
 
@@ -131,20 +130,23 @@ let chart;
 
 function simpan() {
   const toko = document.getElementById("toko").value;
-  if (!toko) return alert("Isi nama toko!");
+  const omset = parseInt(document.getElementById("omset").value);
+
+  if (!toko || !omset) return alert("Lengkapi data!");
 
   const tanggal = new Date().toISOString().split("T")[0];
 
-  data.push({ toko, tanggal });
+  data.push({ toko, omset, tanggal });
   localStorage.setItem("sales", JSON.stringify(data));
 
   document.getElementById("toko").value = "";
+  document.getElementById("omset").value = "";
+
   render();
 }
 
 function render() {
   const today = new Date().toISOString().split("T")[0];
-  const bulan = new Date().getMonth();
 
   const start = document.getElementById("start").value;
   const end = document.getElementById("end").value;
@@ -155,23 +157,21 @@ function render() {
     filtered = data.filter(d => d.tanggal >= start && d.tanggal <= end);
   }
 
-  // EC hari ini
-  let ec = data.filter(d => d.tanggal === today).length;
+  // Hari ini
+  let todayData = data.filter(d => d.tanggal === today);
 
-  // OA bulan ini
-  let oaSet = new Set();
-  data.forEach(d => {
-    let dBulan = new Date(d.tanggal).getMonth();
-    if (dBulan === bulan) oaSet.add(d.toko);
-  });
+  let total = todayData.reduce((a,b)=>a+b.omset,0);
+  let ec = todayData.length;
+  let avg = ec ? Math.round(total/ec) : 0;
 
+  document.getElementById("totalOmset").innerText = total;
   document.getElementById("ec").innerText = ec;
-  document.getElementById("oa").innerText = oaSet.size;
+  document.getElementById("avg").innerText = avg;
 
-  // Grafik EC harian
+  // Grafik
   let perHari = {};
   filtered.forEach(d => {
-    perHari[d.tanggal] = (perHari[d.tanggal] || 0) + 1;
+    perHari[d.tanggal] = (perHari[d.tanggal] || 0) + d.omset;
   });
 
   let labels = Object.keys(perHari);
@@ -180,14 +180,12 @@ function render() {
   if (chart) chart.destroy();
 
   chart = new Chart(document.getElementById("chart"), {
-    type: 'line',
+    type: 'bar',
     data: {
       labels: labels,
       datasets: [{
-        label: 'EC Harian',
-        data: values,
-        borderWidth: 2,
-        fill: true
+        label: 'Omset Harian',
+        data: values
       }]
     }
   });
@@ -195,7 +193,7 @@ function render() {
   // History
   let list = "";
   filtered.slice().reverse().forEach(d => {
-    list += `<li>${d.tanggal} - ${d.toko}</li>`;
+    list += `<li>${d.tanggal} - ${d.toko} - Rp ${d.omset}</li>`;
   });
 
   document.getElementById("list").innerHTML = list;
