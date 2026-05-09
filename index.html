@@ -3,11 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sales Pro Max</title>
+<title>Sales Pro Level 4</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf"></script>
+
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 
 <style>
 body{margin:0;background:#020617;color:#e2e8f0;font-family:sans-serif;display:flex;}
@@ -22,14 +25,14 @@ button{background:#3b82f6;color:white;border:none;}
 .stat{flex:1;text-align:center;}
 table{width:100%;border-collapse:collapse;}
 td,th{padding:10px;border-bottom:1px solid #333;}
-.highlight{color:#22c55e;font-weight:bold;}
+.topbar{display:flex;justify-content:space-between;margin-bottom:10px;}
 </style>
 </head>
 
 <body>
 
 <div class="sidebar">
-  <h3>📊 Sales Max</h3>
+  <h3>📊 Sales Biz</h3>
   <div class="menu" onclick="show('input')">Input</div>
   <div class="menu" onclick="show('dashboard')">Dashboard</div>
   <div class="menu" onclick="show('laporan')">Laporan</div>
@@ -37,12 +40,24 @@ td,th{padding:10px;border-bottom:1px solid #333;}
 
 <div class="main">
 
+<div class="topbar">
+  <div id="userInfo">Belum login</div>
+  <div>
+    <button onclick="login()">Login</button>
+    <button onclick="logout()">Logout</button>
+  </div>
+</div>
+
 <!-- INPUT -->
 <div id="input">
   <div class="card">
-    <input id="toko" placeholder="Nama Toko">
+    <input id="toko" placeholder="Toko">
     <input type="date" id="tanggal">
     <input id="omset" type="number" placeholder="Omset">
+    <select id="cabang">
+      <option>Cabang A</option>
+      <option>Cabang B</option>
+    </select>
     <button onclick="simpan()">Simpan</button>
   </div>
 </div>
@@ -50,21 +65,17 @@ td,th{padding:10px;border-bottom:1px solid #333;}
 <!-- DASHBOARD -->
 <div id="dashboard" style="display:none">
   <div class="stats">
-    <div class="card stat">
-      <p>Total Omset</p>
-      <h3 id="totalAll">Rp 0</h3>
-    </div>
-    <div class="card stat">
-      <p>Total Transaksi</p>
-      <h3 id="totalTrx">0</h3>
-    </div>
-    <div class="card stat">
-      <p>Top Toko</p>
-      <h3 id="topToko">-</h3>
-    </div>
+    <div class="card stat"><p>Total</p><h3 id="totalAll">0</h3></div>
+    <div class="card stat"><p>Transaksi</p><h3 id="trx">0</h3></div>
+    <div class="card stat"><p>Top Toko</p><h3 id="top">-</h3></div>
   </div>
 
   <div class="card">
+    <select id="filterCabang" onchange="render()">
+      <option value="">Semua Cabang</option>
+      <option>Cabang A</option>
+      <option>Cabang B</option>
+    </select>
     <canvas id="chart"></canvas>
   </div>
 </div>
@@ -72,16 +83,15 @@ td,th{padding:10px;border-bottom:1px solid #333;}
 <!-- LAPORAN -->
 <div id="laporan" style="display:none">
   <div class="card">
-    <input id="search" placeholder="Cari toko..." oninput="render()">
-    <select id="filterToko" onchange="render()"></select>
-    <button onclick="sortData()">Sort Omset</button>
-
+    <button onclick="exportPDF()">Export PDF</button>
     <table>
       <thead>
         <tr>
           <th>Tanggal</th>
           <th>Toko</th>
+          <th>Cabang</th>
           <th>Omset</th>
+          <th id="aksiHead">Aksi</th>
         </tr>
       </thead>
       <tbody id="table"></tbody>
@@ -103,13 +113,35 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 const db=firebase.firestore();
+const auth=firebase.auth();
 
+let role="staff";
 let data=[];
 let chartInstance;
-let asc=true;
 
-tanggal.value=new Date().toISOString().split("T")[0];
+// LOGIN
+async function login(){
+  let email=prompt("Email");
+  let pass=prompt("Password");
+  await auth.signInWithEmailAndPassword(email,pass);
+}
 
+// LOGOUT
+function logout(){auth.signOut();}
+
+// ROLE CHECK
+auth.onAuthStateChanged(async user=>{
+  if(user){
+    let doc=await db.collection("users").doc(user.uid).get();
+    role=doc.exists?doc.data().role:"staff";
+    userInfo.innerText=user.email+" ("+role+")";
+  }else{
+    userInfo.innerText="Belum login";
+  }
+  render();
+});
+
+// NAV
 function show(id){
   input.style.display="none";
   dashboard.style.display="none";
@@ -117,12 +149,12 @@ function show(id){
   document.getElementById(id).style.display="block";
 }
 
-function rp(a){return "Rp "+Number(a||0).toLocaleString("id-ID");}
+// FORMAT
+function rp(a){return "Rp "+Number(a).toLocaleString("id-ID");}
 
-// LOAD REALTIME
+// LOAD
 db.collection("sales").onSnapshot(snap=>{
   data=snap.docs.map(d=>({...d.data(),id:d.id}));
-  initFilter();
   render();
 });
 
@@ -131,71 +163,65 @@ async function simpan(){
   await db.collection("sales").add({
     toko:toko.value,
     tanggal:tanggal.value,
-    omset:Number(omset.value)
+    omset:Number(omset.value),
+    cabang:cabang.value
   });
 }
 
-// FILTER TOKO
-function initFilter(){
-  let tokoSet=[...new Set(data.map(d=>d.toko))];
-  filterToko.innerHTML='<option value="">Semua Toko</option>';
-  tokoSet.forEach(t=>{
-    filterToko.innerHTML+=`<option>${t}</option>`;
-  });
-}
-
-// SORT
-function sortData(){
-  asc=!asc;
-  data.sort((a,b)=>asc?a.omset-b.omset:b.omset-a.omset);
-  render();
+// DELETE
+async function del(id){
+  if(role!=="admin") return alert("Admin only");
+  await db.collection("sales").doc(id).delete();
 }
 
 // RENDER
 function render(){
-  let keyword=search.value.toLowerCase();
-  let ft=filterToko.value;
+  let cab=filterCabang.value;
 
-  let filtered=data.filter(d=>{
-    return (!ft||d.toko===ft) &&
-           d.toko.toLowerCase().includes(keyword);
-  });
+  let f=data.filter(d=>!cab||d.cabang===cab);
 
-  // TABLE
-  table.innerHTML=filtered.map(d=>`
+  table.innerHTML=f.map(d=>`
     <tr>
       <td>${d.tanggal}</td>
       <td>${d.toko}</td>
+      <td>${d.cabang}</td>
       <td>${rp(d.omset)}</td>
+      <td>${role==="admin"?`<button onclick="del('${d.id}')">Hapus</button>`:"-"}</td>
     </tr>
   `).join("");
 
-  // SUMMARY
-  let total=filtered.reduce((a,b)=>a+b.omset,0);
+  let total=f.reduce((a,b)=>a+b.omset,0);
   totalAll.innerText=rp(total);
-  totalTrx.innerText=filtered.length;
+  trx.innerText=f.length;
 
   let perToko={};
-  filtered.forEach(d=>{
-    perToko[d.toko]=(perToko[d.toko]||0)+d.omset;
-  });
+  f.forEach(d=>perToko[d.toko]=(perToko[d.toko]||0)+d.omset);
 
-  let top=Object.entries(perToko).sort((a,b)=>b[1]-a[1])[0];
-  topToko.innerText=top?top[0]:"-";
-
-  // CHART
-  let labels=Object.keys(perToko);
-  let values=Object.values(perToko);
+  let topToko=Object.entries(perToko).sort((a,b)=>b[1]-a[1])[0];
+  top.innerText=topToko?topToko[0]:"-";
 
   if(chartInstance) chartInstance.destroy();
-
   chartInstance=new Chart(chart,{
     type:'bar',
     data:{
-      labels,
-      datasets:[{data:values}]
+      labels:Object.keys(perToko),
+      datasets:[{data:Object.values(perToko)}]
     }
   });
+}
+
+// PDF
+function exportPDF(){
+  const { jsPDF } = window.jspdf;
+  let doc=new jsPDF();
+
+  let y=10;
+  data.forEach(d=>{
+    doc.text(`${d.tanggal} | ${d.toko} | ${d.cabang} | ${d.omset}`,10,y);
+    y+=10;
+  });
+
+  doc.save("laporan.pdf");
 }
 </script>
 
