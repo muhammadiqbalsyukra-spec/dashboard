@@ -10,41 +10,50 @@
 <style>
 body {
   font-family: 'Segoe UI', sans-serif;
-  background: #f1f5f9;
   margin: 0;
-}
-
-header {
   background: linear-gradient(135deg,#0f172a,#1e293b);
   color: white;
-  padding: 20px;
-  text-align: center;
+}
+
+/* Glass effect */
+.card {
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(15px);
+  border-radius: 15px;
+  padding: 15px;
+  margin-bottom: 15px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.3);
 }
 
 .container {
   padding: 15px;
 }
 
-.card {
-  background: white;
-  padding: 15px;
-  margin-bottom: 15px;
-  border-radius: 15px;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+header {
+  text-align: center;
+  padding: 20px;
+  font-size: 20px;
+  font-weight: bold;
 }
 
 input, button {
-  padding: 10px;
-  margin-top: 5px;
   width: 100%;
-  border-radius: 8px;
-  border: 1px solid #ddd;
+  padding: 10px;
+  margin-top: 8px;
+  border-radius: 10px;
+  border: none;
+  outline: none;
+}
+
+input {
+  background: rgba(255,255,255,0.1);
+  color: white;
 }
 
 button {
-  background: #0f172a;
+  background: #3b82f6;
   color: white;
-  border: none;
+  cursor: pointer;
 }
 
 .stats {
@@ -54,57 +63,54 @@ button {
 
 .stat {
   flex: 1;
-  background: linear-gradient(135deg,#0f172a,#334155);
-  color: white;
-  padding: 20px;
-  border-radius: 15px;
   text-align: center;
 }
 
 .stat h3 {
-  margin: 0;
-  font-size: 24px;
+  margin: 5px 0;
 }
 
 .filter {
   display: flex;
   gap: 10px;
 }
+
+ul {
+  padding-left: 15px;
+}
 </style>
 </head>
 
 <body>
 
-<header>
-  Sales Monitoring Harian
-</header>
+<header>📊 Sales Monitoring</header>
 
 <div class="container">
 
   <div class="card">
     <h3>Input Penjualan</h3>
     <input type="text" id="toko" placeholder="Nama Toko">
-    <input type="number" id="omset" placeholder="Omset (Rp)">
+    <input type="number" id="omset" placeholder="Omset (angka saja)">
     <button onclick="simpan()">Simpan</button>
   </div>
 
-  <div class="stats">
+  <div class="card stats">
     <div class="stat">
-      <h3 id="totalOmset">0</h3>
       <p>Omset Hari Ini</p>
+      <h3 id="totalOmset">Rp 0</h3>
     </div>
     <div class="stat">
-      <h3 id="ec">0</h3>
       <p>EC Hari Ini</p>
+      <h3 id="ec">0</h3>
     </div>
     <div class="stat">
-      <h3 id="avg">0</h3>
       <p>Avg / Toko</p>
+      <h3 id="avg">Rp 0</h3>
     </div>
   </div>
 
   <div class="card">
-    <h3>Filter Tanggal</h3>
+    <h3>Filter</h3>
     <div class="filter">
       <input type="date" id="start">
       <input type="date" id="end">
@@ -128,11 +134,19 @@ button {
 let data = JSON.parse(localStorage.getItem("sales")) || [];
 let chart;
 
+// Format Rupiah
+function formatRupiah(angka) {
+  return "Rp " + angka.toLocaleString("id-ID");
+}
+
 function simpan() {
-  const toko = document.getElementById("toko").value;
+  const toko = document.getElementById("toko").value.trim();
   const omset = parseInt(document.getElementById("omset").value);
 
-  if (!toko || !omset) return alert("Lengkapi data!");
+  if (!toko || isNaN(omset) || omset <= 0) {
+    alert("Isi data dengan benar!");
+    return;
+  }
 
   const tanggal = new Date().toISOString().split("T")[0];
 
@@ -151,27 +165,32 @@ function render() {
   const start = document.getElementById("start").value;
   const end = document.getElementById("end").value;
 
-  let filtered = data;
+  let filtered = [...data];
 
   if (start && end) {
-    filtered = data.filter(d => d.tanggal >= start && d.tanggal <= end);
+    filtered = filtered.filter(d => d.tanggal >= start && d.tanggal <= end);
   }
 
-  // Hari ini
+  // SORT tanggal biar grafik rapi
+  filtered.sort((a,b) => new Date(a.tanggal) - new Date(b.tanggal));
+
+  // Data hari ini
   let todayData = data.filter(d => d.tanggal === today);
 
   let total = todayData.reduce((a,b)=>a+b.omset,0);
   let ec = todayData.length;
   let avg = ec ? Math.round(total/ec) : 0;
 
-  document.getElementById("totalOmset").innerText = total;
+  document.getElementById("totalOmset").innerText = formatRupiah(total);
   document.getElementById("ec").innerText = ec;
-  document.getElementById("avg").innerText = avg;
+  document.getElementById("avg").innerText = formatRupiah(avg);
 
   // Grafik
   let perHari = {};
+
   filtered.forEach(d => {
-    perHari[d.tanggal] = (perHari[d.tanggal] || 0) + d.omset;
+    if (!perHari[d.tanggal]) perHari[d.tanggal] = 0;
+    perHari[d.tanggal] += d.omset;
   });
 
   let labels = Object.keys(perHari);
@@ -185,7 +204,8 @@ function render() {
       labels: labels,
       datasets: [{
         label: 'Omset Harian',
-        data: values
+        data: values,
+        borderWidth: 2
       }]
     }
   });
@@ -193,7 +213,7 @@ function render() {
   // History
   let list = "";
   filtered.slice().reverse().forEach(d => {
-    list += `<li>${d.tanggal} - ${d.toko} - Rp ${d.omset}</li>`;
+    list += `<li>${d.tanggal} - ${d.toko} - ${formatRupiah(d.omset)}</li>`;
   });
 
   document.getElementById("list").innerHTML = list;
