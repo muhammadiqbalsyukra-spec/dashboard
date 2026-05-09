@@ -45,6 +45,7 @@ td,th{padding:10px;border-bottom:1px solid #333;}
   <div>
     <button onclick="login()">Login</button>
     <button onclick="logout()">Logout</button>
+    <button onclick="fixCabang()">Fix Data Lama</button>
   </div>
 </div>
 
@@ -65,7 +66,7 @@ td,th{padding:10px;border-bottom:1px solid #333;}
 <!-- DASHBOARD -->
 <div id="dashboard" style="display:none">
   <div class="stats">
-    <div class="card stat"><p>Total</p><h3 id="totalAll">0</h3></div>
+    <div class="card stat"><p>Total</p><h3 id="totalAll">Rp 0</h3></div>
     <div class="card stat"><p>Transaksi</p><h3 id="trx">0</h3></div>
     <div class="card stat"><p>Top Toko</p><h3 id="top">-</h3></div>
   </div>
@@ -91,7 +92,7 @@ td,th{padding:10px;border-bottom:1px solid #333;}
           <th>Toko</th>
           <th>Cabang</th>
           <th>Omset</th>
-          <th id="aksiHead">Aksi</th>
+          <th>Aksi</th>
         </tr>
       </thead>
       <tbody id="table"></tbody>
@@ -119,6 +120,9 @@ let role="staff";
 let data=[];
 let chartInstance;
 
+// AUTO TANGGAL
+document.getElementById("tanggal").value=new Date().toISOString().split("T")[0];
+
 // LOGIN
 async function login(){
   let email=prompt("Email");
@@ -129,7 +133,7 @@ async function login(){
 // LOGOUT
 function logout(){auth.signOut();}
 
-// ROLE CHECK
+// ROLE
 auth.onAuthStateChanged(async user=>{
   if(user){
     let doc=await db.collection("users").doc(user.uid).get();
@@ -150,7 +154,7 @@ function show(id){
 }
 
 // FORMAT
-function rp(a){return "Rp "+Number(a).toLocaleString("id-ID");}
+function rp(a){return "Rp "+Number(a||0).toLocaleString("id-ID");}
 
 // LOAD
 db.collection("sales").onSnapshot(snap=>{
@@ -160,12 +164,24 @@ db.collection("sales").onSnapshot(snap=>{
 
 // SIMPAN
 async function simpan(){
+  let tokoVal=document.getElementById("toko").value;
+  let tanggalVal=document.getElementById("tanggal").value;
+  let omsetVal=Number(document.getElementById("omset").value);
+  let cabangVal=document.getElementById("cabang").value;
+
+  if(!tokoVal || !tanggalVal || !omsetVal){
+    return alert("Lengkapi data");
+  }
+
   await db.collection("sales").add({
-    toko:toko.value,
-    tanggal:tanggal.value,
-    omset:Number(omset.value),
-    cabang:cabang.value
+    toko:tokoVal,
+    tanggal:tanggalVal,
+    omset:omsetVal,
+    cabang:cabangVal || "Cabang A"
   });
+
+  document.getElementById("toko").value="";
+  document.getElementById("omset").value="";
 }
 
 // DELETE
@@ -174,38 +190,61 @@ async function del(id){
   await db.collection("sales").doc(id).delete();
 }
 
+// FIX DATA LAMA
+async function fixCabang(){
+  let snap=await db.collection("sales").get();
+
+  snap.forEach(async doc=>{
+    let d=doc.data();
+    if(!d.cabang){
+      await db.collection("sales").doc(doc.id).update({
+        cabang:"Cabang A"
+      });
+    }
+  });
+
+  alert("Data lama sudah diperbaiki ke Cabang A ✅");
+}
+
 // RENDER
 function render(){
-  let cab=filterCabang.value;
+  let cab=document.getElementById("filterCabang").value;
 
-  let f=data.filter(d=>!cab||d.cabang===cab);
+  let f=data.filter(d=>!cab || d.cabang===cab);
 
-  table.innerHTML=f.map(d=>`
+  document.getElementById("table").innerHTML=f.map(d=>`
     <tr>
       <td>${d.tanggal}</td>
       <td>${d.toko}</td>
-      <td>${d.cabang}</td>
+      <td>${d.cabang || "Cabang A"}</td>
       <td>${rp(d.omset)}</td>
       <td>${role==="admin"?`<button onclick="del('${d.id}')">Hapus</button>`:"-"}</td>
     </tr>
   `).join("");
 
   let total=f.reduce((a,b)=>a+b.omset,0);
-  totalAll.innerText=rp(total);
-  trx.innerText=f.length;
+  document.getElementById("totalAll").innerText=rp(total);
+  document.getElementById("trx").innerText=f.length;
 
   let perToko={};
-  f.forEach(d=>perToko[d.toko]=(perToko[d.toko]||0)+d.omset);
+  f.forEach(d=>{
+    let toko=d.toko || "Unknown";
+    perToko[toko]=(perToko[toko]||0)+d.omset;
+  });
 
   let topToko=Object.entries(perToko).sort((a,b)=>b[1]-a[1])[0];
-  top.innerText=topToko?topToko[0]:"-";
+  document.getElementById("top").innerText=topToko?topToko[0]:"-";
 
   if(chartInstance) chartInstance.destroy();
-  chartInstance=new Chart(chart,{
+
+  chartInstance=new Chart(document.getElementById("chart"),{
     type:'bar',
     data:{
       labels:Object.keys(perToko),
-      datasets:[{data:Object.values(perToko)}]
+      datasets:[{
+        label:"Omset",
+        data:Object.values(perToko)
+      }]
     }
   });
 }
@@ -217,7 +256,7 @@ function exportPDF(){
 
   let y=10;
   data.forEach(d=>{
-    doc.text(`${d.tanggal} | ${d.toko} | ${d.cabang} | ${d.omset}`,10,y);
+    doc.text(`${d.tanggal} | ${d.toko} | ${d.cabang || "Cabang A"} | ${d.omset}`,10,y);
     y+=10;
   });
 
