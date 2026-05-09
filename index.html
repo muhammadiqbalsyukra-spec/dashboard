@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Sales PRO</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: #f1f5f9;
+  margin: 0;
+}
+
+header {
+  background: linear-gradient(135deg,#1e3a8a,#2563eb);
+  color: white;
+  padding: 20px;
+  text-align: center;
+  font-size: 20px;
+}
+
+.container {
+  padding: 15px;
+}
+
+.card {
+  background: white;
+  padding: 15px;
+  margin-bottom: 15px;
+  border-radius: 15px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+}
+
+input, button {
+  padding: 10px;
+  margin-top: 5px;
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+button {
+  background: #2563eb;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.stats {
+  display: flex;
+  gap: 10px;
+}
+
+.stat {
+  flex: 1;
+  background: linear-gradient(135deg,#2563eb,#3b82f6);
+  color: white;
+  padding: 20px;
+  border-radius: 15px;
+  text-align: center;
+}
+
+.stat h3 {
+  font-size: 28px;
+  margin: 0;
+}
+
+.filter {
+  display: flex;
+  gap: 10px;
+}
+
+ul {
+  padding-left: 20px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  Dashboard Sales
+</header>
+
+<div class="container">
+
+  <div class="card">
+    <h3>Input Kunjungan</h3>
+    <input type="text" id="toko" placeholder="Nama Toko">
+    <button onclick="simpan()">Simpan</button>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <h3 id="ec">0</h3>
+      <p>EC Hari Ini</p>
+    </div>
+    <div class="stat">
+      <h3 id="oa">0</h3>
+      <p>OA Bulan Ini</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Filter Tanggal</h3>
+    <div class="filter">
+      <input type="date" id="start">
+      <input type="date" id="end">
+    </div>
+    <button onclick="render()">Terapkan Filter</button>
+  </div>
+
+  <div class="card">
+    <h3>Grafik EC Harian</h3>
+    <canvas id="chart"></canvas>
+  </div>
+
+  <div class="card">
+    <h3>History</h3>
+    <ul id="list"></ul>
+  </div>
+
+</div>
+
+<script>
+let data = JSON.parse(localStorage.getItem("sales")) || [];
+let chart;
+
+function simpan() {
+  const toko = document.getElementById("toko").value;
+  if (!toko) return alert("Isi nama toko!");
+
+  const tanggal = new Date().toISOString().split("T")[0];
+
+  data.push({ toko, tanggal });
+  localStorage.setItem("sales", JSON.stringify(data));
+
+  document.getElementById("toko").value = "";
+  render();
+}
+
+function render() {
+  const today = new Date().toISOString().split("T")[0];
+  const bulan = new Date().getMonth();
+
+  const start = document.getElementById("start").value;
+  const end = document.getElementById("end").value;
+
+  let filtered = data;
+
+  if (start && end) {
+    filtered = data.filter(d => d.tanggal >= start && d.tanggal <= end);
+  }
+
+  // EC hari ini
+  let ec = data.filter(d => d.tanggal === today).length;
+
+  // OA bulan ini
+  let oaSet = new Set();
+  data.forEach(d => {
+    let dBulan = new Date(d.tanggal).getMonth();
+    if (dBulan === bulan) oaSet.add(d.toko);
+  });
+
+  document.getElementById("ec").innerText = ec;
+  document.getElementById("oa").innerText = oaSet.size;
+
+  // Grafik EC harian
+  let perHari = {};
+  filtered.forEach(d => {
+    perHari[d.tanggal] = (perHari[d.tanggal] || 0) + 1;
+  });
+
+  let labels = Object.keys(perHari);
+  let values = Object.values(perHari);
+
+  if (chart) chart.destroy();
+
+  chart = new Chart(document.getElementById("chart"), {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'EC Harian',
+        data: values,
+        borderWidth: 2,
+        fill: true
+      }]
+    }
+  });
+
+  // History
+  let list = "";
+  filtered.slice().reverse().forEach(d => {
+    list += `<li>${d.tanggal} - ${d.toko}</li>`;
+  });
+
+  document.getElementById("list").innerHTML = list;
+}
+
+render();
+</script>
+
+</body>
+</html>
