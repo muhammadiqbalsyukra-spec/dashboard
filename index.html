@@ -3,324 +3,287 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sales Monitoring Tools</title>
+<title>Sales Dashboard</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
 body {
-  margin: 0;
-  font-family: 'Segoe UI', sans-serif;
-  background: radial-gradient(circle at top,#0f172a,#020617);
-  color: #e2e8f0;
+  margin:0;
+  font-family:'Segoe UI';
+  background:#020617;
+  color:#e2e8f0;
+  display:flex;
 }
 
-.container { padding: 15px; }
-
-.card {
-  background: rgba(255,255,255,0.05);
-  border-radius: 20px;
-  padding: 15px;
-  margin-bottom: 15px;
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255,255,255,0.1);
+/* SIDEBAR */
+.sidebar{
+  width:220px;
+  background:rgba(255,255,255,0.05);
+  height:100vh;
+  padding:20px;
+  backdrop-filter:blur(10px);
 }
 
-header {
-  text-align: center;
-  padding: 20px;
-  font-size: 22px;
-  font-weight: bold;
+.menu{
+  padding:12px;
+  margin:5px 0;
+  border-radius:10px;
+  cursor:pointer;
 }
 
-input, button, select {
-  width: 100%;
-  padding: 12px;
-  margin-top: 8px;
-  border-radius: 12px;
-  border: none;
-  outline: none;
+.menu:hover{
+  background:#3b82f6;
 }
 
-input, select {
-  background: rgba(255,255,255,0.08);
-  color: white;
+/* MAIN */
+.main{
+  flex:1;
+  padding:20px;
 }
 
-button {
-  background: linear-gradient(135deg,#3b82f6,#6366f1);
-  color: white;
-  cursor: pointer;
+.card{
+  background:rgba(255,255,255,0.05);
+  padding:15px;
+  border-radius:15px;
+  margin-bottom:15px;
 }
 
-.stats { display: flex; gap: 10px; }
-
-.stat {
-  flex: 1;
-  background: rgba(255,255,255,0.05);
-  border-radius: 15px;
-  padding: 15px;
-  text-align: center;
+input,button,select{
+  width:100%;
+  padding:10px;
+  margin-top:8px;
+  border-radius:10px;
+  border:none;
 }
 
-.filter { display: flex; gap: 10px; }
-
-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-th, td { padding: 10px; }
-tr { border-bottom: 1px solid rgba(255,255,255,0.1); }
-
-.tools-box { position: relative; }
-.tools-menu {
-  display: none;
-  margin-top: 10px;
-  background: rgba(0,0,0,0.6);
-  padding: 10px;
-  border-radius: 10px;
+button{
+  background:#3b82f6;
+  color:white;
 }
-.tools-menu.active { display: block; }
 
-.action-btn {
-  padding: 5px 8px;
-  border-radius: 6px;
-  font-size: 12px;
-  margin-right: 5px;
-  cursor: pointer;
+.hidden{display:none;}
+
+.stats{
+  display:flex;
+  gap:10px;
 }
-.edit { background: orange; }
-.delete { background: red; }
 
-.hidden { display: none; }
+.stat{
+  flex:1;
+  text-align:center;
+}
+
+/* TABLE */
+table{width:100%;border-collapse:collapse;}
+td,th{padding:10px;border-bottom:1px solid #333;}
 </style>
 </head>
 
 <body>
 
-<header>📊 Sales Monitoring</header>
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <h3>📊 Sales</h3>
 
-<div class="container">
-
-<div class="card">
-  <h3>Input Penjualan</h3>
-  <input type="text" id="toko" placeholder="Nama Toko">
-  <input type="number" id="omset" placeholder="Omset">
-  <button onclick="simpan()">Simpan</button>
+  <div class="menu" onclick="show('input')">Input</div>
+  <div class="menu" onclick="show('tools')">Tools</div>
+  <div class="menu" onclick="show('grafik')">Grafik</div>
+  <div class="menu" onclick="show('filter')">Filter</div>
+  <div class="menu" onclick="show('laporan')">Laporan</div>
 </div>
 
-<div class="card tools-box">
-  <button onclick="toggleTools()">🛠 Tools</button>
-  <div class="tools-menu" id="toolsMenu">
-    <button onclick="toggleEdit()">Mode Edit ON/OFF</button>
+<!-- MAIN -->
+<div class="main">
+
+<!-- INPUT -->
+<div id="input" class="section">
+  <div class="card">
+    <h3>Input Penjualan</h3>
+    <input id="toko" placeholder="Nama Toko">
+    <input id="omset" type="number" placeholder="Omset">
+    <button onclick="simpan()">Simpan</button>
+  </div>
+
+  <div class="stats">
+    <div class="card stat">
+      <p>Omset Hari Ini</p>
+      <h3 id="total">Rp 0</h3>
+    </div>
+    <div class="card stat">
+      <p>EC</p>
+      <h3 id="ec">0</h3>
+    </div>
+    <div class="card stat">
+      <p>Avg</p>
+      <h3 id="avg">Rp 0</h3>
+    </div>
+  </div>
+</div>
+
+<!-- TOOLS -->
+<div id="tools" class="section hidden">
+  <div class="card">
+    <h3>Tools</h3>
+    <button onclick="toggleEdit()">Mode Edit</button>
     <select id="chartType" onchange="render()">
-      <option value="line">Grafik Line</option>
-      <option value="bar">Grafik Bar</option>
+      <option value="line">Line</option>
+      <option value="bar">Bar</option>
     </select>
   </div>
 </div>
 
-<div class="stats">
-  <div class="stat">
-    <p>Omset Hari Ini</p>
-    <h3 id="totalOmset">Rp 0</h3>
-  </div>
-  <div class="stat">
-    <p>EC Hari Ini</p>
-    <h3 id="ec">0</h3>
-  </div>
-  <div class="stat">
-    <p>Avg / Toko</p>
-    <h3 id="avg">Rp 0</h3>
+<!-- GRAFIK -->
+<div id="grafik" class="section hidden">
+  <div class="card">
+    <h3>Grafik</h3>
+    <canvas id="chart"></canvas>
   </div>
 </div>
 
-<div class="card">
-  <h3>Filter</h3>
-  <div class="filter">
+<!-- FILTER -->
+<div id="filter" class="section hidden">
+  <div class="card">
+    <h3>Filter</h3>
     <input type="date" id="start">
     <input type="date" id="end">
+    <button onclick="render()">Terapkan</button>
   </div>
-  <button onclick="render()">Terapkan</button>
 </div>
 
-<div class="card">
-  <h3>Grafik</h3>
-  <canvas id="chart"></canvas>
-</div>
-
-<div class="card">
-  <h3>Laporan</h3>
-  <table>
-    <thead>
-      <tr>
-        <th>Tanggal</th>
-        <th>Toko</th>
-        <th>Omset</th>
-        <th class="aksiCol hidden">Aksi</th>
-      </tr>
-    </thead>
-    <tbody id="tableData"></tbody>
-  </table>
+<!-- LAPORAN -->
+<div id="laporan" class="section hidden">
+  <div class="card">
+    <h3>Laporan</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Tanggal</th>
+          <th>Toko</th>
+          <th>Omset</th>
+          <th id="aksiHead" class="hidden">Aksi</th>
+        </tr>
+      </thead>
+      <tbody id="table"></tbody>
+    </table>
+  </div>
 </div>
 
 </div>
 
 <script>
-let data = JSON.parse(localStorage.getItem("sales")) || [];
+let data = JSON.parse(localStorage.getItem("sales"))||[];
 let chart;
-let editMode = false;
+let editMode=false;
 
-function formatRupiah(a){
-  a = Number(a);
-  if(isNaN(a)) return "Rp 0";
-  return "Rp " + a.toLocaleString("id-ID");
+// NAVIGATION
+function show(id){
+  document.querySelectorAll('.section').forEach(s=>s.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
 }
 
-function toggleTools(){
-  document.getElementById("toolsMenu").classList.toggle("active");
+// FORMAT
+function rp(a){
+  return "Rp "+Number(a||0).toLocaleString("id-ID");
 }
 
-function toggleEdit(){
-  editMode = !editMode;
-  document.querySelector(".aksiCol").classList.toggle("hidden", !editMode);
-  render();
-}
-
+// SIMPAN
 function simpan(){
-  let toko = document.getElementById("toko").value.trim();
-  let omset = Number(document.getElementById("omset").value);
+  let toko=document.getElementById("toko").value;
+  let omset=Number(document.getElementById("omset").value);
 
-  if(!toko || isNaN(omset) || omset<=0){
-    alert("Input salah!");
-    return;
-  }
+  if(!toko||!omset)return alert("isi data");
 
-  let tanggal = new Date().toISOString().split("T")[0];
-  data.push({toko,omset,tanggal});
+  let t=new Date().toISOString().split("T")[0];
+  data.push({toko,omset,tanggal:t});
 
   localStorage.setItem("sales",JSON.stringify(data));
   render();
 }
 
-function editData(index){
-  let d = data[index];
-  let toko = prompt("Edit toko", d.toko);
-  let omset = prompt("Edit omset", d.omset);
+// EDIT MODE
+function toggleEdit(){
+  editMode=!editMode;
+  document.getElementById("aksiHead").classList.toggle("hidden",!editMode);
+  render();
+}
 
-  if(!toko || isNaN(omset)) return;
+// EDIT
+function edit(i){
+  let toko=prompt("toko",data[i].toko);
+  let omset=prompt("omset",data[i].omset);
 
-  data[index] = { ...d, toko, omset: Number(omset) };
+  data[i]={...data[i],toko,omset:Number(omset)};
   localStorage.setItem("sales",JSON.stringify(data));
   render();
 }
 
-function deleteData(index){
-  if(confirm("Hapus data?")){
-    data.splice(index,1);
+// DELETE
+function del(i){
+  if(confirm("hapus?")){
+    data.splice(i,1);
     localStorage.setItem("sales",JSON.stringify(data));
     render();
   }
 }
 
+// RENDER
 function render(){
-  let today = new Date().toISOString().split("T")[0];
+  let today=new Date().toISOString().split("T")[0];
 
-  let start = document.getElementById("start").value;
-  let end = document.getElementById("end").value;
+  let tData=data.filter(d=>d.tanggal===today);
 
-  let filtered = data.map((d,i)=>({...d,index:i}));
+  let total=tData.reduce((a,b)=>a+b.omset,0);
+  let ec=tData.length;
+  let avg=ec?Math.round(total/ec):0;
 
-  if(start && end){
-    filtered = filtered.filter(d=>d.tanggal>=start && d.tanggal<=end);
-  }
-
-  filtered.sort((a,b)=>new Date(a.tanggal)-new Date(b.tanggal));
-
-  let todayData = data.filter(d=>d.tanggal===today);
-
-  let total = todayData.reduce((a,b)=>a+b.omset,0);
-  let ec = todayData.length;
-  let avg = ec ? Math.round(total/ec) : 0;
-
-  document.getElementById("totalOmset").innerText = formatRupiah(total);
-  document.getElementById("ec").innerText = ec;
-  document.getElementById("avg").innerText = formatRupiah(avg);
+  document.getElementById("total").innerText=rp(total);
+  document.getElementById("ec").innerText=ec;
+  document.getElementById("avg").innerText=rp(avg);
 
   let perHari={};
-  filtered.forEach(d=>{
+  data.forEach(d=>{
     perHari[d.tanggal]=(perHari[d.tanggal]||0)+d.omset;
   });
 
-  let labels = Object.keys(perHari);
-  let values = Object.values(perHari);
+  let labels=Object.keys(perHari);
+  let values=Object.values(perHari);
 
   if(chart) chart.destroy();
 
-  chart = new Chart(document.getElementById("chart"), {
-    type: document.getElementById("chartType").value,
-    data: {
-      labels: labels,
-      datasets: [{
-        label: "Omset Harian",
-        data: values,
-        borderWidth: 3,
-        borderColor: "#38bdf8",
-        backgroundColor: "rgba(56,189,248,0.2)",
-        tension: 0.4,
-        fill: true,
-        pointRadius: 5,
-        pointBackgroundColor: "#22c55e"
+  chart=new Chart(document.getElementById("chart"),{
+    type:document.getElementById("chartType").value,
+    data:{
+      labels,
+      datasets:[{
+        label:"Omset",
+        data:values,
+        borderWidth:3,
+        borderColor:"#38bdf8",
+        backgroundColor:"rgba(56,189,248,0.2)",
+        tension:0.4
       }]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: {
-          labels: { color: "#e2e8f0" }
-        },
-        tooltip: {
-          callbacks: {
-            label: function(context) {
-              return "Rp " + context.raw.toLocaleString("id-ID");
-            }
-          }
-        }
-      },
-      scales: {
-        x: {
-          ticks: { color: "#cbd5f5" },
-          grid: { color: "rgba(255,255,255,0.1)" }
-        },
-        y: {
-          beginAtZero: true,
-          ticks: {
-            color: "#cbd5f5",
-            callback: function(value) {
-              return "Rp " + value.toLocaleString("id-ID");
-            }
-          },
-          grid: { color: "rgba(255,255,255,0.15)" }
-        }
-      }
     }
   });
 
   let rows="";
-  filtered.slice().reverse().forEach(d=>{
+  data.forEach((d,i)=>{
     rows+=`
     <tr>
       <td>${d.tanggal}</td>
       <td>${d.toko}</td>
-      <td>${formatRupiah(d.omset)}</td>
+      <td>${rp(d.omset)}</td>
       ${
-        editMode ? `
-        <td>
-          <button class="action-btn edit" onclick="editData(${d.index})">Edit</button>
-          <button class="action-btn delete" onclick="deleteData(${d.index})">Hapus</button>
-        </td>` : ""
+        editMode?
+        `<td>
+          <button onclick="edit(${i})">Edit</button>
+          <button onclick="del(${i})">Hapus</button>
+        </td>`:""
       }
     </tr>`;
   });
 
-  document.getElementById("tableData").innerHTML = rows;
+  document.getElementById("table").innerHTML=rows;
 }
 
 render();
