@@ -33,6 +33,7 @@ header {
   font-weight: bold;
 }
 
+/* input */
 input, button, select {
   width: 100%;
   padding: 12px;
@@ -53,6 +54,7 @@ button {
   cursor: pointer;
 }
 
+/* stats */
 .stats { display: flex; gap: 10px; }
 
 .stat {
@@ -63,35 +65,42 @@ button {
   text-align: center;
 }
 
+/* filter */
 .filter { display: flex; gap: 10px; }
 
-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
-}
-
+/* table */
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
 th, td { padding: 10px; }
-
 tr { border-bottom: 1px solid rgba(255,255,255,0.1); }
+
+/* tools dropdown */
+.tools-box { position: relative; }
+.tools-menu {
+  display: none;
+  margin-top: 10px;
+  background: rgba(0,0,0,0.6);
+  padding: 10px;
+  border-radius: 10px;
+}
+.tools-menu.active { display: block; }
 
 .action-btn {
   padding: 5px 8px;
-  margin-right: 5px;
   border-radius: 6px;
   font-size: 12px;
+  margin-right: 5px;
   cursor: pointer;
 }
-
 .edit { background: orange; }
 .delete { background: red; }
-.copy { background: green; }
+
+.hidden { display: none; }
 </style>
 </head>
 
 <body>
 
-<header>📊 Sales Monitoring Tools</header>
+<header>📊 Sales Monitoring</header>
 
 <div class="container">
 
@@ -104,14 +113,17 @@ tr { border-bottom: 1px solid rgba(255,255,255,0.1); }
 </div>
 
 <!-- TOOLS -->
-<div class="card">
-  <h3>🛠 Tools</h3>
-  <select id="chartType" onchange="render()">
-    <option value="line">Grafik Line</option>
-    <option value="bar">Grafik Bar</option>
-  </select>
-  <button onclick="copyData()">Copy Data</button>
-  <button onclick="pasteData()">Paste Data</button>
+<div class="card tools-box">
+  <button onclick="toggleTools()">🛠 Tools</button>
+
+  <div class="tools-menu" id="toolsMenu">
+    <button onclick="toggleEdit()">Mode Edit ON/OFF</button>
+
+    <select id="chartType" onchange="render()">
+      <option value="line">Grafik Line</option>
+      <option value="bar">Grafik Bar</option>
+    </select>
+  </div>
 </div>
 
 <!-- STATS -->
@@ -155,7 +167,7 @@ tr { border-bottom: 1px solid rgba(255,255,255,0.1); }
         <th>Tanggal</th>
         <th>Toko</th>
         <th>Omset</th>
-        <th>Aksi</th>
+        <th class="aksiCol hidden">Aksi</th>
       </tr>
     </thead>
     <tbody id="tableData"></tbody>
@@ -167,12 +179,25 @@ tr { border-bottom: 1px solid rgba(255,255,255,0.1); }
 <script>
 let data = JSON.parse(localStorage.getItem("sales")) || [];
 let chart;
+let editMode = false;
 
 // FORMAT
 function formatRupiah(a){
   a = Number(a);
   if(isNaN(a)) return "Rp 0";
   return "Rp " + a.toLocaleString("id-ID");
+}
+
+// TOGGLE TOOLS
+function toggleTools(){
+  document.getElementById("toolsMenu").classList.toggle("active");
+}
+
+// TOGGLE EDIT MODE
+function toggleEdit(){
+  editMode = !editMode;
+  document.querySelector(".aksiCol").classList.toggle("hidden", !editMode);
+  render();
 }
 
 // SIMPAN
@@ -193,45 +218,24 @@ function simpan(){
 }
 
 // EDIT
-function editData(i){
-  let d = data[i];
-  let toko = prompt("Edit Toko", d.toko);
-  let omset = prompt("Edit Omset", d.omset);
+function editData(index){
+  let d = data[index];
+  let toko = prompt("Edit toko", d.toko);
+  let omset = prompt("Edit omset", d.omset);
 
   if(!toko || isNaN(omset)) return;
 
-  data[i].toko = toko;
-  data[i].omset = Number(omset);
-
+  data[index] = { ...d, toko, omset: Number(omset) };
   localStorage.setItem("sales",JSON.stringify(data));
   render();
 }
 
 // DELETE
-function deleteData(i){
+function deleteData(index){
   if(confirm("Hapus data?")){
-    data.splice(i,1);
+    data.splice(index,1);
     localStorage.setItem("sales",JSON.stringify(data));
     render();
-  }
-}
-
-// COPY
-function copyData(){
-  navigator.clipboard.writeText(JSON.stringify(data));
-  alert("Data di-copy!");
-}
-
-// PASTE
-function pasteData(){
-  let input = prompt("Paste data JSON");
-  try{
-    let parsed = JSON.parse(input);
-    data = parsed;
-    localStorage.setItem("sales",JSON.stringify(data));
-    render();
-  }catch{
-    alert("Format salah!");
   }
 }
 
@@ -242,7 +246,7 @@ function render(){
   let start = document.getElementById("start").value;
   let end = document.getElementById("end").value;
 
-  let filtered = [...data];
+  let filtered = data.map((d,i)=>({...d,index:i}));
 
   if(start && end){
     filtered = filtered.filter(d=>d.tanggal>=start && d.tanggal<=end);
@@ -272,27 +276,27 @@ function render(){
 
   chart = new Chart(document.getElementById("chart"),{
     type: document.getElementById("chartType").value,
-    data:{
-      labels:labels,
-      datasets:[{label:"Omset",data:values}]
-    }
+    data:{ labels, datasets:[{label:"Omset",data:values}] }
   });
 
   let rows="";
-  filtered.slice().reverse().forEach((d,i)=>{
+  filtered.slice().reverse().forEach(d=>{
     rows+=`
     <tr>
       <td>${d.tanggal}</td>
       <td>${d.toko}</td>
       <td>${formatRupiah(d.omset)}</td>
-      <td>
-        <button class="action-btn edit" onclick="editData(${i})">Edit</button>
-        <button class="action-btn delete" onclick="deleteData(${i})">Hapus</button>
-      </td>
+      ${
+        editMode ? `
+        <td>
+          <button class="action-btn edit" onclick="editData(${d.index})">Edit</button>
+          <button class="action-btn delete" onclick="deleteData(${d.index})">Hapus</button>
+        </td>` : ""
+      }
     </tr>`;
   });
 
-  document.getElementById("tableData").innerHTML=rows;
+  document.getElementById("tableData").innerHTML = rows;
 }
 
 render();
