@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sales Pro</title>
+<title>Sales Pro Dashboard</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -19,16 +19,18 @@ body{margin:0;background:#020617;color:white;font-family:sans-serif;display:flex
 .card{background:#1e293b;padding:15px;border-radius:10px;margin-bottom:10px;}
 input,button,select{width:100%;padding:10px;margin-top:5px;}
 button{background:#3b82f6;color:white;border:none;}
+button:disabled{background:#555;}
 .hidden{display:none;}
-.login-box{max-width:300px;margin:100px auto;}
+.stats{display:flex;gap:10px;}
+.stat{flex:1;text-align:center;}
 </style>
 </head>
 
 <body>
 
-<!-- LOGIN SCREEN -->
+<!-- LOGIN -->
 <div id="loginPage" class="main">
-  <div class="card login-box">
+  <div class="card" style="max-width:300px;margin:100px auto;">
     <h3>Login</h3>
     <input id="email" placeholder="Email">
     <input id="password" type="password" placeholder="Password">
@@ -43,6 +45,7 @@ button{background:#3b82f6;color:white;border:none;}
 <div class="sidebar">
   <div>
     <h3>📊 Sales Pro</h3>
+    <div class="menu" onclick="show('dashboard')">Dashboard</div>
     <div class="menu" onclick="show('input')">Input</div>
     <div class="menu" onclick="show('laporan')">Laporan</div>
   </div>
@@ -56,8 +59,53 @@ button{background:#3b82f6;color:white;border:none;}
 
 <div id="userInfo"></div>
 
+<!-- DASHBOARD -->
+<div id="dashboard">
+  <div class="card">
+    <input type="date" id="start" onchange="render()">
+    <input type="date" id="end" onchange="render()">
+
+    <!-- 🔥 Tambahan filter cabang -->
+    <select id="filterCabang" onchange="render()">
+      <option value="">Semua Cabang</option>
+      <option>Cabang A</option>
+      <option>Cabang B</option>
+    </select>
+  </div>
+
+  <div class="stats">
+    <div class="card stat">
+      <h3 id="total">Rp 0</h3>
+      <p>Total Omset</p>
+    </div>
+    <div class="card stat">
+      <h3 id="trx">0</h3>
+      <p>Transaksi</p>
+    </div>
+    <div class="card stat">
+      <h3 id="avg">Rp 0</h3>
+      <p>Avg</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h4>Top Toko</h4>
+    <div id="topToko"></div>
+  </div>
+
+  <!-- 🔥 Insight -->
+  <div class="card">
+    <h4>Insight</h4>
+    <div id="insight"></div>
+  </div>
+
+  <div class="card">
+    <canvas id="chart"></canvas>
+  </div>
+</div>
+
 <!-- INPUT -->
-<div id="input">
+<div id="input" class="hidden">
   <div class="card">
     <input id="toko" placeholder="Toko">
     <input type="date" id="tanggal">
@@ -66,7 +114,7 @@ button{background:#3b82f6;color:white;border:none;}
       <option>Cabang A</option>
       <option>Cabang B</option>
     </select>
-    <button id="btnSimpan" onclick="simpan()">Simpan</button>
+    <button id="btnSimpan" onclick="simpan()" disabled>Simpan</button>
   </div>
 </div>
 
@@ -107,45 +155,42 @@ const auth=firebase.auth();
 
 let role="staff";
 let data=[];
+let isLogin=false;
+let chartInstance;
 
-// LOGIN
+// ✅ AMAN: tunggu DOM siap
+window.onload = () => {
+  document.getElementById("tanggal").value =
+    new Date().toISOString().split("T")[0];
+};
+
+// AUTH
 async function login(){
-  let e=email.value;
-  let p=password.value;
-  await auth.signInWithEmailAndPassword(e,p);
+  await auth.signInWithEmailAndPassword(email.value,password.value);
 }
 
-// REGISTER
 async function register(){
-  let e=email.value;
-  let p=password.value;
-
-  let user=await auth.createUserWithEmailAndPassword(e,p);
-
-  // AUTO ROLE
-  let r=e.includes("admin")?"admin":"staff";
-
-  await db.collection("users").doc(user.user.uid).set({
-    role:r
-  });
-
-  alert("Akun dibuat sebagai "+r);
+  let user=await auth.createUserWithEmailAndPassword(email.value,password.value);
+  let r=email.value.includes("admin")?"admin":"staff";
+  await db.collection("users").doc(user.user.uid).set({role:r});
+  alert("Akun dibuat: "+r);
 }
 
-// LOGOUT
 function logout(){auth.signOut();}
 
-// AUTH STATE
 auth.onAuthStateChanged(async user=>{
   if(user){
+    isLogin=true;
     loginPage.classList.add("hidden");
     app.classList.remove("hidden");
 
     let doc=await db.collection("users").doc(user.uid).get();
-    role=doc.data().role;
+    role=doc.exists?doc.data().role:"staff";
 
     userInfo.innerText=user.email+" ("+role+")";
+    btnSimpan.disabled=false;
   }else{
+    isLogin=false;
     loginPage.classList.remove("hidden");
     app.classList.add("hidden");
   }
@@ -153,6 +198,7 @@ auth.onAuthStateChanged(async user=>{
 
 // NAV
 function show(id){
+  dashboard.classList.add("hidden");
   input.classList.add("hidden");
   laporan.classList.add("hidden");
   document.getElementById(id).classList.remove("hidden");
@@ -160,12 +206,17 @@ function show(id){
 
 // SIMPAN
 async function simpan(){
+  if(!isLogin) return alert("Login dulu");
+
   await db.collection("sales").add({
     toko:toko.value,
     tanggal:tanggal.value,
     omset:Number(omset.value),
-    cabang:cabang.value
+    cabang:cabang.value || "Cabang A"
   });
+
+  toko.value="";
+  omset.value="";
 }
 
 // DELETE
@@ -180,14 +231,76 @@ db.collection("sales").onSnapshot(snap=>{
   render();
 });
 
+// FORMAT
+function rp(a){return "Rp "+Number(a||0).toLocaleString("id-ID");}
+
 // RENDER
 function render(){
-  table.innerHTML=data.map(d=>`
+
+  let s=start.value;
+  let e=end.value;
+  let cab=filterCabang.value;
+
+  let f=data.filter(d=>{
+    if(s && d.tanggal < s) return false;
+    if(e && d.tanggal > e) return false;
+    if(cab && d.cabang !== cab) return false;
+    return true;
+  });
+
+  // SUMMARY
+  let totalVal=f.reduce((a,b)=>a+(b.omset||0),0);
+  let trxVal=f.length;
+  let avgVal=trxVal?Math.round(totalVal/trxVal):0;
+
+  total.innerText=rp(totalVal);
+  trx.innerText=trxVal;
+  avg.innerText=rp(avgVal);
+
+  // TOP TOKO
+  let perToko={};
+  f.forEach(d=>{
+    let t=d.toko||"Unknown";
+    perToko[t]=(perToko[t]||0)+(d.omset||0);
+  });
+
+  let sorted=Object.entries(perToko).sort((a,b)=>b[1]-a[1]);
+
+  topToko.innerHTML=sorted.slice(0,3)
+    .map(x=>`${x[0]} (${rp(x[1])})`).join("<br>");
+
+  // 🔥 INSIGHT
+  let best=sorted[0];
+  let worst=sorted[sorted.length-1];
+
+  insight.innerHTML = `
+    🔥 Terbaik: ${best?best[0]:"-"} <br>
+    ⚠️ Terlemah: ${worst?worst[0]:"-"}
+  `;
+
+  // CHART
+  let perHari={};
+  f.forEach(d=>{
+    perHari[d.tanggal]=(perHari[d.tanggal]||0)+(d.omset||0);
+  });
+
+  let labels=Object.keys(perHari);
+  let values=Object.values(perHari);
+
+  if(chartInstance) chartInstance.destroy();
+
+  chartInstance=new Chart(chart,{
+    type:'line',
+    data:{labels,datasets:[{label:"Omset",data:values}]}
+  });
+
+  // TABLE
+  table.innerHTML=f.map(d=>`
   <tr>
     <td>${d.tanggal}</td>
     <td>${d.toko}</td>
-    <td>${d.cabang}</td>
-    <td>${d.omset}</td>
+    <td>${d.cabang||"Cabang A"}</td>
+    <td>${rp(d.omset)}</td>
     <td>${role==="admin"?`<button onclick="del('${d.id}')">Hapus</button>`:"-"}</td>
   </tr>
   `).join("");
