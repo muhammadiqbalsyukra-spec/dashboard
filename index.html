@@ -3,52 +3,58 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sales Pro - Laporan Pro</title>
+<title>Sales Pro</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jspdf"></script>
-
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 
 <style>
-body{margin:0;background:#020617;color:#e2e8f0;font-family:sans-serif;display:flex;}
-.sidebar{width:220px;background:#0f172a;padding:20px;}
-.menu{padding:10px;cursor:pointer;border-radius:6px;}
+body{margin:0;background:#020617;color:white;font-family:sans-serif;display:flex;}
+.sidebar{width:220px;background:#0f172a;padding:20px;display:flex;flex-direction:column;justify-content:space-between;}
+.menu{padding:10px;border-radius:6px;cursor:pointer;}
 .menu:hover{background:#3b82f6;}
 .main{flex:1;padding:20px;}
 .card{background:#1e293b;padding:15px;border-radius:10px;margin-bottom:10px;}
-input,select,button{width:100%;padding:10px;margin-top:5px;}
+input,button,select{width:100%;padding:10px;margin-top:5px;}
 button{background:#3b82f6;color:white;border:none;}
-.stats{display:flex;gap:10px;}
-.stat{flex:1;text-align:center;}
-table{width:100%;border-collapse:collapse;}
-td,th{padding:10px;border-bottom:1px solid #333;}
-.topbar{display:flex;justify-content:space-between;margin-bottom:10px;}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.badge{background:#0b1220;border:1px solid #243047;padding:6px 8px;border-radius:6px;display:inline-block;margin:2px 4px;}
+.hidden{display:none;}
+.login-box{max-width:300px;margin:100px auto;}
 </style>
 </head>
 
 <body>
 
+<!-- LOGIN SCREEN -->
+<div id="loginPage" class="main">
+  <div class="card login-box">
+    <h3>Login</h3>
+    <input id="email" placeholder="Email">
+    <input id="password" type="password" placeholder="Password">
+    <button onclick="login()">Login</button>
+    <button onclick="register()">Register</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" class="hidden">
+
 <div class="sidebar">
-  <h3>📊 Sales Pro</h3>
-  <div class="menu" onclick="show('input')">Input</div>
-  <div class="menu" onclick="show('laporan')">Laporan Pro</div>
+  <div>
+    <h3>📊 Sales Pro</h3>
+    <div class="menu" onclick="show('input')">Input</div>
+    <div class="menu" onclick="show('laporan')">Laporan</div>
+  </div>
+
+  <div>
+    <div class="menu" onclick="logout()">Logout</div>
+  </div>
 </div>
 
 <div class="main">
 
-<div class="topbar">
-  <div id="userInfo">Belum login</div>
-  <div>
-    <button onclick="login()">Login</button>
-    <button onclick="logout()">Logout</button>
-    <button onclick="fixCabang()">Fix Data Lama</button>
-  </div>
-</div>
+<div id="userInfo"></div>
 
 <!-- INPUT -->
 <div id="input">
@@ -60,73 +66,14 @@ td,th{padding:10px;border-bottom:1px solid #333;}
       <option>Cabang A</option>
       <option>Cabang B</option>
     </select>
-    <button onclick="simpan()">Simpan</button>
+    <button id="btnSimpan" onclick="simpan()">Simpan</button>
   </div>
 </div>
 
-<!-- LAPORAN PRO -->
-<div id="laporan" style="display:none">
-  <div class="card grid2">
-    <div>
-      <label>Mulai</label>
-      <input type="date" id="start">
-    </div>
-    <div>
-      <label>Sampai</label>
-      <input type="date" id="end">
-    </div>
-    <div>
-      <label>Cabang</label>
-      <select id="filterCabang" onchange="render()">
-        <option value="">Semua Cabang</option>
-        <option>Cabang A</option>
-        <option>Cabang B</option>
-      </select>
-    </div>
-    <div>
-      <label>Cari Toko</label>
-      <input id="search" placeholder="ketik nama toko..." oninput="render()">
-    </div>
-    <div>
-      <button onclick="render()">Terapkan Filter</button>
-    </div>
-    <div>
-      <button onclick="exportCSV()">Export Excel (CSV)</button>
-    </div>
-  </div>
-
-  <!-- SUMMARY -->
-  <div class="stats">
-    <div class="card stat">
-      <p>Total</p>
-      <h3 id="sumTotal">Rp 0</h3>
-    </div>
-    <div class="card stat">
-      <p>Transaksi</p>
-      <h3 id="sumTrx">0</h3>
-    </div>
-    <div class="card stat">
-      <p>Avg</p>
-      <h3 id="sumAvg">Rp 0</h3>
-    </div>
-  </div>
-
-  <!-- TOP TOKO -->
+<!-- LAPORAN -->
+<div id="laporan" class="hidden">
   <div class="card">
-    <h4>🏆 Top Toko</h4>
-    <div id="topList"></div>
-  </div>
-
-  <!-- CHART -->
-  <div class="card">
-    <h4>📈 Tren Harian</h4>
-    <canvas id="chart"></canvas>
-  </div>
-
-  <!-- TABLE -->
-  <div class="card">
-    <button onclick="exportPDF()">Export PDF</button>
-    <table>
+    <table width="100%">
       <thead>
         <tr>
           <th>Tanggal</th>
@@ -141,6 +88,7 @@ td,th{padding:10px;border-bottom:1px solid #333;}
   </div>
 </div>
 
+</div>
 </div>
 
 <script>
@@ -159,59 +107,65 @@ const auth=firebase.auth();
 
 let role="staff";
 let data=[];
-let chartInstance=null;
 
-document.getElementById("tanggal").value=new Date().toISOString().split("T")[0];
-
-// AUTH
+// LOGIN
 async function login(){
-  let email=prompt("Email");
-  let pass=prompt("Password");
-  await auth.signInWithEmailAndPassword(email,pass);
+  let e=email.value;
+  let p=password.value;
+  await auth.signInWithEmailAndPassword(e,p);
 }
+
+// REGISTER
+async function register(){
+  let e=email.value;
+  let p=password.value;
+
+  let user=await auth.createUserWithEmailAndPassword(e,p);
+
+  // AUTO ROLE
+  let r=e.includes("admin")?"admin":"staff";
+
+  await db.collection("users").doc(user.user.uid).set({
+    role:r
+  });
+
+  alert("Akun dibuat sebagai "+r);
+}
+
+// LOGOUT
 function logout(){auth.signOut();}
 
+// AUTH STATE
 auth.onAuthStateChanged(async user=>{
   if(user){
+    loginPage.classList.add("hidden");
+    app.classList.remove("hidden");
+
     let doc=await db.collection("users").doc(user.uid).get();
-    role=doc.exists?doc.data().role:"staff";
+    role=doc.data().role;
+
     userInfo.innerText=user.email+" ("+role+")";
   }else{
-    userInfo.innerText="Belum login";
+    loginPage.classList.remove("hidden");
+    app.classList.add("hidden");
   }
-  render();
 });
 
 // NAV
 function show(id){
-  input.style.display="none";
-  laporan.style.display="none";
-  document.getElementById(id).style.display="block";
+  input.classList.add("hidden");
+  laporan.classList.add("hidden");
+  document.getElementById(id).classList.remove("hidden");
 }
-
-// FORMAT
-function rp(a){return "Rp "+Number(a||0).toLocaleString("id-ID");}
-
-// LOAD
-db.collection("sales").onSnapshot(snap=>{
-  data=snap.docs.map(d=>({...d.data(),id:d.id}));
-  render();
-});
 
 // SIMPAN
 async function simpan(){
-  let tokoVal=toko.value;
-  let tanggalVal=tanggal.value;
-  let omsetVal=Number(omset.value);
-  let cabangVal=cabang.value || "Cabang A";
-
-  if(!tokoVal||!tanggalVal||!omsetVal) return alert("Lengkapi data");
-
   await db.collection("sales").add({
-    toko:tokoVal, tanggal:tanggalVal, omset:omsetVal, cabang:cabangVal
+    toko:toko.value,
+    tanggal:tanggal.value,
+    omset:Number(omset.value),
+    cabang:cabang.value
   });
-
-  toko.value=""; omset.value="";
 }
 
 // DELETE
@@ -220,102 +174,23 @@ async function del(id){
   await db.collection("sales").doc(id).delete();
 }
 
-// FIX DATA LAMA
-async function fixCabang(){
-  let snap=await db.collection("sales").get();
-  snap.forEach(async doc=>{
-    if(!doc.data().cabang){
-      await db.collection("sales").doc(doc.id).update({cabang:"Cabang A"});
-    }
-  });
-  alert("Data lama sudah masuk Cabang A ✅");
-}
+// LOAD
+db.collection("sales").onSnapshot(snap=>{
+  data=snap.docs.map(d=>({...d.data(),id:d.id}));
+  render();
+});
 
-// FILTER + RENDER
+// RENDER
 function render(){
-  let s=start.value;
-  let e=end.value;
-  let cab=filterCabang.value;
-  let q=(search.value||"").toLowerCase();
-
-  let f=data.filter(d=>{
-    if(s && d.tanggal < s) return false;
-    if(e && d.tanggal > e) return false;
-    if(cab && d.cabang !== cab) return false;
-    if(q && !(d.toko||"").toLowerCase().includes(q)) return false;
-    return true;
-  });
-
-  // SUMMARY
-  let total=f.reduce((a,b)=>a+(b.omset||0),0);
-  let trx=f.length;
-  let avg=trx?Math.round(total/trx):0;
-
-  sumTotal.innerText=rp(total);
-  sumTrx.innerText=trx;
-  sumAvg.innerText=rp(avg);
-
-  // TOP TOKO
-  let perToko={};
-  f.forEach(d=>{
-    let t=d.toko||"Unknown";
-    perToko[t]=(perToko[t]||0)+(d.omset||0);
-  });
-  let topArr=Object.entries(perToko).sort((a,b)=>b[1]-a[1]).slice(0,5);
-  topList.innerHTML = topArr.map(([t,v],i)=>`<span class="badge">${i+1}. ${t} — ${rp(v)}</span>`).join("");
-
-  // TREN HARIAN
-  let perHari={};
-  f.forEach(d=>{
-    let t=d.tanggal||"";
-    perHari[t]=(perHari[t]||0)+(d.omset||0);
-  });
-  let labels=Object.keys(perHari).sort();
-  let values=labels.map(l=>perHari[l]);
-
-  if(chartInstance) chartInstance.destroy();
-  chartInstance=new Chart(document.getElementById("chart"),{
-    type:'line',
-    data:{labels, datasets:[{label:"Omset", data:values}]}
-  });
-
-  // TABLE
-  table.innerHTML = f.map(d=>`
-    <tr>
-      <td>${d.tanggal}</td>
-      <td>${d.toko}</td>
-      <td>${d.cabang||"Cabang A"}</td>
-      <td>${rp(d.omset)}</td>
-      <td>${role==="admin"?`<button onclick="del('${d.id}')">Hapus</button>`:"-"}</td>
-    </tr>
+  table.innerHTML=data.map(d=>`
+  <tr>
+    <td>${d.tanggal}</td>
+    <td>${d.toko}</td>
+    <td>${d.cabang}</td>
+    <td>${d.omset}</td>
+    <td>${role==="admin"?`<button onclick="del('${d.id}')">Hapus</button>`:"-"}</td>
+  </tr>
   `).join("");
-}
-
-// EXPORT CSV
-function exportCSV(){
-  let rows = [["Tanggal","Toko","Cabang","Omset"]];
-  data.forEach(d=>{
-    rows.push([d.tanggal,d.toko,d.cabang||"Cabang A",d.omset]);
-  });
-  let csv = rows.map(r=>r.join(",")).join("\n");
-
-  let blob=new Blob([csv],{type:'text/csv'});
-  let a=document.createElement("a");
-  a.href=URL.createObjectURL(blob);
-  a.download="laporan.csv";
-  a.click();
-}
-
-// EXPORT PDF
-function exportPDF(){
-  const { jsPDF } = window.jspdf;
-  let doc=new jsPDF();
-  let y=10;
-  data.forEach(d=>{
-    doc.text(`${d.tanggal} | ${d.toko} | ${d.cabang||"Cabang A"} | ${d.omset}`,10,y);
-    y+=8;
-  });
-  doc.save("laporan.pdf");
 }
 </script>
 
