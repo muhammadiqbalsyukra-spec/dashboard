@@ -3,59 +3,64 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sales Monitor PRO</title>
+<title>Sales Monitoring Tools</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
 body {
-  font-family: 'Segoe UI', sans-serif;
   margin: 0;
-  background: linear-gradient(135deg,#0f172a,#1e293b);
-  color: white;
+  font-family: 'Segoe UI', sans-serif;
+  background: radial-gradient(circle at top,#0f172a,#020617);
+  color: #e2e8f0;
 }
 
-/* Glass effect */
-.card {
-  background: rgba(255,255,255,0.08);
-  backdrop-filter: blur(15px);
-  border-radius: 15px;
-  padding: 15px;
-  margin-bottom: 15px;
-  box-shadow: 0 8px 30px rgba(0,0,0,0.3);
-}
-
+/* Container */
 .container {
   padding: 15px;
 }
 
+/* Card modern */
+.card {
+  background: rgba(255,255,255,0.05);
+  border-radius: 20px;
+  padding: 15px;
+  margin-bottom: 15px;
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+/* Header */
 header {
   text-align: center;
   padding: 20px;
-  font-size: 20px;
+  font-size: 22px;
   font-weight: bold;
 }
 
+/* Input */
 input, button {
   width: 100%;
-  padding: 10px;
+  padding: 12px;
   margin-top: 8px;
-  border-radius: 10px;
+  border-radius: 12px;
   border: none;
   outline: none;
+  font-size: 14px;
 }
 
 input {
-  background: rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.08);
   color: white;
 }
 
 button {
-  background: #3b82f6;
+  background: linear-gradient(135deg,#3b82f6,#6366f1);
   color: white;
   cursor: pointer;
 }
 
+/* Stats */
 .stats {
   display: flex;
   gap: 10px;
@@ -63,38 +68,57 @@ button {
 
 .stat {
   flex: 1;
+  background: rgba(255,255,255,0.05);
+  border-radius: 15px;
+  padding: 15px;
   text-align: center;
 }
 
 .stat h3 {
   margin: 5px 0;
+  font-size: 18px;
 }
 
+/* Filter */
 .filter {
   display: flex;
   gap: 10px;
 }
 
-ul {
-  padding-left: 15px;
+/* Table */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+th, td {
+  padding: 10px;
+  text-align: left;
+}
+
+tr {
+  border-bottom: 1px solid rgba(255,255,255,0.1);
 }
 </style>
 </head>
 
 <body>
 
-<header>📊 Sales Monitoring</header>
+<header>📊 Sales Monitoring Tools</header>
 
 <div class="container">
 
+  <!-- INPUT -->
   <div class="card">
     <h3>Input Penjualan</h3>
     <input type="text" id="toko" placeholder="Nama Toko">
-    <input type="number" id="omset" placeholder="Omset (angka saja)">
-    <button onclick="simpan()">Simpan</button>
+    <input type="number" id="omset" placeholder="Omset (contoh: 5000000)">
+    <button onclick="simpan()">Simpan Penjualan</button>
   </div>
 
-  <div class="card stats">
+  <!-- STATS -->
+  <div class="stats">
     <div class="stat">
       <p>Omset Hari Ini</p>
       <h3 id="totalOmset">Rp 0</h3>
@@ -109,8 +133,9 @@ ul {
     </div>
   </div>
 
+  <!-- FILTER -->
   <div class="card">
-    <h3>Filter</h3>
+    <h3>Filter Tanggal</h3>
     <div class="filter">
       <input type="date" id="start">
       <input type="date" id="end">
@@ -118,14 +143,25 @@ ul {
     <button onclick="render()">Terapkan</button>
   </div>
 
+  <!-- GRAFIK -->
   <div class="card">
     <h3>Grafik Omset Harian</h3>
     <canvas id="chart"></canvas>
   </div>
 
+  <!-- TABLE -->
   <div class="card">
-    <h3>History</h3>
-    <ul id="list"></ul>
+    <h3>Laporan Penjualan</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Tanggal</th>
+          <th>Toko</th>
+          <th>Omset</th>
+        </tr>
+      </thead>
+      <tbody id="tableData"></tbody>
+    </table>
   </div>
 
 </div>
@@ -134,17 +170,22 @@ ul {
 let data = JSON.parse(localStorage.getItem("sales")) || [];
 let chart;
 
-// Format Rupiah
+// FORMAT RUPIAH AMAN
 function formatRupiah(angka) {
+  angka = Number(angka);
+  if (isNaN(angka)) return "Rp 0";
   return "Rp " + angka.toLocaleString("id-ID");
 }
 
+// SIMPAN DATA
 function simpan() {
   const toko = document.getElementById("toko").value.trim();
-  const omset = parseInt(document.getElementById("omset").value);
+  let omset = document.getElementById("omset").value;
+
+  omset = Number(omset);
 
   if (!toko || isNaN(omset) || omset <= 0) {
-    alert("Isi data dengan benar!");
+    alert("Input tidak valid!");
     return;
   }
 
@@ -159,6 +200,7 @@ function simpan() {
   render();
 }
 
+// RENDER
 function render() {
   const today = new Date().toISOString().split("T")[0];
 
@@ -171,10 +213,9 @@ function render() {
     filtered = filtered.filter(d => d.tanggal >= start && d.tanggal <= end);
   }
 
-  // SORT tanggal biar grafik rapi
-  filtered.sort((a,b) => new Date(a.tanggal) - new Date(b.tanggal));
+  filtered.sort((a,b)=> new Date(a.tanggal)-new Date(b.tanggal));
 
-  // Data hari ini
+  // DATA HARI INI
   let todayData = data.filter(d => d.tanggal === today);
 
   let total = todayData.reduce((a,b)=>a+b.omset,0);
@@ -185,12 +226,10 @@ function render() {
   document.getElementById("ec").innerText = ec;
   document.getElementById("avg").innerText = formatRupiah(avg);
 
-  // Grafik
+  // GRAFIK
   let perHari = {};
-
-  filtered.forEach(d => {
-    if (!perHari[d.tanggal]) perHari[d.tanggal] = 0;
-    perHari[d.tanggal] += d.omset;
+  filtered.forEach(d=>{
+    perHari[d.tanggal] = (perHari[d.tanggal] || 0) + d.omset;
   });
 
   let labels = Object.keys(perHari);
@@ -199,24 +238,31 @@ function render() {
   if (chart) chart.destroy();
 
   chart = new Chart(document.getElementById("chart"), {
-    type: 'bar',
+    type: 'line',
     data: {
       labels: labels,
       datasets: [{
         label: 'Omset Harian',
         data: values,
-        borderWidth: 2
+        tension: 0.3,
+        fill: true
       }]
     }
   });
 
-  // History
-  let list = "";
-  filtered.slice().reverse().forEach(d => {
-    list += `<li>${d.tanggal} - ${d.toko} - ${formatRupiah(d.omset)}</li>`;
+  // TABLE
+  let rows = "";
+  filtered.slice().reverse().forEach(d=>{
+    rows += `
+      <tr>
+        <td>${d.tanggal}</td>
+        <td>${d.toko}</td>
+        <td>${formatRupiah(d.omset)}</td>
+      </tr>
+    `;
   });
 
-  document.getElementById("list").innerHTML = list;
+  document.getElementById("tableData").innerHTML = rows;
 }
 
 render();
