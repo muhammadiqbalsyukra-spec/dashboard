@@ -33,7 +33,6 @@ header {
   font-weight: bold;
 }
 
-/* input */
 input, button, select {
   width: 100%;
   padding: 12px;
@@ -54,7 +53,6 @@ button {
   cursor: pointer;
 }
 
-/* stats */
 .stats { display: flex; gap: 10px; }
 
 .stat {
@@ -65,15 +63,12 @@ button {
   text-align: center;
 }
 
-/* filter */
 .filter { display: flex; gap: 10px; }
 
-/* table */
 table { width: 100%; border-collapse: collapse; font-size: 13px; }
 th, td { padding: 10px; }
 tr { border-bottom: 1px solid rgba(255,255,255,0.1); }
 
-/* tools dropdown */
 .tools-box { position: relative; }
 .tools-menu {
   display: none;
@@ -104,7 +99,6 @@ tr { border-bottom: 1px solid rgba(255,255,255,0.1); }
 
 <div class="container">
 
-<!-- INPUT -->
 <div class="card">
   <h3>Input Penjualan</h3>
   <input type="text" id="toko" placeholder="Nama Toko">
@@ -112,13 +106,10 @@ tr { border-bottom: 1px solid rgba(255,255,255,0.1); }
   <button onclick="simpan()">Simpan</button>
 </div>
 
-<!-- TOOLS -->
 <div class="card tools-box">
   <button onclick="toggleTools()">🛠 Tools</button>
-
   <div class="tools-menu" id="toolsMenu">
     <button onclick="toggleEdit()">Mode Edit ON/OFF</button>
-
     <select id="chartType" onchange="render()">
       <option value="line">Grafik Line</option>
       <option value="bar">Grafik Bar</option>
@@ -126,7 +117,6 @@ tr { border-bottom: 1px solid rgba(255,255,255,0.1); }
   </div>
 </div>
 
-<!-- STATS -->
 <div class="stats">
   <div class="stat">
     <p>Omset Hari Ini</p>
@@ -142,7 +132,6 @@ tr { border-bottom: 1px solid rgba(255,255,255,0.1); }
   </div>
 </div>
 
-<!-- FILTER -->
 <div class="card">
   <h3>Filter</h3>
   <div class="filter">
@@ -152,13 +141,11 @@ tr { border-bottom: 1px solid rgba(255,255,255,0.1); }
   <button onclick="render()">Terapkan</button>
 </div>
 
-<!-- GRAFIK -->
 <div class="card">
   <h3>Grafik</h3>
   <canvas id="chart"></canvas>
 </div>
 
-<!-- TABLE -->
 <div class="card">
   <h3>Laporan</h3>
   <table>
@@ -181,26 +168,22 @@ let data = JSON.parse(localStorage.getItem("sales")) || [];
 let chart;
 let editMode = false;
 
-// FORMAT
 function formatRupiah(a){
   a = Number(a);
   if(isNaN(a)) return "Rp 0";
   return "Rp " + a.toLocaleString("id-ID");
 }
 
-// TOGGLE TOOLS
 function toggleTools(){
   document.getElementById("toolsMenu").classList.toggle("active");
 }
 
-// TOGGLE EDIT MODE
 function toggleEdit(){
   editMode = !editMode;
   document.querySelector(".aksiCol").classList.toggle("hidden", !editMode);
   render();
 }
 
-// SIMPAN
 function simpan(){
   let toko = document.getElementById("toko").value.trim();
   let omset = Number(document.getElementById("omset").value);
@@ -217,7 +200,6 @@ function simpan(){
   render();
 }
 
-// EDIT
 function editData(index){
   let d = data[index];
   let toko = prompt("Edit toko", d.toko);
@@ -230,7 +212,6 @@ function editData(index){
   render();
 }
 
-// DELETE
 function deleteData(index){
   if(confirm("Hapus data?")){
     data.splice(index,1);
@@ -239,7 +220,6 @@ function deleteData(index){
   }
 }
 
-// RENDER
 function render(){
   let today = new Date().toISOString().split("T")[0];
 
@@ -274,9 +254,53 @@ function render(){
 
   if(chart) chart.destroy();
 
-  chart = new Chart(document.getElementById("chart"),{
+  chart = new Chart(document.getElementById("chart"), {
     type: document.getElementById("chartType").value,
-    data:{ labels, datasets:[{label:"Omset",data:values}] }
+    data: {
+      labels: labels,
+      datasets: [{
+        label: "Omset Harian",
+        data: values,
+        borderWidth: 3,
+        borderColor: "#38bdf8",
+        backgroundColor: "rgba(56,189,248,0.2)",
+        tension: 0.4,
+        fill: true,
+        pointRadius: 5,
+        pointBackgroundColor: "#22c55e"
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          labels: { color: "#e2e8f0" }
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              return "Rp " + context.raw.toLocaleString("id-ID");
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: "#cbd5f5" },
+          grid: { color: "rgba(255,255,255,0.1)" }
+        },
+        y: {
+          beginAtZero: true,
+          ticks: {
+            color: "#cbd5f5",
+            callback: function(value) {
+              return "Rp " + value.toLocaleString("id-ID");
+            }
+          },
+          grid: { color: "rgba(255,255,255,0.15)" }
+        }
+      }
+    }
   });
 
   let rows="";
