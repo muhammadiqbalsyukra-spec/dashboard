@@ -3,12 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sales Dashboard</title>
+<title>Sales Cloud Dashboard</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+<!-- FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
+
 <style>
-body {
+body{
   margin:0;
   font-family:'Segoe UI';
   background:#020617;
@@ -16,233 +20,145 @@ body {
   display:flex;
 }
 
-/* SIDEBAR */
 .sidebar{
   width:220px;
-  background:rgba(255,255,255,0.05);
-  height:100vh;
   padding:20px;
-  backdrop-filter:blur(10px);
+  background:#0f172a;
 }
 
 .menu{
-  padding:12px;
-  margin:5px 0;
-  border-radius:10px;
+  padding:10px;
   cursor:pointer;
 }
 
-.menu:hover{
-  background:#3b82f6;
-}
+.menu:hover{background:#3b82f6;}
 
-/* MAIN */
-.main{
-  flex:1;
-  padding:20px;
-}
+.main{flex:1;padding:20px;}
 
 .card{
-  background:rgba(255,255,255,0.05);
+  background:#1e293b;
   padding:15px;
-  border-radius:15px;
-  margin-bottom:15px;
+  border-radius:10px;
+  margin-bottom:10px;
 }
 
 input,button,select{
   width:100%;
   padding:10px;
-  margin-top:8px;
-  border-radius:10px;
-  border:none;
+  margin-top:5px;
 }
 
-button{
-  background:#3b82f6;
-  color:white;
-}
+button{background:#3b82f6;color:white;}
 
 .hidden{display:none;}
-
-.stats{
-  display:flex;
-  gap:10px;
-}
-
-.stat{
-  flex:1;
-  text-align:center;
-}
-
-/* TABLE */
-table{width:100%;border-collapse:collapse;}
-td,th{padding:10px;border-bottom:1px solid #333;}
 </style>
 </head>
 
 <body>
 
-<!-- SIDEBAR -->
 <div class="sidebar">
   <h3>📊 Sales</h3>
-
   <div class="menu" onclick="show('input')">Input</div>
-  <div class="menu" onclick="show('tools')">Tools</div>
-  <div class="menu" onclick="show('grafik')">Grafik</div>
-  <div class="menu" onclick="show('filter')">Filter</div>
-  <div class="menu" onclick="show('laporan')">Laporan</div>
+  <div class="menu" onclick="show('bulanan')">Bulanan</div>
 </div>
 
-<!-- MAIN -->
 <div class="main">
 
-<!-- INPUT -->
-<div id="input" class="section">
+<div id="input">
   <div class="card">
-    <h3>Input Penjualan</h3>
-    <input id="toko" placeholder="Nama Toko">
-    <input id="omset" type="number" placeholder="Omset">
+    <h3>Input</h3>
+    <input id="toko" placeholder="Toko">
+    <input id="tanggal" type="date">
+    <input id="omset" type="number">
     <button onclick="simpan()">Simpan</button>
   </div>
-
-  <div class="stats">
-    <div class="card stat">
-      <p>Omset Hari Ini</p>
-      <h3 id="total">Rp 0</h3>
-    </div>
-    <div class="card stat">
-      <p>EC</p>
-      <h3 id="ec">0</h3>
-    </div>
-    <div class="card stat">
-      <p>Avg</p>
-      <h3 id="avg">Rp 0</h3>
-    </div>
-  </div>
 </div>
 
-<!-- TOOLS -->
-<div id="tools" class="section hidden">
+<div id="bulanan" class="hidden">
   <div class="card">
-    <h3>Tools</h3>
-    <button onclick="toggleEdit()">Mode Edit</button>
-    <select id="chartType" onchange="render()">
-      <option value="line">Line</option>
-      <option value="bar">Bar</option>
+    <h3>Laporan Bulanan</h3>
+    <select id="bulan" onchange="loadBulanan()">
+      <option value="0">Jan</option>
+      <option value="1">Feb</option>
+      <option value="2">Mar</option>
+      <option value="3">Apr</option>
+      <option value="4">Mei</option>
+      <option value="5">Jun</option>
+      <option value="6">Jul</option>
+      <option value="7">Agu</option>
+      <option value="8">Sep</option>
+      <option value="9">Okt</option>
+      <option value="10">Nov</option>
+      <option value="11">Des</option>
     </select>
-  </div>
-</div>
 
-<!-- GRAFIK -->
-<div id="grafik" class="section hidden">
-  <div class="card">
-    <h3>Grafik</h3>
-    <canvas id="chart"></canvas>
-  </div>
-</div>
+    <h4 id="totalBulanan">Total: Rp 0</h4>
+    <h4 id="ecBulanan">EC: 0</h4>
+    <h4 id="avgBulanan">Avg: Rp 0</h4>
 
-<!-- FILTER -->
-<div id="filter" class="section hidden">
-  <div class="card">
-    <h3>Filter</h3>
-    <input type="date" id="start">
-    <input type="date" id="end">
-    <button onclick="render()">Terapkan</button>
-  </div>
-</div>
-
-<!-- LAPORAN -->
-<div id="laporan" class="section hidden">
-  <div class="card">
-    <h3>Laporan</h3>
-    <table>
-      <thead>
-        <tr>
-          <th>Tanggal</th>
-          <th>Toko</th>
-          <th>Omset</th>
-          <th id="aksiHead" class="hidden">Aksi</th>
-        </tr>
-      </thead>
-      <tbody id="table"></tbody>
-    </table>
+    <canvas id="chartBulanan"></canvas>
   </div>
 </div>
 
 </div>
 
 <script>
-let data = JSON.parse(localStorage.getItem("sales"))||[];
+// CONFIG (GANTI PUNYAMU)
+const firebaseConfig = {
+  apiKey: "ISI",
+  authDomain: "ISI",
+  projectId: "ISI"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+let data=[];
 let chart;
-let editMode=false;
 
-// NAVIGATION
+// NAV
 function show(id){
-  document.querySelectorAll('.section').forEach(s=>s.classList.add('hidden'));
-  document.getElementById(id).classList.remove('hidden');
-}
-
-// FORMAT
-function rp(a){
-  return "Rp "+Number(a||0).toLocaleString("id-ID");
+  document.getElementById("input").classList.add("hidden");
+  document.getElementById("bulanan").classList.add("hidden");
+  document.getElementById(id).classList.remove("hidden");
 }
 
 // SIMPAN
-function simpan(){
+async function simpan(){
   let toko=document.getElementById("toko").value;
+  let tanggal=document.getElementById("tanggal").value;
   let omset=Number(document.getElementById("omset").value);
 
-  if(!toko||!omset)return alert("isi data");
+  if(!toko||!tanggal||!omset) return alert("Lengkapi");
 
-  let t=new Date().toISOString().split("T")[0];
-  data.push({toko,omset,tanggal:t});
+  await db.collection("sales").add({toko,tanggal,omset});
 
-  localStorage.setItem("sales",JSON.stringify(data));
-  render();
+  alert("Tersimpan ke cloud");
+  loadData();
 }
 
-// EDIT MODE
-function toggleEdit(){
-  editMode=!editMode;
-  document.getElementById("aksiHead").classList.toggle("hidden",!editMode);
-  render();
+// LOAD DATA
+async function loadData(){
+  let snap=await db.collection("sales").get();
+  data=snap.docs.map(d=>d.data());
 }
 
-// EDIT
-function edit(i){
-  let toko=prompt("toko",data[i].toko);
-  let omset=prompt("omset",data[i].omset);
+// LAPORAN BULANAN
+function loadBulanan(){
+  let bulan=parseInt(document.getElementById("bulan").value);
 
-  data[i]={...data[i],toko,omset:Number(omset)};
-  localStorage.setItem("sales",JSON.stringify(data));
-  render();
-}
+  let filtered=data.filter(d=>new Date(d.tanggal).getMonth()===bulan);
 
-// DELETE
-function del(i){
-  if(confirm("hapus?")){
-    data.splice(i,1);
-    localStorage.setItem("sales",JSON.stringify(data));
-    render();
-  }
-}
-
-// RENDER
-function render(){
-  let today=new Date().toISOString().split("T")[0];
-
-  let tData=data.filter(d=>d.tanggal===today);
-
-  let total=tData.reduce((a,b)=>a+b.omset,0);
-  let ec=tData.length;
+  let total=filtered.reduce((a,b)=>a+b.omset,0);
+  let ec=filtered.length;
   let avg=ec?Math.round(total/ec):0;
 
-  document.getElementById("total").innerText=rp(total);
-  document.getElementById("ec").innerText=ec;
-  document.getElementById("avg").innerText=rp(avg);
+  document.getElementById("totalBulanan").innerText="Total: Rp "+total.toLocaleString("id-ID");
+  document.getElementById("ecBulanan").innerText="EC: "+ec;
+  document.getElementById("avgBulanan").innerText="Avg: Rp "+avg.toLocaleString("id-ID");
 
   let perHari={};
-  data.forEach(d=>{
+  filtered.forEach(d=>{
     perHari[d.tanggal]=(perHari[d.tanggal]||0)+d.omset;
   });
 
@@ -251,42 +167,19 @@ function render(){
 
   if(chart) chart.destroy();
 
-  chart=new Chart(document.getElementById("chart"),{
-    type:document.getElementById("chartType").value,
+  chart=new Chart(document.getElementById("chartBulanan"),{
+    type:'line',
     data:{
       labels,
-      datasets:[{
-        label:"Omset",
-        data:values,
-        borderWidth:3,
-        borderColor:"#38bdf8",
-        backgroundColor:"rgba(56,189,248,0.2)",
-        tension:0.4
-      }]
+      datasets:[{label:'Omset',data:values}]
     }
   });
-
-  let rows="";
-  data.forEach((d,i)=>{
-    rows+=`
-    <tr>
-      <td>${d.tanggal}</td>
-      <td>${d.toko}</td>
-      <td>${rp(d.omset)}</td>
-      ${
-        editMode?
-        `<td>
-          <button onclick="edit(${i})">Edit</button>
-          <button onclick="del(${i})">Hapus</button>
-        </td>`:""
-      }
-    </tr>`;
-  });
-
-  document.getElementById("table").innerHTML=rows;
 }
 
-render();
+// INIT
+document.getElementById("tanggal").value=new Date().toISOString().split("T")[0];
+loadData();
+
 </script>
 
 </body>
