@@ -7,7 +7,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<!-- FIREBASE COMPAT (PENTING) -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
@@ -19,14 +18,12 @@ body{
   color:#e2e8f0;
   display:flex;
 }
-
 .sidebar{
   width:220px;
   background:#0f172a;
   padding:20px;
   height:100vh;
 }
-
 .menu{
   padding:10px;
   margin:5px 0;
@@ -34,29 +31,22 @@ body{
   border-radius:8px;
 }
 .menu:hover{background:#3b82f6;}
-
 .main{flex:1;padding:20px;}
-
 .card{
   background:#1e293b;
   padding:15px;
   border-radius:10px;
   margin-bottom:10px;
 }
-
 input,button,select{
   width:100%;
   padding:10px;
   margin-top:5px;
 }
-
 button{background:#3b82f6;color:white;}
-
 .hidden{display:none;}
-
 .stats{display:flex;gap:10px;}
 .stat{flex:1;text-align:center;}
-
 table{width:100%;border-collapse:collapse;}
 td,th{padding:10px;border-bottom:1px solid #333;}
 </style>
@@ -178,7 +168,8 @@ firebase.initializeApp(firebaseConfig);
 const db=firebase.firestore();
 
 let data=[];
-let chart,chartB;
+let chartInstance=null;
+let chartBInstance=null;
 let editMode=false;
 
 document.getElementById("tanggal").value=new Date().toISOString().split("T")[0];
@@ -192,53 +183,58 @@ function show(id){
 // FORMAT
 function rp(a){return "Rp "+Number(a||0).toLocaleString("id-ID");}
 
-// LOAD DATA CLOUD
-async function loadData(){
-  let snap=await db.collection("sales").get();
-  data=snap.docs.map(d=>({...d.data(),id:d.id}));
-  render();
+// REALTIME DATA
+function loadData(){
+  db.collection("sales").onSnapshot(snapshot=>{
+    data=snapshot.docs.map(d=>({...d.data(),id:d.id}));
+    render();
+    renderBulanan();
+  });
 }
 
 // SIMPAN
 async function simpan(){
-  let toko=toko.value;
+  let tokoVal=document.getElementById("toko").value;
   let tanggal=document.getElementById("tanggal").value;
   let omset=Number(document.getElementById("omset").value);
 
-  if(!toko||!tanggal||!omset)return alert("Lengkapi");
+  if(!tokoVal||!tanggal||!omset) return alert("Lengkapi");
 
-  await db.collection("sales").add({toko,tanggal,omset});
-  loadData();
+  await db.collection("sales").add({toko:tokoVal,tanggal,omset});
+
+  document.getElementById("toko").value="";
+  document.getElementById("omset").value="";
 }
 
 // EDIT MODE
 function toggleEdit(){
   editMode=!editMode;
-  aksiHead.classList.toggle("hidden",!editMode);
+  document.getElementById("aksiHead").classList.toggle("hidden",!editMode);
   render();
 }
 
 // DELETE
 async function del(id){
-  if(confirm("hapus?")){
+  if(confirm("Hapus data?")){
     await db.collection("sales").doc(id).delete();
-    loadData();
   }
 }
 
 // RENDER HARIAN
 function render(){
   let today=new Date().toISOString().split("T")[0];
+
   let tData=data.filter(d=>d.tanggal===today);
 
-  let total=tData.reduce((a,b)=>a+b.omset,0);
-  let ec=tData.length;
-  let avg=ec?Math.round(total/ec):0;
+  let totalVal=tData.reduce((a,b)=>a+b.omset,0);
+  let ecVal=tData.length;
+  let avgVal=ecVal?Math.round(totalVal/ecVal):0;
 
-  total.innerText=rp(total);
-  ec.innerText=ec;
-  avg.innerText=rp(avg);
+  document.getElementById("total").innerText=rp(totalVal);
+  document.getElementById("ec").innerText=ecVal;
+  document.getElementById("avg").innerText=rp(avgVal);
 
+  // grafik
   let perHari={};
   data.forEach(d=>{
     perHari[d.tanggal]=(perHari[d.tanggal]||0)+d.omset;
@@ -247,13 +243,20 @@ function render(){
   let labels=Object.keys(perHari);
   let values=Object.values(perHari);
 
-  if(chart) chart.destroy();
+  if(chartInstance) chartInstance.destroy();
 
-  chart=new Chart(chart,{
-    type:chartType.value,
-    data:{labels,datasets:[{data:values}]}
+  chartInstance=new Chart(document.getElementById("chart"),{
+    type:document.getElementById("chartType").value,
+    data:{
+      labels,
+      datasets:[{
+        label:"Omset",
+        data:values
+      }]
+    }
   });
 
+  // tabel
   let rows="";
   data.forEach(d=>{
     rows+=`
@@ -265,41 +268,55 @@ function render(){
     </tr>`;
   });
 
-  table.innerHTML=rows;
+  document.getElementById("table").innerHTML=rows;
 }
 
 // BULANAN
 function renderBulanan(){
-  let b=bulan.value;
-  let f=data.filter(d=>new Date(d.tanggal).getMonth()==b);
+  let b=document.getElementById("bulan").value;
+  let now=new Date();
 
-  let total=f.reduce((a,b)=>a+b.omset,0);
-  let ec=f.length;
-  let avg=ec?Math.round(total/ec):0;
+  let f=data.filter(d=>{
+    let dt=new Date(d.tanggal);
+    return dt.getMonth()==b && dt.getFullYear()==now.getFullYear();
+  });
 
-  totalB.innerText="Total "+rp(total);
-  ecB.innerText="EC "+ec;
-  avgB.innerText="Avg "+rp(avg);
+  let totalVal=f.reduce((a,b)=>a+b.omset,0);
+  let ecVal=f.length;
+  let avgVal=ecVal?Math.round(totalVal/ecVal):0;
+
+  document.getElementById("totalB").innerText="Total "+rp(totalVal);
+  document.getElementById("ecB").innerText="EC "+ecVal;
+  document.getElementById("avgB").innerText="Avg "+rp(avgVal);
 
   let perHari={};
-  f.forEach(d=>perHari[d.tanggal]=(perHari[d.tanggal]||0)+d.omset);
+  f.forEach(d=>{
+    perHari[d.tanggal]=(perHari[d.tanggal]||0)+d.omset;
+  });
 
   let labels=Object.keys(perHari);
   let values=Object.values(perHari);
 
-  if(chartB) chartB.destroy();
+  if(chartBInstance) chartBInstance.destroy();
 
-  chartB=new Chart(chartB,{
+  chartBInstance=new Chart(document.getElementById("chartB"),{
     type:'line',
-    data:{labels,datasets:[{data:values}]}
+    data:{
+      labels,
+      datasets:[{
+        label:"Bulanan",
+        data:values
+      }]
+    }
   });
 }
 
 // INIT BULAN
 for(let i=0;i<12;i++){
-  bulan.innerHTML+=`<option value="${i}">${i+1}</option>`;
+  document.getElementById("bulan").innerHTML+=`<option value="${i}">${i+1}</option>`;
 }
 
+// START
 loadData();
 </script>
 
