@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sales Cloud Dashboard</title>
+<title>Sales Pro Dashboard</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<!-- FIREBASE -->
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
+<!-- FIREBASE COMPAT (PENTING) -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
 <style>
 body{
@@ -22,15 +22,17 @@ body{
 
 .sidebar{
   width:220px;
-  padding:20px;
   background:#0f172a;
+  padding:20px;
+  height:100vh;
 }
 
 .menu{
   padding:10px;
+  margin:5px 0;
   cursor:pointer;
+  border-radius:8px;
 }
-
 .menu:hover{background:#3b82f6;}
 
 .main{flex:1;padding:20px;}
@@ -51,6 +53,12 @@ input,button,select{
 button{background:#3b82f6;color:white;}
 
 .hidden{display:none;}
+
+.stats{display:flex;gap:10px;}
+.stat{flex:1;text-align:center;}
+
+table{width:100%;border-collapse:collapse;}
+td,th{padding:10px;border-bottom:1px solid #333;}
 </style>
 </head>
 
@@ -59,44 +67,98 @@ button{background:#3b82f6;color:white;}
 <div class="sidebar">
   <h3>📊 Sales</h3>
   <div class="menu" onclick="show('input')">Input</div>
+  <div class="menu" onclick="show('tools')">Tools</div>
+  <div class="menu" onclick="show('grafik')">Grafik</div>
+  <div class="menu" onclick="show('filter')">Filter</div>
+  <div class="menu" onclick="show('laporan')">Laporan</div>
   <div class="menu" onclick="show('bulanan')">Bulanan</div>
 </div>
 
 <div class="main">
 
-<div id="input">
+<!-- INPUT -->
+<div id="input" class="section">
   <div class="card">
     <h3>Input</h3>
     <input id="toko" placeholder="Toko">
-    <input id="tanggal" type="date">
-    <input id="omset" type="number">
+    <input type="date" id="tanggal">
+    <input id="omset" type="number" placeholder="Omset">
     <button onclick="simpan()">Simpan</button>
+  </div>
+
+  <div class="stats">
+    <div class="card stat">
+      <p>Omset Hari Ini</p>
+      <h3 id="total">Rp 0</h3>
+    </div>
+    <div class="card stat">
+      <p>EC</p>
+      <h3 id="ec">0</h3>
+    </div>
+    <div class="card stat">
+      <p>Avg</p>
+      <h3 id="avg">Rp 0</h3>
+    </div>
   </div>
 </div>
 
-<div id="bulanan" class="hidden">
+<!-- TOOLS -->
+<div id="tools" class="section hidden">
   <div class="card">
-    <h3>Laporan Bulanan</h3>
-    <select id="bulan" onchange="loadBulanan()">
-      <option value="0">Jan</option>
-      <option value="1">Feb</option>
-      <option value="2">Mar</option>
-      <option value="3">Apr</option>
-      <option value="4">Mei</option>
-      <option value="5">Jun</option>
-      <option value="6">Jul</option>
-      <option value="7">Agu</option>
-      <option value="8">Sep</option>
-      <option value="9">Okt</option>
-      <option value="10">Nov</option>
-      <option value="11">Des</option>
+    <h3>Tools</h3>
+    <button onclick="toggleEdit()">Mode Edit</button>
+    <select id="chartType" onchange="render()">
+      <option value="line">Line</option>
+      <option value="bar">Bar</option>
     </select>
+  </div>
+</div>
 
-    <h4 id="totalBulanan">Total: Rp 0</h4>
-    <h4 id="ecBulanan">EC: 0</h4>
-    <h4 id="avgBulanan">Avg: Rp 0</h4>
+<!-- GRAFIK -->
+<div id="grafik" class="section hidden">
+  <div class="card">
+    <h3>Grafik</h3>
+    <canvas id="chart"></canvas>
+  </div>
+</div>
 
-    <canvas id="chartBulanan"></canvas>
+<!-- FILTER -->
+<div id="filter" class="section hidden">
+  <div class="card">
+    <input type="date" id="start">
+    <input type="date" id="end">
+    <button onclick="render()">Filter</button>
+  </div>
+</div>
+
+<!-- LAPORAN -->
+<div id="laporan" class="section hidden">
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th>Tanggal</th>
+          <th>Toko</th>
+          <th>Omset</th>
+          <th id="aksiHead" class="hidden">Aksi</th>
+        </tr>
+      </thead>
+      <tbody id="table"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- BULANAN -->
+<div id="bulanan" class="section hidden">
+  <div class="card">
+    <h3>Bulanan</h3>
+    <select id="bulan" onchange="renderBulanan()"></select>
+
+    <h4 id="totalB"></h4>
+    <h4 id="ecB"></h4>
+    <h4 id="avgB"></h4>
+
+    <canvas id="chartB"></canvas>
   </div>
 </div>
 
@@ -113,54 +175,72 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+const db=firebase.firestore();
 
 let data=[];
-let chart;
+let chart,chartB;
+let editMode=false;
+
+document.getElementById("tanggal").value=new Date().toISOString().split("T")[0];
 
 // NAV
 function show(id){
-  document.getElementById("input").classList.add("hidden");
-  document.getElementById("bulanan").classList.add("hidden");
+  document.querySelectorAll(".section").forEach(s=>s.classList.add("hidden"));
   document.getElementById(id).classList.remove("hidden");
+}
+
+// FORMAT
+function rp(a){return "Rp "+Number(a||0).toLocaleString("id-ID");}
+
+// LOAD DATA CLOUD
+async function loadData(){
+  let snap=await db.collection("sales").get();
+  data=snap.docs.map(d=>({...d.data(),id:d.id}));
+  render();
 }
 
 // SIMPAN
 async function simpan(){
-  let toko=document.getElementById("toko").value;
+  let toko=toko.value;
   let tanggal=document.getElementById("tanggal").value;
   let omset=Number(document.getElementById("omset").value);
 
-  if(!toko||!tanggal||!omset) return alert("Lengkapi");
+  if(!toko||!tanggal||!omset)return alert("Lengkapi");
 
   await db.collection("sales").add({toko,tanggal,omset});
-
-  alert("Tersimpan ke cloud");
   loadData();
 }
 
-// LOAD DATA
-async function loadData(){
-  let snap=await db.collection("sales").get();
-  data=snap.docs.map(d=>d.data());
+// EDIT MODE
+function toggleEdit(){
+  editMode=!editMode;
+  aksiHead.classList.toggle("hidden",!editMode);
+  render();
 }
 
-// LAPORAN BULANAN
-function loadBulanan(){
-  let bulan=parseInt(document.getElementById("bulan").value);
+// DELETE
+async function del(id){
+  if(confirm("hapus?")){
+    await db.collection("sales").doc(id).delete();
+    loadData();
+  }
+}
 
-  let filtered=data.filter(d=>new Date(d.tanggal).getMonth()===bulan);
+// RENDER HARIAN
+function render(){
+  let today=new Date().toISOString().split("T")[0];
+  let tData=data.filter(d=>d.tanggal===today);
 
-  let total=filtered.reduce((a,b)=>a+b.omset,0);
-  let ec=filtered.length;
+  let total=tData.reduce((a,b)=>a+b.omset,0);
+  let ec=tData.length;
   let avg=ec?Math.round(total/ec):0;
 
-  document.getElementById("totalBulanan").innerText="Total: Rp "+total.toLocaleString("id-ID");
-  document.getElementById("ecBulanan").innerText="EC: "+ec;
-  document.getElementById("avgBulanan").innerText="Avg: Rp "+avg.toLocaleString("id-ID");
+  total.innerText=rp(total);
+  ec.innerText=ec;
+  avg.innerText=rp(avg);
 
   let perHari={};
-  filtered.forEach(d=>{
+  data.forEach(d=>{
     perHari[d.tanggal]=(perHari[d.tanggal]||0)+d.omset;
   });
 
@@ -169,19 +249,58 @@ function loadBulanan(){
 
   if(chart) chart.destroy();
 
-  chart=new Chart(document.getElementById("chartBulanan"),{
+  chart=new Chart(chart,{
+    type:chartType.value,
+    data:{labels,datasets:[{data:values}]}
+  });
+
+  let rows="";
+  data.forEach(d=>{
+    rows+=`
+    <tr>
+      <td>${d.tanggal}</td>
+      <td>${d.toko}</td>
+      <td>${rp(d.omset)}</td>
+      ${editMode?`<td><button onclick="del('${d.id}')">Hapus</button></td>`:""}
+    </tr>`;
+  });
+
+  table.innerHTML=rows;
+}
+
+// BULANAN
+function renderBulanan(){
+  let b=bulan.value;
+  let f=data.filter(d=>new Date(d.tanggal).getMonth()==b);
+
+  let total=f.reduce((a,b)=>a+b.omset,0);
+  let ec=f.length;
+  let avg=ec?Math.round(total/ec):0;
+
+  totalB.innerText="Total "+rp(total);
+  ecB.innerText="EC "+ec;
+  avgB.innerText="Avg "+rp(avg);
+
+  let perHari={};
+  f.forEach(d=>perHari[d.tanggal]=(perHari[d.tanggal]||0)+d.omset);
+
+  let labels=Object.keys(perHari);
+  let values=Object.values(perHari);
+
+  if(chartB) chartB.destroy();
+
+  chartB=new Chart(chartB,{
     type:'line',
-    data:{
-      labels,
-      datasets:[{label:'Omset',data:values}]
-    }
+    data:{labels,datasets:[{data:values}]}
   });
 }
 
-// INIT
-document.getElementById("tanggal").value=new Date().toISOString().split("T")[0];
-loadData();
+// INIT BULAN
+for(let i=0;i<12;i++){
+  bulan.innerHTML+=`<option value="${i}">${i+1}</option>`;
+}
 
+loadData();
 </script>
 
 </body>
