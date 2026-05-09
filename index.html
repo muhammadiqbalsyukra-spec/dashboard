@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sales Pro Level 4</title>
+<title>Sales Pro - Laporan Pro</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf"></script>
@@ -26,16 +26,17 @@ button{background:#3b82f6;color:white;border:none;}
 table{width:100%;border-collapse:collapse;}
 td,th{padding:10px;border-bottom:1px solid #333;}
 .topbar{display:flex;justify-content:space-between;margin-bottom:10px;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.badge{background:#0b1220;border:1px solid #243047;padding:6px 8px;border-radius:6px;display:inline-block;margin:2px 4px;}
 </style>
 </head>
 
 <body>
 
 <div class="sidebar">
-  <h3>📊 Sales Biz</h3>
+  <h3>📊 Sales Pro</h3>
   <div class="menu" onclick="show('input')">Input</div>
-  <div class="menu" onclick="show('dashboard')">Dashboard</div>
-  <div class="menu" onclick="show('laporan')">Laporan</div>
+  <div class="menu" onclick="show('laporan')">Laporan Pro</div>
 </div>
 
 <div class="main">
@@ -63,26 +64,66 @@ td,th{padding:10px;border-bottom:1px solid #333;}
   </div>
 </div>
 
-<!-- DASHBOARD -->
-<div id="dashboard" style="display:none">
-  <div class="stats">
-    <div class="card stat"><p>Total</p><h3 id="totalAll">Rp 0</h3></div>
-    <div class="card stat"><p>Transaksi</p><h3 id="trx">0</h3></div>
-    <div class="card stat"><p>Top Toko</p><h3 id="top">-</h3></div>
+<!-- LAPORAN PRO -->
+<div id="laporan" style="display:none">
+  <div class="card grid2">
+    <div>
+      <label>Mulai</label>
+      <input type="date" id="start">
+    </div>
+    <div>
+      <label>Sampai</label>
+      <input type="date" id="end">
+    </div>
+    <div>
+      <label>Cabang</label>
+      <select id="filterCabang" onchange="render()">
+        <option value="">Semua Cabang</option>
+        <option>Cabang A</option>
+        <option>Cabang B</option>
+      </select>
+    </div>
+    <div>
+      <label>Cari Toko</label>
+      <input id="search" placeholder="ketik nama toko..." oninput="render()">
+    </div>
+    <div>
+      <button onclick="render()">Terapkan Filter</button>
+    </div>
+    <div>
+      <button onclick="exportCSV()">Export Excel (CSV)</button>
+    </div>
   </div>
 
+  <!-- SUMMARY -->
+  <div class="stats">
+    <div class="card stat">
+      <p>Total</p>
+      <h3 id="sumTotal">Rp 0</h3>
+    </div>
+    <div class="card stat">
+      <p>Transaksi</p>
+      <h3 id="sumTrx">0</h3>
+    </div>
+    <div class="card stat">
+      <p>Avg</p>
+      <h3 id="sumAvg">Rp 0</h3>
+    </div>
+  </div>
+
+  <!-- TOP TOKO -->
   <div class="card">
-    <select id="filterCabang" onchange="render()">
-      <option value="">Semua Cabang</option>
-      <option>Cabang A</option>
-      <option>Cabang B</option>
-    </select>
+    <h4>🏆 Top Toko</h4>
+    <div id="topList"></div>
+  </div>
+
+  <!-- CHART -->
+  <div class="card">
+    <h4>📈 Tren Harian</h4>
     <canvas id="chart"></canvas>
   </div>
-</div>
 
-<!-- LAPORAN -->
-<div id="laporan" style="display:none">
+  <!-- TABLE -->
   <div class="card">
     <button onclick="exportPDF()">Export PDF</button>
     <table>
@@ -118,22 +159,18 @@ const auth=firebase.auth();
 
 let role="staff";
 let data=[];
-let chartInstance;
+let chartInstance=null;
 
-// AUTO TANGGAL
 document.getElementById("tanggal").value=new Date().toISOString().split("T")[0];
 
-// LOGIN
+// AUTH
 async function login(){
   let email=prompt("Email");
   let pass=prompt("Password");
   await auth.signInWithEmailAndPassword(email,pass);
 }
-
-// LOGOUT
 function logout(){auth.signOut();}
 
-// ROLE
 auth.onAuthStateChanged(async user=>{
   if(user){
     let doc=await db.collection("users").doc(user.uid).get();
@@ -148,7 +185,6 @@ auth.onAuthStateChanged(async user=>{
 // NAV
 function show(id){
   input.style.display="none";
-  dashboard.style.display="none";
   laporan.style.display="none";
   document.getElementById(id).style.display="block";
 }
@@ -164,24 +200,18 @@ db.collection("sales").onSnapshot(snap=>{
 
 // SIMPAN
 async function simpan(){
-  let tokoVal=document.getElementById("toko").value;
-  let tanggalVal=document.getElementById("tanggal").value;
-  let omsetVal=Number(document.getElementById("omset").value);
-  let cabangVal=document.getElementById("cabang").value;
+  let tokoVal=toko.value;
+  let tanggalVal=tanggal.value;
+  let omsetVal=Number(omset.value);
+  let cabangVal=cabang.value || "Cabang A";
 
-  if(!tokoVal || !tanggalVal || !omsetVal){
-    return alert("Lengkapi data");
-  }
+  if(!tokoVal||!tanggalVal||!omsetVal) return alert("Lengkapi data");
 
   await db.collection("sales").add({
-    toko:tokoVal,
-    tanggal:tanggalVal,
-    omset:omsetVal,
-    cabang:cabangVal || "Cabang A"
+    toko:tokoVal, tanggal:tanggalVal, omset:omsetVal, cabang:cabangVal
   });
 
-  document.getElementById("toko").value="";
-  document.getElementById("omset").value="";
+  toko.value=""; omset.value="";
 }
 
 // DELETE
@@ -193,73 +223,98 @@ async function del(id){
 // FIX DATA LAMA
 async function fixCabang(){
   let snap=await db.collection("sales").get();
-
   snap.forEach(async doc=>{
-    let d=doc.data();
-    if(!d.cabang){
-      await db.collection("sales").doc(doc.id).update({
-        cabang:"Cabang A"
-      });
+    if(!doc.data().cabang){
+      await db.collection("sales").doc(doc.id).update({cabang:"Cabang A"});
     }
   });
-
-  alert("Data lama sudah diperbaiki ke Cabang A ✅");
+  alert("Data lama sudah masuk Cabang A ✅");
 }
 
-// RENDER
+// FILTER + RENDER
 function render(){
-  let cab=document.getElementById("filterCabang").value;
+  let s=start.value;
+  let e=end.value;
+  let cab=filterCabang.value;
+  let q=(search.value||"").toLowerCase();
 
-  let f=data.filter(d=>!cab || d.cabang===cab);
+  let f=data.filter(d=>{
+    if(s && d.tanggal < s) return false;
+    if(e && d.tanggal > e) return false;
+    if(cab && d.cabang !== cab) return false;
+    if(q && !(d.toko||"").toLowerCase().includes(q)) return false;
+    return true;
+  });
 
-  document.getElementById("table").innerHTML=f.map(d=>`
+  // SUMMARY
+  let total=f.reduce((a,b)=>a+(b.omset||0),0);
+  let trx=f.length;
+  let avg=trx?Math.round(total/trx):0;
+
+  sumTotal.innerText=rp(total);
+  sumTrx.innerText=trx;
+  sumAvg.innerText=rp(avg);
+
+  // TOP TOKO
+  let perToko={};
+  f.forEach(d=>{
+    let t=d.toko||"Unknown";
+    perToko[t]=(perToko[t]||0)+(d.omset||0);
+  });
+  let topArr=Object.entries(perToko).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  topList.innerHTML = topArr.map(([t,v],i)=>`<span class="badge">${i+1}. ${t} — ${rp(v)}</span>`).join("");
+
+  // TREN HARIAN
+  let perHari={};
+  f.forEach(d=>{
+    let t=d.tanggal||"";
+    perHari[t]=(perHari[t]||0)+(d.omset||0);
+  });
+  let labels=Object.keys(perHari).sort();
+  let values=labels.map(l=>perHari[l]);
+
+  if(chartInstance) chartInstance.destroy();
+  chartInstance=new Chart(document.getElementById("chart"),{
+    type:'line',
+    data:{labels, datasets:[{label:"Omset", data:values}]}
+  });
+
+  // TABLE
+  table.innerHTML = f.map(d=>`
     <tr>
       <td>${d.tanggal}</td>
       <td>${d.toko}</td>
-      <td>${d.cabang || "Cabang A"}</td>
+      <td>${d.cabang||"Cabang A"}</td>
       <td>${rp(d.omset)}</td>
       <td>${role==="admin"?`<button onclick="del('${d.id}')">Hapus</button>`:"-"}</td>
     </tr>
   `).join("");
-
-  let total=f.reduce((a,b)=>a+b.omset,0);
-  document.getElementById("totalAll").innerText=rp(total);
-  document.getElementById("trx").innerText=f.length;
-
-  let perToko={};
-  f.forEach(d=>{
-    let toko=d.toko || "Unknown";
-    perToko[toko]=(perToko[toko]||0)+d.omset;
-  });
-
-  let topToko=Object.entries(perToko).sort((a,b)=>b[1]-a[1])[0];
-  document.getElementById("top").innerText=topToko?topToko[0]:"-";
-
-  if(chartInstance) chartInstance.destroy();
-
-  chartInstance=new Chart(document.getElementById("chart"),{
-    type:'bar',
-    data:{
-      labels:Object.keys(perToko),
-      datasets:[{
-        label:"Omset",
-        data:Object.values(perToko)
-      }]
-    }
-  });
 }
 
-// PDF
+// EXPORT CSV
+function exportCSV(){
+  let rows = [["Tanggal","Toko","Cabang","Omset"]];
+  data.forEach(d=>{
+    rows.push([d.tanggal,d.toko,d.cabang||"Cabang A",d.omset]);
+  });
+  let csv = rows.map(r=>r.join(",")).join("\n");
+
+  let blob=new Blob([csv],{type:'text/csv'});
+  let a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download="laporan.csv";
+  a.click();
+}
+
+// EXPORT PDF
 function exportPDF(){
   const { jsPDF } = window.jspdf;
   let doc=new jsPDF();
-
   let y=10;
   data.forEach(d=>{
-    doc.text(`${d.tanggal} | ${d.toko} | ${d.cabang || "Cabang A"} | ${d.omset}`,10,y);
-    y+=10;
+    doc.text(`${d.tanggal} | ${d.toko} | ${d.cabang||"Cabang A"} | ${d.omset}`,10,y);
+    y+=8;
   });
-
   doc.save("laporan.pdf");
 }
 </script>
