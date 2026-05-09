@@ -15,12 +15,8 @@ body {
   color: #e2e8f0;
 }
 
-/* Container */
-.container {
-  padding: 15px;
-}
+.container { padding: 15px; }
 
-/* Card modern */
 .card {
   background: rgba(255,255,255,0.05);
   border-radius: 20px;
@@ -30,7 +26,6 @@ body {
   border: 1px solid rgba(255,255,255,0.1);
 }
 
-/* Header */
 header {
   text-align: center;
   padding: 20px;
@@ -38,18 +33,16 @@ header {
   font-weight: bold;
 }
 
-/* Input */
-input, button {
+input, button, select {
   width: 100%;
   padding: 12px;
   margin-top: 8px;
   border-radius: 12px;
   border: none;
   outline: none;
-  font-size: 14px;
 }
 
-input {
+input, select {
   background: rgba(255,255,255,0.08);
   color: white;
 }
@@ -60,11 +53,7 @@ button {
   cursor: pointer;
 }
 
-/* Stats */
-.stats {
-  display: flex;
-  gap: 10px;
-}
+.stats { display: flex; gap: 10px; }
 
 .stat {
   flex: 1;
@@ -74,32 +63,29 @@ button {
   text-align: center;
 }
 
-.stat h3 {
-  margin: 5px 0;
-  font-size: 18px;
-}
+.filter { display: flex; gap: 10px; }
 
-/* Filter */
-.filter {
-  display: flex;
-  gap: 10px;
-}
-
-/* Table */
 table {
   width: 100%;
   border-collapse: collapse;
   font-size: 13px;
 }
 
-th, td {
-  padding: 10px;
-  text-align: left;
+th, td { padding: 10px; }
+
+tr { border-bottom: 1px solid rgba(255,255,255,0.1); }
+
+.action-btn {
+  padding: 5px 8px;
+  margin-right: 5px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
 }
 
-tr {
-  border-bottom: 1px solid rgba(255,255,255,0.1);
-}
+.edit { background: orange; }
+.delete { background: red; }
+.copy { background: green; }
 </style>
 </head>
 
@@ -109,60 +95,72 @@ tr {
 
 <div class="container">
 
-  <!-- INPUT -->
-  <div class="card">
-    <h3>Input Penjualan</h3>
-    <input type="text" id="toko" placeholder="Nama Toko">
-    <input type="number" id="omset" placeholder="Omset (contoh: 5000000)">
-    <button onclick="simpan()">Simpan Penjualan</button>
-  </div>
+<!-- INPUT -->
+<div class="card">
+  <h3>Input Penjualan</h3>
+  <input type="text" id="toko" placeholder="Nama Toko">
+  <input type="number" id="omset" placeholder="Omset">
+  <button onclick="simpan()">Simpan</button>
+</div>
 
-  <!-- STATS -->
-  <div class="stats">
-    <div class="stat">
-      <p>Omset Hari Ini</p>
-      <h3 id="totalOmset">Rp 0</h3>
-    </div>
-    <div class="stat">
-      <p>EC Hari Ini</p>
-      <h3 id="ec">0</h3>
-    </div>
-    <div class="stat">
-      <p>Avg / Toko</p>
-      <h3 id="avg">Rp 0</h3>
-    </div>
-  </div>
+<!-- TOOLS -->
+<div class="card">
+  <h3>🛠 Tools</h3>
+  <select id="chartType" onchange="render()">
+    <option value="line">Grafik Line</option>
+    <option value="bar">Grafik Bar</option>
+  </select>
+  <button onclick="copyData()">Copy Data</button>
+  <button onclick="pasteData()">Paste Data</button>
+</div>
 
-  <!-- FILTER -->
-  <div class="card">
-    <h3>Filter Tanggal</h3>
-    <div class="filter">
-      <input type="date" id="start">
-      <input type="date" id="end">
-    </div>
-    <button onclick="render()">Terapkan</button>
+<!-- STATS -->
+<div class="stats">
+  <div class="stat">
+    <p>Omset Hari Ini</p>
+    <h3 id="totalOmset">Rp 0</h3>
   </div>
+  <div class="stat">
+    <p>EC Hari Ini</p>
+    <h3 id="ec">0</h3>
+  </div>
+  <div class="stat">
+    <p>Avg / Toko</p>
+    <h3 id="avg">Rp 0</h3>
+  </div>
+</div>
 
-  <!-- GRAFIK -->
-  <div class="card">
-    <h3>Grafik Omset Harian</h3>
-    <canvas id="chart"></canvas>
+<!-- FILTER -->
+<div class="card">
+  <h3>Filter</h3>
+  <div class="filter">
+    <input type="date" id="start">
+    <input type="date" id="end">
   </div>
+  <button onclick="render()">Terapkan</button>
+</div>
 
-  <!-- TABLE -->
-  <div class="card">
-    <h3>Laporan Penjualan</h3>
-    <table>
-      <thead>
-        <tr>
-          <th>Tanggal</th>
-          <th>Toko</th>
-          <th>Omset</th>
-        </tr>
-      </thead>
-      <tbody id="tableData"></tbody>
-    </table>
-  </div>
+<!-- GRAFIK -->
+<div class="card">
+  <h3>Grafik</h3>
+  <canvas id="chart"></canvas>
+</div>
+
+<!-- TABLE -->
+<div class="card">
+  <h3>Laporan</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Tanggal</th>
+        <th>Toko</th>
+        <th>Omset</th>
+        <th>Aksi</th>
+      </tr>
+    </thead>
+    <tbody id="tableData"></tbody>
+  </table>
+</div>
 
 </div>
 
@@ -170,53 +168,89 @@ tr {
 let data = JSON.parse(localStorage.getItem("sales")) || [];
 let chart;
 
-// FORMAT RUPIAH AMAN
-function formatRupiah(angka) {
-  angka = Number(angka);
-  if (isNaN(angka)) return "Rp 0";
-  return "Rp " + angka.toLocaleString("id-ID");
+// FORMAT
+function formatRupiah(a){
+  a = Number(a);
+  if(isNaN(a)) return "Rp 0";
+  return "Rp " + a.toLocaleString("id-ID");
 }
 
-// SIMPAN DATA
-function simpan() {
-  const toko = document.getElementById("toko").value.trim();
-  let omset = document.getElementById("omset").value;
+// SIMPAN
+function simpan(){
+  let toko = document.getElementById("toko").value.trim();
+  let omset = Number(document.getElementById("omset").value);
 
-  omset = Number(omset);
-
-  if (!toko || isNaN(omset) || omset <= 0) {
-    alert("Input tidak valid!");
+  if(!toko || isNaN(omset) || omset<=0){
+    alert("Input salah!");
     return;
   }
 
-  const tanggal = new Date().toISOString().split("T")[0];
+  let tanggal = new Date().toISOString().split("T")[0];
+  data.push({toko,omset,tanggal});
 
-  data.push({ toko, omset, tanggal });
-  localStorage.setItem("sales", JSON.stringify(data));
-
-  document.getElementById("toko").value = "";
-  document.getElementById("omset").value = "";
-
+  localStorage.setItem("sales",JSON.stringify(data));
   render();
 }
 
-// RENDER
-function render() {
-  const today = new Date().toISOString().split("T")[0];
+// EDIT
+function editData(i){
+  let d = data[i];
+  let toko = prompt("Edit Toko", d.toko);
+  let omset = prompt("Edit Omset", d.omset);
 
-  const start = document.getElementById("start").value;
-  const end = document.getElementById("end").value;
+  if(!toko || isNaN(omset)) return;
+
+  data[i].toko = toko;
+  data[i].omset = Number(omset);
+
+  localStorage.setItem("sales",JSON.stringify(data));
+  render();
+}
+
+// DELETE
+function deleteData(i){
+  if(confirm("Hapus data?")){
+    data.splice(i,1);
+    localStorage.setItem("sales",JSON.stringify(data));
+    render();
+  }
+}
+
+// COPY
+function copyData(){
+  navigator.clipboard.writeText(JSON.stringify(data));
+  alert("Data di-copy!");
+}
+
+// PASTE
+function pasteData(){
+  let input = prompt("Paste data JSON");
+  try{
+    let parsed = JSON.parse(input);
+    data = parsed;
+    localStorage.setItem("sales",JSON.stringify(data));
+    render();
+  }catch{
+    alert("Format salah!");
+  }
+}
+
+// RENDER
+function render(){
+  let today = new Date().toISOString().split("T")[0];
+
+  let start = document.getElementById("start").value;
+  let end = document.getElementById("end").value;
 
   let filtered = [...data];
 
-  if (start && end) {
-    filtered = filtered.filter(d => d.tanggal >= start && d.tanggal <= end);
+  if(start && end){
+    filtered = filtered.filter(d=>d.tanggal>=start && d.tanggal<=end);
   }
 
-  filtered.sort((a,b)=> new Date(a.tanggal)-new Date(b.tanggal));
+  filtered.sort((a,b)=>new Date(a.tanggal)-new Date(b.tanggal));
 
-  // DATA HARI INI
-  let todayData = data.filter(d => d.tanggal === today);
+  let todayData = data.filter(d=>d.tanggal===today);
 
   let total = todayData.reduce((a,b)=>a+b.omset,0);
   let ec = todayData.length;
@@ -226,43 +260,39 @@ function render() {
   document.getElementById("ec").innerText = ec;
   document.getElementById("avg").innerText = formatRupiah(avg);
 
-  // GRAFIK
-  let perHari = {};
+  let perHari={};
   filtered.forEach(d=>{
-    perHari[d.tanggal] = (perHari[d.tanggal] || 0) + d.omset;
+    perHari[d.tanggal]=(perHari[d.tanggal]||0)+d.omset;
   });
 
   let labels = Object.keys(perHari);
   let values = Object.values(perHari);
 
-  if (chart) chart.destroy();
+  if(chart) chart.destroy();
 
-  chart = new Chart(document.getElementById("chart"), {
-    type: 'line',
-    data: {
-      labels: labels,
-      datasets: [{
-        label: 'Omset Harian',
-        data: values,
-        tension: 0.3,
-        fill: true
-      }]
+  chart = new Chart(document.getElementById("chart"),{
+    type: document.getElementById("chartType").value,
+    data:{
+      labels:labels,
+      datasets:[{label:"Omset",data:values}]
     }
   });
 
-  // TABLE
-  let rows = "";
-  filtered.slice().reverse().forEach(d=>{
-    rows += `
-      <tr>
-        <td>${d.tanggal}</td>
-        <td>${d.toko}</td>
-        <td>${formatRupiah(d.omset)}</td>
-      </tr>
-    `;
+  let rows="";
+  filtered.slice().reverse().forEach((d,i)=>{
+    rows+=`
+    <tr>
+      <td>${d.tanggal}</td>
+      <td>${d.toko}</td>
+      <td>${formatRupiah(d.omset)}</td>
+      <td>
+        <button class="action-btn edit" onclick="editData(${i})">Edit</button>
+        <button class="action-btn delete" onclick="deleteData(${i})">Hapus</button>
+      </td>
+    </tr>`;
   });
 
-  document.getElementById("tableData").innerHTML = rows;
+  document.getElementById("tableData").innerHTML=rows;
 }
 
 render();
