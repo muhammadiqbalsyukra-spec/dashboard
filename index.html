@@ -65,7 +65,8 @@ input,select,button{
 button{background:#3b82f6;color:white;}
 
 .hidden{display:none;}
-.table{width:100%;}
+.table{width:100%;border-collapse:collapse;}
+.table th,.table td{padding:10px;border-bottom:1px solid #334155;}
 .small{font-size:12px;opacity:.7}
 
 /* STAT */
@@ -109,14 +110,12 @@ button{background:#3b82f6;color:white;}
 <!-- DASHBOARD -->
 <div id="dashboard">
 
-  <!-- FILTER -->
   <div class="card">
     <input type="date" id="start" onchange="render()">
     <input type="date" id="end" onchange="render()">
     <select id="filterCabang" onchange="render()"></select>
   </div>
 
-  <!-- STATS -->
   <div class="grid">
     <div class="stat">
       <h2 id="total">Rp 0</h2>
@@ -132,7 +131,6 @@ button{background:#3b82f6;color:white;}
     </div>
   </div>
 
-  <!-- CHART -->
   <div class="grid">
     <div class="card">
       <h3>📈 Omset Harian</h3>
@@ -153,15 +151,12 @@ button{background:#3b82f6;color:white;}
     <input id="toko" placeholder="Toko">
     <input type="date" id="tanggal">
     <input id="omset" type="number" placeholder="Omset">
-
     <div class="small">Cabang: <b id="infoCabang"></b></div>
-
     <button onclick="simpan()">Simpan</button>
   </div>
 
-  <!-- ADMIN -->
   <div class="card" id="boxCabang" style="display:none">
-    <h3>Tambah Cabang</h3>
+    <h3>Tambah Sales</h3>
     <input id="newCabang">
     <button onclick="tambahCabang()">Tambah</button>
   </div>
@@ -173,7 +168,7 @@ button{background:#3b82f6;color:white;}
     <table class="table">
       <thead>
         <tr>
-          <th>Tanggal</th><th>Toko</th><th>Cabang</th><th>Omset</th><th>Aksi</th>
+          <th>Tanggal</th><th>Toko</th><th>Sales</th><th>Omset</th><th>Aksi</th>
         </tr>
       </thead>
       <tbody id="table"></tbody>
@@ -201,17 +196,27 @@ const auth=firebase.auth();
 
 let data=[],role="staff",userCabang="",cabangList=[],chartInstance,chartSalesInstance;
 
-// DEFAULT TANGGAL
+// 🔥 NORMALISASI CABANG
+function fixCabang(n){
+  if(!n) return "Sales 1";
+  if(n.includes("Sales")) return n;
+
+  const map={
+    "Cabang A":"Sales 1",
+    "Cabang B":"Sales 2",
+    "Cabang C":"Sales 3"
+  };
+  return map[n] || "Sales 1";
+}
+
 window.onload=()=>{
   tanggal.value=new Date().toISOString().split("T")[0];
 };
 
-// LOGIN
 async function login(){
   await auth.signInWithEmailAndPassword(email.value,password.value);
 }
 
-// REGISTER
 async function register(){
   let user=await auth.createUserWithEmailAndPassword(email.value,password.value);
   let isAdmin=email.value.includes("admin");
@@ -222,7 +227,6 @@ async function register(){
   });
 }
 
-// AUTH
 auth.onAuthStateChanged(async user=>{
   if(user){
     loginPage.classList.add("hidden");
@@ -251,13 +255,11 @@ auth.onAuthStateChanged(async user=>{
 
 function logout(){auth.signOut();}
 
-// NAV
-function show(id,el){
+function show(id){
   ["dashboard","input","laporan"].forEach(x=>document.getElementById(x).classList.add("hidden"));
   document.getElementById(id).classList.remove("hidden");
 }
 
-// CABANG
 db.collection("cabang").onSnapshot(snap=>{
   cabangList=snap.docs.map(d=>d.data().nama);
 
@@ -275,33 +277,28 @@ async function tambahCabang(){
   newCabang.value="";
 }
 
-// DATA
 db.collection("sales").onSnapshot(snap=>{
   data=snap.docs.map(d=>({...d.data(),id:d.id}));
   render();
 });
 
-// SIMPAN
 async function simpan(){
   await db.collection("sales").add({
     toko:toko.value,
     tanggal:tanggal.value,
     omset:Number(omset.value),
-    cabang: role==="admin"
+    cabang: fixCabang(role==="admin"
       ? (filterCabang.value || cabangList[0])
-      : userCabang
+      : userCabang)
   });
 }
 
-// FORMAT
 function rp(a){return "Rp "+Number(a||0).toLocaleString("id-ID");}
 
-// RENDER
 function render(){
 
   let f=data.map(d=>{
-    if(d.cabang==="Cabang A") d.cabang="Sales 1";
-    if(d.cabang==="Cabang B") d.cabang="Sales 2";
+    d.cabang=fixCabang(d.cabang);
     return d;
   }).filter(d=>{
     if(role!=="admin" && d.cabang!==userCabang) return false;
@@ -314,27 +311,37 @@ function render(){
   trx.innerText=f.length;
   avg.innerText=rp(f.length?totalVal/f.length:0);
 
-  // CHART HARIAN
   let perHari={};
   f.forEach(d=>perHari[d.tanggal]=(perHari[d.tanggal]||0)+d.omset);
 
   if(chartInstance) chartInstance.destroy();
   chartInstance=new Chart(chart,{
     type:'line',
-    data:{labels:Object.keys(perHari),datasets:[{data:Object.values(perHari)}]}
+    data:{
+      labels:Object.keys(perHari),
+      datasets:[{
+        label:"Omset",
+        data:Object.values(perHari),
+        tension:0.4
+      }]
+    }
   });
 
-  // CHART SALES
   let perSales={};
   f.forEach(d=>perSales[d.cabang]=(perSales[d.cabang]||0)+d.omset);
 
   if(chartSalesInstance) chartSalesInstance.destroy();
   chartSalesInstance=new Chart(chartSales,{
     type:'bar',
-    data:{labels:Object.keys(perSales),datasets:[{data:Object.values(perSales)}]}
+    data:{
+      labels:Object.keys(perSales),
+      datasets:[{
+        label:"Total",
+        data:Object.values(perSales)
+      }]
+    }
   });
 
-  // TABLE
   table.innerHTML=f.map(d=>`
     <tr>
       <td>${d.tanggal}</td>
@@ -346,7 +353,6 @@ function render(){
   `).join("");
 }
 
-// DELETE
 async function del(id){
   if(role!=="admin") return;
   await db.collection("sales").doc(id).delete();
