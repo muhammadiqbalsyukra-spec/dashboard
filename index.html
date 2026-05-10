@@ -164,33 +164,47 @@ async function login(){
 // REGISTER
 async function register(){
   const user=await auth.createUserWithEmailAndPassword(email.value,password.value);
-  const isAdmin=email.value.includes("admin");
+  const isAdmin=email.value.toLowerCase().includes("admin");
   await db.collection("users").doc(user.user.uid).set({
     role:isAdmin?"admin":"staff",
     cabang:isAdmin?"ALL":"Sales 1"
   });
 }
 
-// AUTH STATE (🔥 FIX UTAMA)
+// AUTH STATE (🔥 FIX ADMIN FINAL)
 auth.onAuthStateChanged(async user=>{
   if(user){
     loginPage.classList.add("hidden");
     app.classList.remove("hidden");
 
-    let ref=db.collection("users").doc(user.uid);
-    let doc=await ref.get();
+    let ref = db.collection("users").doc(user.uid);
+    let doc = await ref.get();
 
-    if(!doc.exists || !doc.data().role){
-      let isAdmin=user.email.includes("admin");
+    const emailLogin = user.email.toLowerCase();
+
+    // 🔥 GANTI DENGAN EMAIL KAMU
+    const isAdminEmail = emailLogin === "muhammadiqbalsyukra@gmail.com";
+
+    if(!doc.exists){
       await ref.set({
-        role:isAdmin?"admin":"staff",
-        cabang:isAdmin?"ALL":"Sales 1"
+        role: isAdminEmail ? "admin" : "staff",
+        cabang: isAdminEmail ? "ALL" : "Sales 1"
       });
-      role=isAdmin?"admin":"staff";
-      userCabang=isAdmin?"ALL":"Sales 1";
+    }
+
+    let dataUser = (await ref.get()).data();
+
+    if(isAdminEmail){
+      role = "admin";
+      userCabang = "ALL";
+
+      await ref.set({
+        role: "admin",
+        cabang: "ALL"
+      });
     }else{
-      role=doc.data().role;
-      userCabang=doc.data().cabang;
+      role = dataUser.role || "staff";
+      userCabang = dataUser.cabang || "Sales 1";
     }
 
     userInfo.innerText=user.email+" ("+role+")";
@@ -209,7 +223,7 @@ auth.onAuthStateChanged(async user=>{
 function logout(){auth.signOut();}
 
 // NAV
-function show(id,el){
+function show(id){
   ["dashboard","input","laporan"].forEach(x=>document.getElementById(x).classList.add("hidden"));
   document.getElementById(id).classList.remove("hidden");
 }
