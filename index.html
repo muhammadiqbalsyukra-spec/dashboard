@@ -20,20 +20,42 @@ body{
   font-family:'Inter',sans-serif;
   display:flex;
 }
+
+/* SIDEBAR */
 .sidebar{
-  width:230px;
+  width:220px;
   background:#020617;
   padding:20px;
 }
-.menu{padding:12px;border-radius:10px;cursor:pointer;}
-.menu:hover,.active{background:#3b82f6;}
-.main{flex:1;padding:30px;}
+
+/* MAIN */
+.main{
+  flex:1;
+  padding:30px;
+  max-width:1200px;
+  margin:auto;
+}
+
+/* GRID */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+  gap:20px;
+}
+
+/* CARD */
 .card{
   background:#1e293b;
   padding:20px;
   border-radius:16px;
   margin-bottom:15px;
 }
+
+/* MENU */
+.menu{padding:12px;border-radius:10px;cursor:pointer;}
+.menu:hover,.active{background:#3b82f6;}
+
+/* INPUT */
 input,select,button{
   width:100%;
   padding:10px;
@@ -41,9 +63,18 @@ input,select,button{
   border-radius:8px;
 }
 button{background:#3b82f6;color:white;}
+
 .hidden{display:none;}
 .table{width:100%;}
 .small{font-size:12px;opacity:.7}
+
+/* STAT */
+.stat{
+  text-align:center;
+  padding:20px;
+  border-radius:12px;
+  background:linear-gradient(135deg,#3b82f6,#06b6d4);
+}
 </style>
 </head>
 
@@ -77,21 +108,43 @@ button{background:#3b82f6;color:white;}
 
 <!-- DASHBOARD -->
 <div id="dashboard">
+
+  <!-- FILTER -->
   <div class="card">
     <input type="date" id="start" onchange="render()">
     <input type="date" id="end" onchange="render()">
     <select id="filterCabang" onchange="render()"></select>
   </div>
 
-  <div class="card">
-    <h2 id="total">Rp 0</h2>
-    <div>Transaksi: <b id="trx">0</b></div>
-    <div>Rata-rata: <b id="avg">Rp 0</b></div>
+  <!-- STATS -->
+  <div class="grid">
+    <div class="stat">
+      <h2 id="total">Rp 0</h2>
+      <p>Total Omset</p>
+    </div>
+    <div class="stat">
+      <h2 id="trx">0</h2>
+      <p>Transaksi</p>
+    </div>
+    <div class="stat">
+      <h2 id="avg">Rp 0</h2>
+      <p>Rata-rata</p>
+    </div>
   </div>
 
-  <div class="card">
-    <canvas id="chart"></canvas>
+  <!-- CHART -->
+  <div class="grid">
+    <div class="card">
+      <h3>📈 Omset Harian</h3>
+      <canvas id="chart"></canvas>
+    </div>
+
+    <div class="card">
+      <h3>👤 Per Sales</h3>
+      <canvas id="chartSales"></canvas>
+    </div>
   </div>
+
 </div>
 
 <!-- INPUT -->
@@ -106,7 +159,7 @@ button{background:#3b82f6;color:white;}
     <button onclick="simpan()">Simpan</button>
   </div>
 
-  <!-- ADMIN ONLY -->
+  <!-- ADMIN -->
   <div class="card" id="boxCabang" style="display:none">
     <h3>Tambah Cabang</h3>
     <input id="newCabang">
@@ -140,12 +193,18 @@ const firebaseConfig = {
   messagingSenderId: "795043382766",
   appId: "1:795043382766:web:9d908c909fb6a2774dfaff"
 };
+
 firebase.initializeApp(firebaseConfig);
 
 const db=firebase.firestore();
 const auth=firebase.auth();
 
-let data=[],role="staff",userCabang="",cabangList=[],chartInstance;
+let data=[],role="staff",userCabang="",cabangList=[],chartInstance,chartSalesInstance;
+
+// DEFAULT TANGGAL
+window.onload=()=>{
+  tanggal.value=new Date().toISOString().split("T")[0];
+};
 
 // LOGIN
 async function login(){
@@ -178,7 +237,6 @@ auth.onAuthStateChanged(async user=>{
 
     boxCabang.style.display = (role==="admin")?"block":"none";
 
-    // seed cabang awal
     let cek=await db.collection("cabang").get();
     if(cek.empty){
       await db.collection("cabang").add({nama:"Sales 1"});
@@ -242,7 +300,6 @@ function rp(a){return "Rp "+Number(a||0).toLocaleString("id-ID");}
 function render(){
 
   let f=data.map(d=>{
-    // 🔥 AUTO FIX DATA LAMA
     if(d.cabang==="Cabang A") d.cabang="Sales 1";
     if(d.cabang==="Cabang B") d.cabang="Sales 2";
     return d;
@@ -257,6 +314,7 @@ function render(){
   trx.innerText=f.length;
   avg.innerText=rp(f.length?totalVal/f.length:0);
 
+  // CHART HARIAN
   let perHari={};
   f.forEach(d=>perHari[d.tanggal]=(perHari[d.tanggal]||0)+d.omset);
 
@@ -266,6 +324,17 @@ function render(){
     data:{labels:Object.keys(perHari),datasets:[{data:Object.values(perHari)}]}
   });
 
+  // CHART SALES
+  let perSales={};
+  f.forEach(d=>perSales[d.cabang]=(perSales[d.cabang]||0)+d.omset);
+
+  if(chartSalesInstance) chartSalesInstance.destroy();
+  chartSalesInstance=new Chart(chartSales,{
+    type:'bar',
+    data:{labels:Object.keys(perSales),datasets:[{data:Object.values(perSales)}]}
+  });
+
+  // TABLE
   table.innerHTML=f.map(d=>`
     <tr>
       <td>${d.tanggal}</td>
