@@ -19,7 +19,6 @@
   --primary:#3b82f6;
   --text:#e2e8f0;
 }
-*{transition:all .2s ease;}
 body{
   margin:0;
   background:linear-gradient(135deg,#020617,#0f172a);
@@ -30,17 +29,12 @@ body{
 .sidebar{
   width:230px;
   background:rgba(2,6,23,0.8);
-  backdrop-filter:blur(10px);
   padding:20px;
   display:flex;
   flex-direction:column;
   justify-content:space-between;
 }
-.menu{
-  padding:12px;
-  border-radius:10px;
-  cursor:pointer;
-}
+.menu{padding:12px;border-radius:10px;cursor:pointer;}
 .menu:hover,.menu.active{background:var(--primary);}
 .main{flex:1;padding:30px;}
 .card{
@@ -74,7 +68,6 @@ button{background:var(--primary);color:white;}
 
 <div id="toast" class="toast"></div>
 
-<!-- LOGIN -->
 <div id="loginPage" class="main">
   <div class="card">
     <h3>Login</h3>
@@ -82,11 +75,10 @@ button{background:var(--primary);color:white;}
     <input id="password" type="password" placeholder="Password">
     <button onclick="login()">Login</button>
     <button onclick="register()">Register</button>
-    <div class="small">Tips: email yang mengandung “admin” akan jadi admin.</div>
+    <div class="small">Tips: email mengandung "admin" = admin</div>
   </div>
 </div>
 
-<!-- APP -->
 <div id="app" class="hidden">
 
   <div class="sidebar">
@@ -103,14 +95,11 @@ button{background:var(--primary);color:white;}
 
     <div id="userInfo"></div>
 
-    <!-- DASHBOARD -->
     <div id="dashboard">
       <div class="card">
         <h3>Filter</h3>
         <input type="date" id="start" onchange="render()">
         <input type="date" id="end" onchange="render()">
-
-        <!-- Admin bisa pilih cabang, staff dikunci -->
         <select id="filterCabang" onchange="render()"></select>
       </div>
 
@@ -121,34 +110,20 @@ button{background:var(--primary);color:white;}
       </div>
 
       <div class="card">
-        <h3>Grafik Omset</h3>
-        <canvas id="chart" height="120"></canvas>
+        <canvas id="chart"></canvas>
       </div>
     </div>
 
-    <!-- INPUT -->
     <div id="input" class="hidden">
       <div class="card">
         <input id="toko" placeholder="Toko">
         <input type="date" id="tanggal">
         <input id="omset" type="number" placeholder="Omset">
-
-        <!-- Ditampilkan hanya sebagai info -->
-        <div class="small">Cabang kamu: <b id="infoCabang"></b></div>
-
+        <div class="small">Cabang: <b id="infoCabang"></b></div>
         <button id="btnSimpan" onclick="simpan()" disabled>Simpan</button>
-      </div>
-
-      <!-- Kelola Cabang (ADMIN SAJA) -->
-      <div class="card" id="boxCabang" style="display:none">
-        <h3>Kelola Cabang</h3>
-        <input id="newCabang" placeholder="Nama cabang / sales">
-        <button onclick="tambahCabang()">Tambah</button>
-        <div id="listCabang"></div>
       </div>
     </div>
 
-    <!-- LAPORAN -->
     <div id="laporan" class="hidden">
       <div class="card">
         <table class="table">
@@ -175,79 +150,55 @@ const firebaseConfig = {
   appId: "1:795043382766:web:9d908c909fb6a2774dfaff"
 };
 firebase.initializeApp(firebaseConfig);
+
 const db=firebase.firestore();
 const auth=firebase.auth();
 
-let data=[],role="staff",chartInstance,cabangList=[];
-let userCabang=""; // 🔥 cabang milik user
+let data=[],role="staff",userCabang="Sales 1",chartInstance;
 
-// ===== TOAST
-function toastMsg(msg){
-  const t=document.getElementById("toast");
-  t.innerText=msg;
-  t.style.display="block";
-  setTimeout(()=>t.style.display="none",2000);
-}
-
-// ===== LOAD
-window.onload=()=>{
-  tanggal.value=new Date().toISOString().split("T")[0];
-};
-
-// ===== AUTH
+// LOGIN
 async function login(){
   await auth.signInWithEmailAndPassword(email.value,password.value);
-  toastMsg("Login berhasil");
 }
 
+// REGISTER
 async function register(){
   const user=await auth.createUserWithEmailAndPassword(email.value,password.value);
-
-  // default role & cabang
-  const isAdmin=email.value.toLowerCase().includes("admin");
-  const roleSet=isAdmin?"admin":"staff";
-
-  // jika staff, kasih cabang default pertama (atau Sales 1)
-  const snap=await db.collection("cabang").get();
-  let defaultCabang="Sales 1";
-  if(!snap.empty) defaultCabang=snap.docs[0].data().nama;
-
+  const isAdmin=email.value.includes("admin");
   await db.collection("users").doc(user.user.uid).set({
-    role: roleSet,
-    cabang: roleSet==="admin" ? "ALL" : defaultCabang
+    role:isAdmin?"admin":"staff",
+    cabang:isAdmin?"ALL":"Sales 1"
   });
-
-  toastMsg("Akun dibuat: "+roleSet);
 }
 
-function logout(){auth.signOut();}
-
-// ===== USER STATE
+// AUTH STATE (🔥 FIX UTAMA)
 auth.onAuthStateChanged(async user=>{
   if(user){
     loginPage.classList.add("hidden");
     app.classList.remove("hidden");
 
-    const doc=await db.collection("users").doc(user.uid).get();
-    role=doc.exists?doc.data().role:"staff";
-    userCabang=doc.exists?doc.data().cabang:"Sales 1";
+    let ref=db.collection("users").doc(user.uid);
+    let doc=await ref.get();
 
-    userInfo.innerText = user.email + " ("+role+")";
+    if(!doc.exists || !doc.data().role){
+      let isAdmin=user.email.includes("admin");
+      await ref.set({
+        role:isAdmin?"admin":"staff",
+        cabang:isAdmin?"ALL":"Sales 1"
+      });
+      role=isAdmin?"admin":"staff";
+      userCabang=isAdmin?"ALL":"Sales 1";
+    }else{
+      role=doc.data().role;
+      userCabang=doc.data().cabang;
+    }
 
-    infoCabang.innerText = (role==="admin") ? "Semua Cabang" : userCabang;
+    userInfo.innerText=user.email+" ("+role+")";
+    infoCabang.innerText=userCabang;
 
-    // tombol simpan aktif
     btnSimpan.disabled=false;
 
-    // admin boleh kelola cabang
-    boxCabang.style.display = (role==="admin") ? "block" : "none";
-
-    // seed cabang kalau kosong
-    const cek = await db.collection("cabang").get();
-    if(cek.empty){
-      await db.collection("cabang").add({nama:"Sales 1"});
-      await db.collection("cabang").add({nama:"Sales 2"});
-    }
+    render();
 
   }else{
     loginPage.classList.remove("hidden");
@@ -255,119 +206,43 @@ auth.onAuthStateChanged(async user=>{
   }
 });
 
-// ===== NAV
+function logout(){auth.signOut();}
+
+// NAV
 function show(id,el){
   ["dashboard","input","laporan"].forEach(x=>document.getElementById(x).classList.add("hidden"));
   document.getElementById(id).classList.remove("hidden");
-  document.querySelectorAll(".menu").forEach(m=>m.classList.remove("active"));
-  el.classList.add("active");
 }
 
-// ===== CABANG (REALTIME)
-db.collection("cabang").onSnapshot(snap=>{
-  cabangList = snap.docs.map(d=>({id:d.id,...d.data()}));
-  renderCabang();
-});
-
-function renderCabang(){
-  // FILTER
-  if(role==="admin"){
-    filterCabang.innerHTML = '<option value="">Semua</option>' +
-      cabangList.map(c=>`<option>${c.nama}</option>`).join("");
-    filterCabang.disabled=false;
-  }else{
-    // staff terkunci ke cabangnya
-    filterCabang.innerHTML = `<option>${userCabang}</option>`;
-    filterCabang.value = userCabang;
-    filterCabang.disabled=true;
-  }
-
-  // LIST (admin)
-  listCabang.innerHTML = cabangList.map(c=>`
-    <div style="display:flex;justify-content:space-between;margin-top:6px">
-      <span>${c.nama}</span>
-      ${role==="admin"?`<button onclick="hapusCabang('${c.id}')">Hapus</button>`:""}
-    </div>
-  `).join("");
-}
-
-async function tambahCabang(){
-  if(role!=="admin") return;
-  if(!newCabang.value) return toastMsg("Isi dulu");
-  await db.collection("cabang").add({nama:newCabang.value});
-  newCabang.value="";
-}
-
-async function hapusCabang(id){
-  if(role!=="admin") return;
-  await db.collection("cabang").doc(id).delete();
-}
-
-// ===== DATA
-async function simpan(){
-  await db.collection("sales").add({
-    toko:toko.value,
-    tanggal:tanggal.value,
-    omset:Number(omset.value),
-    // 🔥 otomatis pakai cabang user
-    cabang: (role==="admin" && cabangList.length)
-      ? (filterCabang.value || cabangList[0].nama)
-      : userCabang
-  });
-  toastMsg("Tersimpan");
-  toko.value=""; omset.value="";
-}
-
-async function del(id){
-  if(role!=="admin") return toastMsg("Admin only");
-  await db.collection("sales").doc(id).delete();
-  toastMsg("Dihapus");
-}
-
-// realtime sales
+// DATA REALTIME
 db.collection("sales").onSnapshot(snap=>{
   data=snap.docs.map(d=>({...d.data(),id:d.id}));
   render();
 });
 
-// ===== RENDER
+// SIMPAN
+async function simpan(){
+  await db.collection("sales").add({
+    toko:toko.value,
+    tanggal:tanggal.value,
+    omset:Number(omset.value),
+    cabang:role==="admin"?"ALL":userCabang
+  });
+}
+
+// FORMAT
 function rp(a){return "Rp "+Number(a||0).toLocaleString("id-ID");}
 
+// RENDER
 function render(){
-  let s=start.value;
-  let e=end.value;
-  let cab = filterCabang.value;
-
-  let f = data.filter(d=>{
+  let f=data.filter(d=>{
     if(role!=="admin" && d.cabang!==userCabang) return false;
-    if(s && d.tanggal < s) return false;
-    if(e && d.tanggal > e) return false;
-    if(role==="admin" && cab && d.cabang!==cab) return false;
     return true;
   });
 
   let totalVal=f.reduce((a,b)=>a+(b.omset||0),0);
-  let trxVal=f.length;
-  let avgVal=trxVal?Math.round(totalVal/trxVal):0;
-
   total.innerText=rp(totalVal);
-  trx.innerText=trxVal;
-  avg.innerText=rp(avgVal);
 
-  // chart per hari
-  let perHari={};
-  f.forEach(d=>perHari[d.tanggal]=(perHari[d.tanggal]||0)+d.omset);
-
-  if(chartInstance) chartInstance.destroy();
-  chartInstance=new Chart(chart,{
-    type:'line',
-    data:{
-      labels:Object.keys(perHari),
-      datasets:[{data:Object.values(perHari)}]
-    }
-  });
-
-  // table
   table.innerHTML=f.map(d=>`
     <tr>
       <td>${d.tanggal}</td>
@@ -377,6 +252,12 @@ function render(){
       <td>${role==="admin"?`<button onclick="del('${d.id}')">Hapus</button>`:"-"}</td>
     </tr>
   `).join("");
+}
+
+// DELETE
+async function del(id){
+  if(role!=="admin") return;
+  await db.collection("sales").doc(id).delete();
 }
 </script>
 
