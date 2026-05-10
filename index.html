@@ -20,68 +20,24 @@ body{
   font-family:'Inter',sans-serif;
   display:flex;
 }
-
-/* SIDEBAR */
-.sidebar{
-  width:220px;
-  background:#020617;
-  padding:20px;
-}
-
-/* MAIN */
-.main{
-  flex:1;
-  padding:30px;
-  max-width:1200px;
-  margin:auto;
-}
-
-/* GRID */
-.grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-  gap:20px;
-}
-
-/* CARD */
-.card{
-  background:#1e293b;
-  padding:20px;
-  border-radius:16px;
-  margin-bottom:15px;
-}
-
-/* MENU */
+.sidebar{width:220px;background:#020617;padding:20px;}
+.main{flex:1;padding:30px;max-width:1200px;margin:auto;}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px;}
+.card{background:#1e293b;padding:20px;border-radius:16px;margin-bottom:15px;}
 .menu{padding:12px;border-radius:10px;cursor:pointer;}
 .menu:hover,.active{background:#3b82f6;}
-
-/* INPUT */
-input,select,button{
-  width:100%;
-  padding:10px;
-  margin-top:6px;
-  border-radius:8px;
-}
+input,select,button{width:100%;padding:10px;margin-top:6px;border-radius:8px;}
 button{background:#3b82f6;color:white;}
-
 .hidden{display:none;}
 .table{width:100%;border-collapse:collapse;}
 .table th,.table td{padding:10px;border-bottom:1px solid #334155;}
 .small{font-size:12px;opacity:.7}
-
-/* STAT */
-.stat{
-  text-align:center;
-  padding:20px;
-  border-radius:12px;
-  background:linear-gradient(135deg,#3b82f6,#06b6d4);
-}
+.stat{text-align:center;padding:20px;border-radius:12px;background:linear-gradient(135deg,#3b82f6,#06b6d4);}
 </style>
 </head>
 
 <body>
 
-<!-- LOGIN -->
 <div id="loginPage" class="main">
   <div class="card">
     <h3>Login</h3>
@@ -92,14 +48,13 @@ button{background:#3b82f6;color:white;}
   </div>
 </div>
 
-<!-- APP -->
 <div id="app" class="hidden">
 
 <div class="sidebar">
   <h3>Sales Pro</h3>
-  <div class="menu active" onclick="show('dashboard',this)">Dashboard</div>
-  <div class="menu" onclick="show('input',this)">Input</div>
-  <div class="menu" onclick="show('laporan',this)">Laporan</div>
+  <div class="menu active" onclick="show('dashboard')">Dashboard</div>
+  <div class="menu" onclick="show('input')">Input</div>
+  <div class="menu" onclick="show('laporan')">Laporan</div>
   <div class="menu" onclick="logout()">Logout</div>
 </div>
 
@@ -107,7 +62,6 @@ button{background:#3b82f6;color:white;}
 
 <div id="userInfo"></div>
 
-<!-- DASHBOARD -->
 <div id="dashboard">
 
   <div class="card">
@@ -117,18 +71,9 @@ button{background:#3b82f6;color:white;}
   </div>
 
   <div class="grid">
-    <div class="stat">
-      <h2 id="total">Rp 0</h2>
-      <p>Total Omset</p>
-    </div>
-    <div class="stat">
-      <h2 id="trx">0</h2>
-      <p>Transaksi</p>
-    </div>
-    <div class="stat">
-      <h2 id="avg">Rp 0</h2>
-      <p>Rata-rata</p>
-    </div>
+    <div class="stat"><h2 id="total">Rp 0</h2><p>Total Omset</p></div>
+    <div class="stat"><h2 id="trx">0</h2><p>Transaksi</p></div>
+    <div class="stat"><h2 id="avg">Rp 0</h2><p>Rata-rata</p></div>
   </div>
 
   <div class="grid">
@@ -136,7 +81,6 @@ button{background:#3b82f6;color:white;}
       <h3>📈 Omset Harian</h3>
       <canvas id="chart"></canvas>
     </div>
-
     <div class="card">
       <h3>👤 Per Sales</h3>
       <canvas id="chartSales"></canvas>
@@ -145,13 +89,12 @@ button{background:#3b82f6;color:white;}
 
 </div>
 
-<!-- INPUT -->
 <div id="input" class="hidden">
   <div class="card">
     <input id="toko" placeholder="Toko">
     <input type="date" id="tanggal">
     <input id="omset" type="number" placeholder="Omset">
-    <div class="small">Cabang: <b id="infoCabang"></b></div>
+    <div class="small">Sales: <b id="infoCabang"></b></div>
     <button onclick="simpan()">Simpan</button>
   </div>
 
@@ -162,7 +105,6 @@ button{background:#3b82f6;color:white;}
   </div>
 </div>
 
-<!-- LAPORAN -->
 <div id="laporan" class="hidden">
   <div class="card">
     <table class="table">
@@ -188,7 +130,6 @@ const firebaseConfig = {
   messagingSenderId: "795043382766",
   appId: "1:795043382766:web:9d908c909fb6a2774dfaff"
 };
-
 firebase.initializeApp(firebaseConfig);
 
 const db=firebase.firestore();
@@ -196,37 +137,19 @@ const auth=firebase.auth();
 
 let data=[],role="staff",userCabang="",cabangList=[],chartInstance,chartSalesInstance;
 
-// 🔥 NORMALISASI CABANG
+// NORMALISASI
 function fixCabang(n){
   if(!n) return "Sales 1";
   if(n.includes("Sales")) return n;
-
-  const map={
-    "Cabang A":"Sales 1",
-    "Cabang B":"Sales 2",
-    "Cabang C":"Sales 3"
-  };
-  return map[n] || "Sales 1";
+  const map={"Cabang A":"Sales 1","Cabang B":"Sales 2"};
+  return map[n]||"Sales 1";
 }
 
 window.onload=()=>{
   tanggal.value=new Date().toISOString().split("T")[0];
 };
 
-async function login(){
-  await auth.signInWithEmailAndPassword(email.value,password.value);
-}
-
-async function register(){
-  let user=await auth.createUserWithEmailAndPassword(email.value,password.value);
-  let isAdmin=email.value.includes("admin");
-
-  await db.collection("users").doc(user.user.uid).set({
-    role:isAdmin?"admin":"staff",
-    cabang:isAdmin?"ALL":"Sales 1"
-  });
-}
-
+// AUTH
 auth.onAuthStateChanged(async user=>{
   if(user){
     loginPage.classList.add("hidden");
@@ -241,11 +164,7 @@ auth.onAuthStateChanged(async user=>{
 
     boxCabang.style.display = (role==="admin")?"block":"none";
 
-    let cek=await db.collection("cabang").get();
-    if(cek.empty){
-      await db.collection("cabang").add({nama:"Sales 1"});
-      await db.collection("cabang").add({nama:"Sales 2"});
-    }
+    render(); // 🔥 FIX UTAMA
 
   }else{
     loginPage.classList.remove("hidden");
@@ -253,13 +172,30 @@ auth.onAuthStateChanged(async user=>{
   }
 });
 
+// LOGIN
+async function login(){
+  await auth.signInWithEmailAndPassword(email.value,password.value);
+}
+
+// REGISTER
+async function register(){
+  let user=await auth.createUserWithEmailAndPassword(email.value,password.value);
+  let isAdmin=email.value.includes("admin");
+  await db.collection("users").doc(user.user.uid).set({
+    role:isAdmin?"admin":"staff",
+    cabang:isAdmin?"ALL":"Sales 1"
+  });
+}
+
 function logout(){auth.signOut();}
 
+// NAV
 function show(id){
   ["dashboard","input","laporan"].forEach(x=>document.getElementById(x).classList.add("hidden"));
   document.getElementById(id).classList.remove("hidden");
 }
 
+// CABANG
 db.collection("cabang").onSnapshot(snap=>{
   cabangList=snap.docs.map(d=>d.data().nama);
 
@@ -272,37 +208,35 @@ db.collection("cabang").onSnapshot(snap=>{
   }
 });
 
-async function tambahCabang(){
-  await db.collection("cabang").add({nama:newCabang.value});
-  newCabang.value="";
-}
-
+// DATA
 db.collection("sales").onSnapshot(snap=>{
   data=snap.docs.map(d=>({...d.data(),id:d.id}));
   render();
 });
 
+// SIMPAN
 async function simpan(){
   await db.collection("sales").add({
     toko:toko.value,
     tanggal:tanggal.value,
     omset:Number(omset.value),
-    cabang: fixCabang(role==="admin"
-      ? (filterCabang.value || cabangList[0])
+    cabang:fixCabang(role==="admin"
+      ? (filterCabang.value||cabangList[0])
       : userCabang)
   });
 }
 
-function rp(a){return "Rp "+Number(a||0).toLocaleString("id-ID");}
-
+// RENDER
 function render(){
+
+  let cab=filterCabang.value;
 
   let f=data.map(d=>{
     d.cabang=fixCabang(d.cabang);
     return d;
   }).filter(d=>{
     if(role!=="admin" && d.cabang!==userCabang) return false;
-    if(filterCabang.value && role==="admin" && d.cabang!==filterCabang.value) return false;
+    if(role==="admin" && cab && d.cabang!==cab) return false;
     return true;
   });
 
@@ -317,14 +251,7 @@ function render(){
   if(chartInstance) chartInstance.destroy();
   chartInstance=new Chart(chart,{
     type:'line',
-    data:{
-      labels:Object.keys(perHari),
-      datasets:[{
-        label:"Omset",
-        data:Object.values(perHari),
-        tension:0.4
-      }]
-    }
+    data:{labels:Object.keys(perHari),datasets:[{data:Object.values(perHari)}]}
   });
 
   let perSales={};
@@ -333,13 +260,7 @@ function render(){
   if(chartSalesInstance) chartSalesInstance.destroy();
   chartSalesInstance=new Chart(chartSales,{
     type:'bar',
-    data:{
-      labels:Object.keys(perSales),
-      datasets:[{
-        label:"Total",
-        data:Object.values(perSales)
-      }]
-    }
+    data:{labels:Object.keys(perSales),datasets:[{data:Object.values(perSales)}]}
   });
 
   table.innerHTML=f.map(d=>`
@@ -352,6 +273,8 @@ function render(){
     </tr>
   `).join("");
 }
+
+function rp(a){return "Rp "+Number(a||0).toLocaleString("id-ID");}
 
 async function del(id){
   if(role!=="admin") return;
