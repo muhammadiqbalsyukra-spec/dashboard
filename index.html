@@ -13,32 +13,23 @@
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 
 <style>
-:root{
-  --bg:#0f172a;
-  --card:rgba(30,41,59,0.7);
-  --primary:#3b82f6;
-  --text:#e2e8f0;
-}
 body{
   margin:0;
   background:linear-gradient(135deg,#020617,#0f172a);
-  color:var(--text);
+  color:#e2e8f0;
   font-family:'Inter',sans-serif;
   display:flex;
 }
 .sidebar{
   width:230px;
-  background:rgba(2,6,23,0.8);
+  background:#020617;
   padding:20px;
-  display:flex;
-  flex-direction:column;
-  justify-content:space-between;
 }
 .menu{padding:12px;border-radius:10px;cursor:pointer;}
-.menu:hover,.menu.active{background:var(--primary);}
+.menu:hover,.active{background:#3b82f6;}
 .main{flex:1;padding:30px;}
 .card{
-  background:var(--card);
+  background:#1e293b;
   padding:20px;
   border-radius:16px;
   margin-bottom:15px;
@@ -49,25 +40,16 @@ input,select,button{
   margin-top:6px;
   border-radius:8px;
 }
-button{background:var(--primary);color:white;}
+button{background:#3b82f6;color:white;}
 .hidden{display:none;}
 .table{width:100%;}
-.toast{
-  position:fixed;
-  bottom:20px;
-  right:20px;
-  background:#22c55e;
-  padding:10px;
-  display:none;
-}
-.small{opacity:.8;font-size:12px}
+.small{font-size:12px;opacity:.7}
 </style>
 </head>
 
 <body>
 
-<div id="toast" class="toast"></div>
-
+<!-- LOGIN -->
 <div id="loginPage" class="main">
   <div class="card">
     <h3>Login</h3>
@@ -75,69 +57,78 @@ button{background:var(--primary);color:white;}
     <input id="password" type="password" placeholder="Password">
     <button onclick="login()">Login</button>
     <button onclick="register()">Register</button>
-    <div class="small">Tips: email mengandung "admin" = admin</div>
   </div>
 </div>
 
+<!-- APP -->
 <div id="app" class="hidden">
 
-  <div class="sidebar">
-    <div>
-      <h3>Sales Pro</h3>
-      <div class="menu active" onclick="show('dashboard',this)">Dashboard</div>
-      <div class="menu" onclick="show('input',this)">Input</div>
-      <div class="menu" onclick="show('laporan',this)">Laporan</div>
-    </div>
-    <div class="menu" onclick="logout()">Logout</div>
+<div class="sidebar">
+  <h3>Sales Pro</h3>
+  <div class="menu active" onclick="show('dashboard',this)">Dashboard</div>
+  <div class="menu" onclick="show('input',this)">Input</div>
+  <div class="menu" onclick="show('laporan',this)">Laporan</div>
+  <div class="menu" onclick="logout()">Logout</div>
+</div>
+
+<div class="main">
+
+<div id="userInfo"></div>
+
+<!-- DASHBOARD -->
+<div id="dashboard">
+  <div class="card">
+    <input type="date" id="start" onchange="render()">
+    <input type="date" id="end" onchange="render()">
+    <select id="filterCabang" onchange="render()"></select>
   </div>
 
-  <div class="main">
-
-    <div id="userInfo"></div>
-
-    <div id="dashboard">
-      <div class="card">
-        <h3>Filter</h3>
-        <input type="date" id="start" onchange="render()">
-        <input type="date" id="end" onchange="render()">
-        <select id="filterCabang" onchange="render()"></select>
-      </div>
-
-      <div class="card">
-        <h2 id="total">Rp 0</h2>
-        <div>Transaksi: <b id="trx">0</b></div>
-        <div>Rata-rata: <b id="avg">Rp 0</b></div>
-      </div>
-
-      <div class="card">
-        <canvas id="chart"></canvas>
-      </div>
-    </div>
-
-    <div id="input" class="hidden">
-      <div class="card">
-        <input id="toko" placeholder="Toko">
-        <input type="date" id="tanggal">
-        <input id="omset" type="number" placeholder="Omset">
-        <div class="small">Cabang: <b id="infoCabang"></b></div>
-        <button id="btnSimpan" onclick="simpan()" disabled>Simpan</button>
-      </div>
-    </div>
-
-    <div id="laporan" class="hidden">
-      <div class="card">
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Tanggal</th><th>Toko</th><th>Cabang</th><th>Omset</th><th>Aksi</th>
-            </tr>
-          </thead>
-          <tbody id="table"></tbody>
-        </table>
-      </div>
-    </div>
-
+  <div class="card">
+    <h2 id="total">Rp 0</h2>
+    <div>Transaksi: <b id="trx">0</b></div>
+    <div>Rata-rata: <b id="avg">Rp 0</b></div>
   </div>
+
+  <div class="card">
+    <canvas id="chart"></canvas>
+  </div>
+</div>
+
+<!-- INPUT -->
+<div id="input" class="hidden">
+  <div class="card">
+    <input id="toko" placeholder="Toko">
+    <input type="date" id="tanggal">
+    <input id="omset" type="number" placeholder="Omset">
+
+    <div class="small">Cabang: <b id="infoCabang"></b></div>
+
+    <button onclick="simpan()">Simpan</button>
+  </div>
+
+  <!-- ADMIN ONLY -->
+  <div class="card" id="boxCabang" style="display:none">
+    <h3>Tambah Cabang</h3>
+    <input id="newCabang">
+    <button onclick="tambahCabang()">Tambah</button>
+  </div>
+</div>
+
+<!-- LAPORAN -->
+<div id="laporan" class="hidden">
+  <div class="card">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Tanggal</th><th>Toko</th><th>Cabang</th><th>Omset</th><th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody id="table"></tbody>
+    </table>
+  </div>
+</div>
+
+</div>
 </div>
 
 <script>
@@ -154,7 +145,7 @@ firebase.initializeApp(firebaseConfig);
 const db=firebase.firestore();
 const auth=firebase.auth();
 
-let data=[],role="staff",userCabang="Sales 1",chartInstance;
+let data=[],role="staff",userCabang="",cabangList=[],chartInstance;
 
 // LOGIN
 async function login(){
@@ -163,56 +154,36 @@ async function login(){
 
 // REGISTER
 async function register(){
-  const user=await auth.createUserWithEmailAndPassword(email.value,password.value);
-  const isAdmin=email.value.toLowerCase().includes("admin");
+  let user=await auth.createUserWithEmailAndPassword(email.value,password.value);
+  let isAdmin=email.value.includes("admin");
+
   await db.collection("users").doc(user.user.uid).set({
     role:isAdmin?"admin":"staff",
     cabang:isAdmin?"ALL":"Sales 1"
   });
 }
 
-// AUTH STATE (🔥 FIX ADMIN FINAL)
+// AUTH
 auth.onAuthStateChanged(async user=>{
   if(user){
     loginPage.classList.add("hidden");
     app.classList.remove("hidden");
 
-    let ref = db.collection("users").doc(user.uid);
-    let doc = await ref.get();
-
-    const emailLogin = user.email.toLowerCase();
-
-    // 🔥 GANTI DENGAN EMAIL KAMU
-    const isAdminEmail = emailLogin === "muhammadiqbalsyukra@gmail.com";
-
-    if(!doc.exists){
-      await ref.set({
-        role: isAdminEmail ? "admin" : "staff",
-        cabang: isAdminEmail ? "ALL" : "Sales 1"
-      });
-    }
-
-    let dataUser = (await ref.get()).data();
-
-    if(isAdminEmail){
-      role = "admin";
-      userCabang = "ALL";
-
-      await ref.set({
-        role: "admin",
-        cabang: "ALL"
-      });
-    }else{
-      role = dataUser.role || "staff";
-      userCabang = dataUser.cabang || "Sales 1";
-    }
+    let doc=await db.collection("users").doc(user.uid).get();
+    role=doc.data().role;
+    userCabang=doc.data().cabang;
 
     userInfo.innerText=user.email+" ("+role+")";
     infoCabang.innerText=userCabang;
 
-    btnSimpan.disabled=false;
+    boxCabang.style.display = (role==="admin")?"block":"none";
 
-    render();
+    // seed cabang awal
+    let cek=await db.collection("cabang").get();
+    if(cek.empty){
+      await db.collection("cabang").add({nama:"Sales 1"});
+      await db.collection("cabang").add({nama:"Sales 2"});
+    }
 
   }else{
     loginPage.classList.remove("hidden");
@@ -223,12 +194,30 @@ auth.onAuthStateChanged(async user=>{
 function logout(){auth.signOut();}
 
 // NAV
-function show(id){
+function show(id,el){
   ["dashboard","input","laporan"].forEach(x=>document.getElementById(x).classList.add("hidden"));
   document.getElementById(id).classList.remove("hidden");
 }
 
-// DATA REALTIME
+// CABANG
+db.collection("cabang").onSnapshot(snap=>{
+  cabangList=snap.docs.map(d=>d.data().nama);
+
+  if(role==="admin"){
+    filterCabang.innerHTML='<option value="">Semua</option>'+
+      cabangList.map(c=>`<option>${c}</option>`).join("");
+  }else{
+    filterCabang.innerHTML=`<option>${userCabang}</option>`;
+    filterCabang.disabled=true;
+  }
+});
+
+async function tambahCabang(){
+  await db.collection("cabang").add({nama:newCabang.value});
+  newCabang.value="";
+}
+
+// DATA
 db.collection("sales").onSnapshot(snap=>{
   data=snap.docs.map(d=>({...d.data(),id:d.id}));
   render();
@@ -240,7 +229,9 @@ async function simpan(){
     toko:toko.value,
     tanggal:tanggal.value,
     omset:Number(omset.value),
-    cabang:role==="admin"?"ALL":userCabang
+    cabang: role==="admin"
+      ? (filterCabang.value || cabangList[0])
+      : userCabang
   });
 }
 
@@ -249,13 +240,31 @@ function rp(a){return "Rp "+Number(a||0).toLocaleString("id-ID");}
 
 // RENDER
 function render(){
-  let f=data.filter(d=>{
+
+  let f=data.map(d=>{
+    // 🔥 AUTO FIX DATA LAMA
+    if(d.cabang==="Cabang A") d.cabang="Sales 1";
+    if(d.cabang==="Cabang B") d.cabang="Sales 2";
+    return d;
+  }).filter(d=>{
     if(role!=="admin" && d.cabang!==userCabang) return false;
+    if(filterCabang.value && role==="admin" && d.cabang!==filterCabang.value) return false;
     return true;
   });
 
   let totalVal=f.reduce((a,b)=>a+(b.omset||0),0);
   total.innerText=rp(totalVal);
+  trx.innerText=f.length;
+  avg.innerText=rp(f.length?totalVal/f.length:0);
+
+  let perHari={};
+  f.forEach(d=>perHari[d.tanggal]=(perHari[d.tanggal]||0)+d.omset);
+
+  if(chartInstance) chartInstance.destroy();
+  chartInstance=new Chart(chart,{
+    type:'line',
+    data:{labels:Object.keys(perHari),datasets:[{data:Object.values(perHari)}]}
+  });
 
   table.innerHTML=f.map(d=>`
     <tr>
