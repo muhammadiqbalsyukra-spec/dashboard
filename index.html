@@ -1,3 +1,6 @@
+# Sales Pro Dashboard — Final 1 File
+
+```html
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -30,10 +33,6 @@ body{
   overflow-x:hidden;
 }
 
-/* ======================
-   LOGIN PAGE
-====================== */
-
 #loginPage{
   min-height:100vh;
   display:flex;
@@ -50,8 +49,7 @@ body{
   backdrop-filter:blur(15px);
   border-radius:24px;
   padding:30px;
-  box-shadow:
-  0 15px 35px rgba(0,0,0,.35);
+  box-shadow:0 15px 35px rgba(0,0,0,.35);
 }
 
 .login-title{
@@ -60,23 +58,18 @@ body{
   margin-bottom:25px;
 }
 
-/* ======================
-   APP
-====================== */
-
 #app{
   display:none;
+  opacity:0;
+  transition:.3s;
   width:100%;
   min-height:100vh;
 }
 
 #app.show{
   display:flex;
+  opacity:1;
 }
-
-/* ======================
-   SIDEBAR
-====================== */
 
 .sidebar{
   width:260px;
@@ -117,20 +110,12 @@ body{
   box-shadow:0 10px 25px rgba(37,99,235,.35);
 }
 
-/* ======================
-   MAIN
-====================== */
-
 .main{
   flex:1;
   width:100%;
   min-width:0;
   padding:30px;
 }
-
-/* ======================
-   USER INFO
-====================== */
 
 #userInfo{
   display:inline-block;
@@ -140,10 +125,6 @@ body{
   background:rgba(255,255,255,.05);
   font-size:14px;
 }
-
-/* ======================
-   CARD
-====================== */
 
 .card{
   width:100%;
@@ -158,9 +139,9 @@ body{
   inset 0 1px 1px rgba(255,255,255,.04);
 }
 
-/* ======================
-   GRID
-====================== */
+.card h3{
+  margin-bottom:18px;
+}
 
 .grid{
   display:grid;
@@ -169,21 +150,13 @@ body{
   margin-bottom:20px;
 }
 
-/* ======================
-   STAT CARD
-====================== */
-
 .stat{
   position:relative;
   overflow:hidden;
   border-radius:22px;
   padding:28px;
-  background:
-  linear-gradient(135deg,
-  rgba(59,130,246,.9),
-  rgba(6,182,212,.8));
-  box-shadow:
-  0 15px 35px rgba(59,130,246,.25);
+  background:linear-gradient(135deg,rgba(59,130,246,.9),rgba(6,182,212,.8));
+  box-shadow:0 15px 35px rgba(59,130,246,.25);
 }
 
 .stat::before{
@@ -202,14 +175,6 @@ body{
   margin-bottom:10px;
 }
 
-.stat p{
-  opacity:.9;
-}
-
-/* ======================
-   INPUT
-====================== */
-
 input,
 select{
   width:100%;
@@ -222,6 +187,7 @@ select{
   color:white;
   font-size:14px;
   border:1px solid transparent;
+  transition:.2s;
 }
 
 input:focus,
@@ -233,10 +199,6 @@ select:focus{
 input::placeholder{
   color:#94a3b8;
 }
-
-/* ======================
-   BUTTON
-====================== */
 
 button{
   width:100%;
@@ -257,9 +219,12 @@ button:hover{
   transform:translateY(-2px);
 }
 
-/* ======================
-   TABLE
-====================== */
+.table button{
+  width:auto;
+  padding:8px 12px;
+  margin:0;
+  font-size:12px;
+}
 
 .table-wrapper{
   overflow-x:auto;
@@ -275,26 +240,15 @@ button:hover{
   background:rgba(255,255,255,.05);
 }
 
-.table th{
-  text-align:left;
+.table th,
+.table td{
   padding:16px;
   font-size:14px;
-  color:#94a3b8;
 }
 
 .table td{
-  padding:16px;
   border-bottom:1px solid rgba(255,255,255,.06);
-  font-size:14px;
 }
-
-.table tbody tr:hover{
-  background:rgba(255,255,255,.03);
-}
-
-/* ======================
-   CHART
-====================== */
 
 .chart-box{
   position:relative;
@@ -307,27 +261,15 @@ canvas{
   height:100% !important;
 }
 
-/* ======================
-   SMALL TEXT
-====================== */
-
 .small{
   font-size:13px;
   margin-top:10px;
   opacity:.7;
 }
 
-/* ======================
-   HIDDEN
-====================== */
-
 .hidden{
   display:none !important;
 }
-
-/* ======================
-   MOBILE
-====================== */
 
 @media(max-width:900px){
 
@@ -363,22 +305,11 @@ canvas{
     grid-template-columns:1fr;
   }
 
-  .card{
-    padding:18px;
-  }
-
-  .stat h2{
-    font-size:26px;
-  }
-
 }
 
 </style>
 </head>
-
 <body>
-
-<!-- LOGIN -->
 
 <div id="loginPage">
 
@@ -390,11 +321,7 @@ canvas{
 
     <input id="email" placeholder="Email">
 
-    <input
-      id="password"
-      type="password"
-      placeholder="Password"
-    >
+    <input id="password" type="password" placeholder="Password">
 
     <button onclick="login()">
       Login
@@ -408,11 +335,7 @@ canvas{
 
 </div>
 
-<!-- APP -->
-
 <div id="app">
-
-  <!-- SIDEBAR -->
 
   <div class="sidebar">
 
@@ -436,34 +359,19 @@ canvas{
 
   </div>
 
-  <!-- MAIN -->
-
   <div class="main">
 
     <div id="userInfo"></div>
-
-    <!-- DASHBOARD -->
 
     <div id="dashboard">
 
       <div class="card">
 
-        <input
-          type="date"
-          id="start"
-          onchange="render()"
-        >
+        <input type="date" id="start" onchange="render()">
 
-        <input
-          type="date"
-          id="end"
-          onchange="render()"
-        >
+        <input type="date" id="end" onchange="render()">
 
-        <select
-          id="filterCabang"
-          onchange="render()"
-        ></select>
+        <select id="filterCabang" onchange="render()"></select>
 
       </div>
 
@@ -512,34 +420,22 @@ canvas{
 
     </div>
 
-    <!-- INPUT -->
-
     <div id="input" class="hidden">
 
       <div class="card">
 
-        <h3 style="margin-bottom:15px;">
-          Input Data Sales
-        </h3>
+        <h3>Input Data Sales</h3>
 
-        <input
-          id="toko"
-          placeholder="Nama Toko"
-        >
+        <input id="toko" placeholder="Nama Toko">
 
-        <input
-          type="date"
-          id="tanggal"
-        >
+        <input type="date" id="tanggal">
 
-        <input
-          id="omset"
-          type="number"
-          placeholder="Nominal Omset"
-        >
+        <input id="omset" type="number" placeholder="Nominal Omset">
+
+        <select id="inputSales"></select>
 
         <div class="small">
-          Sales:
+          Sales aktif:
           <b id="infoCabang"></b>
         </div>
 
@@ -549,20 +445,11 @@ canvas{
 
       </div>
 
-      <div
-        class="card"
-        id="boxCabang"
-        style="display:none"
-      >
+      <div class="card" id="boxCabang" style="display:none">
 
-        <h3 style="margin-bottom:15px;">
-          Tambah Sales
-        </h3>
+        <h3>Tambah Sales</h3>
 
-        <input
-          id="newCabang"
-          placeholder="Nama Sales"
-        >
+        <input id="newCabang" placeholder="Nama Sales">
 
         <button onclick="tambahCabang()">
           Tambah Sales
@@ -571,8 +458,6 @@ canvas{
       </div>
 
     </div>
-
-    <!-- LAPORAN -->
 
     <div id="laporan" class="hidden">
 
@@ -619,19 +504,15 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 
-const db=firebase.firestore();
-const auth=firebase.auth();
+const db = firebase.firestore();
+const auth = firebase.auth();
 
-let data=[],
-role="staff",
-userCabang="",
-cabangList=[],
-chartInstance,
-chartSalesInstance;
-
-/* ======================
-   FIX CABANG
-====================== */
+let data = [];
+let role = "staff";
+let userCabang = "";
+let cabangList = [];
+let chartInstance;
+let chartSalesInstance;
 
 function fixCabang(n){
 
@@ -648,10 +529,6 @@ function fixCabang(n){
   return map[n]||"Sales 1";
 }
 
-/* ======================
-   LOAD
-====================== */
-
 window.onload=()=>{
 
   tanggal.value=
@@ -661,60 +538,40 @@ window.onload=()=>{
 
 };
 
-/* ======================
-   AUTH
-====================== */
-
 auth.onAuthStateChanged(async user=>{
 
   if(user){
 
-    document
-    .getElementById("loginPage")
-    .classList.add("hidden");
+    loginPage.classList.add("hidden");
+    app.classList.add("show");
 
-    document
-    .getElementById("app")
-    .classList.add("show");
-
-    let doc=
-    await db.collection("users")
+    let doc = await db
+    .collection("users")
     .doc(user.uid)
     .get();
 
-    role=doc.data().role;
-    userCabang=doc.data().cabang;
+    role = doc.data().role;
+    userCabang = doc.data().cabang;
 
-    userInfo.innerText=
-    user.email+" ("+role+")";
+    userInfo.innerText = user.email + " (" + role + ")";
 
-    infoCabang.innerText=
-    userCabang;
+    infoCabang.innerText = userCabang;
 
-    boxCabang.style.display=
-    role==="admin"
-    ?"block"
-    :"none";
+    boxCabang.style.display =
+    role === "admin"
+    ? "block"
+    : "none";
 
     render();
 
   }else{
 
-    document
-    .getElementById("loginPage")
-    .classList.remove("hidden");
-
-    document
-    .getElementById("app")
-    .classList.remove("show");
+    loginPage.classList.remove("hidden");
+    app.classList.remove("show");
 
   }
 
 });
-
-/* ======================
-   LOGIN
-====================== */
 
 async function login(){
 
@@ -734,15 +591,11 @@ async function login(){
 
 }
 
-/* ======================
-   REGISTER
-====================== */
-
 async function register(){
 
   try{
 
-    let user=
+    let user =
     await auth
     .createUserWithEmailAndPassword(
       email.value,
@@ -776,29 +629,17 @@ async function register(){
 
 }
 
-/* ======================
-   LOGOUT
-====================== */
-
 function logout(){
-
   auth.signOut();
-
 }
-
-/* ======================
-   NAVIGATION
-====================== */
 
 function showPage(id,el){
 
   ["dashboard","input","laporan"]
   .forEach(x=>{
-
     document
     .getElementById(x)
     .classList.add("hidden");
-
   });
 
   document
@@ -813,23 +654,28 @@ function showPage(id,el){
 
 }
 
-/* ======================
-   CABANG
-====================== */
-
 db.collection("cabang")
 .onSnapshot(snap=>{
 
-  cabangList=
+  cabangList =
   snap.docs.map(d=>d.data().nama);
 
-  if(role==="admin"){
+  inputSales.innerHTML=
+  cabangList.map(c=>
+  `<option value="${c}">${c}</option>`
+  ).join("");
+
+  if(role === "admin"){
 
     filterCabang.innerHTML=
     '<option value="">Semua</option>'+
     cabangList.map(c=>
     `<option>${c}</option>`
     ).join("");
+
+    if(cabangList.length){
+      inputSales.value=cabangList[0];
+    }
 
   }else{
 
@@ -838,39 +684,36 @@ db.collection("cabang")
 
     filterCabang.disabled=true;
 
+    inputSales.innerHTML=
+    `<option>${userCabang}</option>`;
+
   }
 
 });
 
-/* ======================
-   DATA
-====================== */
-
-db.collection("sales")
+ db.collection("sales")
 .onSnapshot(snap=>{
 
   data=snap.docs.map(d=>({
-
     ...d.data(),
     id:d.id
-
   }));
 
   render();
 
 });
 
-/* ======================
-   SIMPAN
-====================== */
-
 async function simpan(){
 
-  if(!toko.value || !omset.value){
+  if(
+    !toko.value ||
+    !omset.value ||
+    (role === "admin" && !inputSales.value)
+  ){
 
     alert("Lengkapi data");
-
     return;
+
   }
 
   await db.collection("sales")
@@ -882,37 +725,33 @@ async function simpan(){
 
     omset:Number(omset.value),
 
-    cabang:fixCabang(
-
-      role==="admin"
-      ?(filterCabang.value||cabangList[0])
-      :userCabang
-
-    )
+    cabang:
+    role === "admin"
+    ? inputSales.value
+    : userCabang
 
   });
 
   toko.value="";
   omset.value="";
 
-}
+  alert("Data berhasil disimpan");
 
-/* ======================
-   RENDER
-====================== */
+}
 
 function render(){
 
   if(!filterCabang) return;
 
-  let cab=
-  filterCabang.value;
+  let cab = filterCabang.value;
 
-  let f=data
+  let startDate = start.value;
+  let endDate = end.value;
+
+  let f = data
   .map(d=>{
 
-    d.cabang=
-    fixCabang(d.cabang);
+    d.cabang = fixCabang(d.cabang);
 
     return d;
 
@@ -921,40 +760,41 @@ function render(){
   .filter(d=>{
 
     if(
-      role!=="admin" &&
-      d.cabang!==userCabang
+      role !== "admin" &&
+      d.cabang !== userCabang
     )
     return false;
 
     if(
-      role==="admin" &&
+      role === "admin" &&
       cab &&
-      d.cabang!==cab
+      d.cabang !== cab
     )
+    return false;
+
+    if(startDate && d.tanggal < startDate)
+    return false;
+
+    if(endDate && d.tanggal > endDate)
     return false;
 
     return true;
 
   });
 
-  let totalVal=
+  let totalVal =
   f.reduce((a,b)=>
-  a+(b.omset||0),0);
+  a + (b.omset||0),0);
 
-  total.innerText=
-  rp(totalVal);
+  total.innerText = rp(totalVal);
 
-  trx.innerText=
-  f.length;
+  trx.innerText = f.length;
 
-  avg.innerText=
-  rp(
+  avg.innerText = rp(
     f.length
-    ?totalVal/f.length
-    :0
+    ? totalVal / f.length
+    : 0
   );
-
-  /* CHART HARIAN */
 
   let perHari={};
 
@@ -962,14 +802,14 @@ function render(){
 
     perHari[d.tanggal]=
     (perHari[d.tanggal]||0)
-    +d.omset;
+    + d.omset;
 
   });
 
   if(chartInstance)
   chartInstance.destroy();
 
-  chartInstance=
+  chartInstance =
   new Chart(chart,{
 
     type:'line',
@@ -995,22 +835,20 @@ function render(){
 
   });
 
-  /* CHART SALES */
-
   let perSales={};
 
   f.forEach(d=>{
 
     perSales[d.cabang]=
     (perSales[d.cabang]||0)
-    +d.omset;
+    + d.omset;
 
   });
 
   if(chartSalesInstance)
   chartSalesInstance.destroy();
 
-  chartSalesInstance=
+  chartSalesInstance =
   new Chart(chartSales,{
 
     type:'bar',
@@ -1034,9 +872,7 @@ function render(){
 
   });
 
-  /* TABLE */
-
-  table.innerHTML=
+  table.innerHTML =
   f.map(d=>`
 
     <tr>
@@ -1052,13 +888,13 @@ function render(){
       <td>
 
       ${
-        role==="admin"
+        role === "admin"
 
-        ?`<button onclick="del('${d.id}')">
+        ? `<button onclick="del('${d.id}')">
         Hapus
         </button>`
 
-        :"-"
+        : "-"
       }
 
       </td>
@@ -1069,25 +905,17 @@ function render(){
 
 }
 
-/* ======================
-   RUPIAH
-====================== */
-
 function rp(a){
 
-  return "Rp "+
+  return "Rp " +
   Number(a||0)
   .toLocaleString("id-ID");
 
 }
 
-/* ======================
-   DELETE
-====================== */
-
 async function del(id){
 
-  if(role!=="admin")
+  if(role !== "admin")
   return;
 
   await db.collection("sales")
@@ -1095,10 +923,6 @@ async function del(id){
   .delete();
 
 }
-
-/* ======================
-   TAMBAH CABANG
-====================== */
 
 async function tambahCabang(){
 
@@ -1120,3 +944,4 @@ async function tambahCabang(){
 
 </body>
 </html>
+```
