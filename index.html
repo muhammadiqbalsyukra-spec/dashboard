@@ -27,13 +27,22 @@ body{
   radial-gradient(circle at bottom right,#0f172a,#020617 50%);
   color:#e2e8f0;
   min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* APP */
+
+#app{
   display:flex;
+  min-height:100vh;
+  width:100%;
 }
 
 /* SIDEBAR */
 
 .sidebar{
   width:260px;
+  flex-shrink:0;
   background:rgba(15,23,42,.75);
   backdrop-filter:blur(18px);
   border-right:1px solid rgba(255,255,255,.08);
@@ -77,13 +86,28 @@ body{
   flex:1;
   padding:30px;
   width:100%;
-  max-width:1400px;
-  margin:auto;
+  min-width:0;
+}
+
+/* LOGIN */
+
+#loginPage{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  min-height:100vh;
+  padding:20px;
+}
+
+#loginPage .card{
+  width:100%;
+  max-width:420px;
 }
 
 /* CARD */
 
 .card{
+  width:100%;
   background:rgba(15,23,42,.65);
   border:1px solid rgba(255,255,255,.06);
   backdrop-filter:blur(15px);
@@ -107,11 +131,13 @@ body{
   grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
   gap:20px;
   margin-bottom:20px;
+  align-items:stretch;
 }
 
 /* STAT */
 
 .stat{
+  width:100%;
   padding:28px;
   border-radius:22px;
   position:relative;
@@ -202,6 +228,8 @@ button:active{
   border-collapse:collapse;
   overflow:hidden;
   border-radius:16px;
+  display:block;
+  overflow-x:auto;
 }
 
 .table thead{
@@ -230,20 +258,6 @@ button:active{
   background:rgba(255,255,255,.03);
 }
 
-/* LOGIN */
-
-#loginPage{
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  min-height:100vh;
-}
-
-#loginPage .card{
-  width:100%;
-  max-width:420px;
-}
-
 /* USER INFO */
 
 #userInfo{
@@ -267,12 +281,15 @@ button:active{
 
 canvas{
   margin-top:20px;
+  width:100% !important;
+  max-width:100%;
 }
 
 /* SCROLLBAR */
 
 ::-webkit-scrollbar{
   width:10px;
+  height:10px;
 }
 
 ::-webkit-scrollbar-thumb{
@@ -280,11 +297,25 @@ canvas{
   border-radius:20px;
 }
 
+/* HIDDEN */
+
+.hidden{
+  display:none;
+}
+
+/* SECTION */
+
+#dashboard,
+#input,
+#laporan{
+  width:100%;
+}
+
 /* MOBILE */
 
 @media(max-width:900px){
 
-  body{
+  #app{
     flex-direction:column;
   }
 
@@ -295,6 +326,8 @@ canvas{
     display:flex;
     gap:10px;
     overflow:auto;
+    border-right:none;
+    border-bottom:1px solid rgba(255,255,255,.08);
   }
 
   .sidebar h3{
@@ -307,21 +340,31 @@ canvas{
   }
 
   .main{
-    padding:20px;
+    padding:16px;
+  }
+
+  .card{
+    padding:18px;
   }
 
   .grid{
     grid-template-columns:1fr;
   }
 
-  .table{
-    font-size:12px;
+  .stat h2{
+    font-size:26px;
   }
 
-}
+  table{
+    min-width:700px;
+  }
 
-.hidden{
-  display:none;
+  input,
+  select,
+  button{
+    font-size:16px;
+  }
+
 }
 
 </style>
@@ -329,152 +372,196 @@ canvas{
 
 <body>
 
-<div id="loginPage" class="main">
+<div id="loginPage">
+
   <div class="card">
-    <h2 style="margin-bottom:20px;">Sales Pro Login</h2>
+
+    <h2 style="margin-bottom:20px;">
+      Sales Pro Login
+    </h2>
 
     <input id="email" placeholder="Email">
-    <input id="password" type="password" placeholder="Password">
 
-    <button onclick="login()">Login</button>
-    <button onclick="register()">Register</button>
-  </div>
-</div>
+    <input
+      id="password"
+      type="password"
+      placeholder="Password"
+    >
 
-<div id="app" class="hidden">
+    <button onclick="login()">
+      Login
+    </button>
 
-<div class="sidebar">
-
-  <h3>Sales Pro</h3>
-
-  <div class="menu active" onclick="show('dashboard')">
-    📊 Dashboard
-  </div>
-
-  <div class="menu" onclick="show('input')">
-    ➕ Input
-  </div>
-
-  <div class="menu" onclick="show('laporan')">
-    📑 Laporan
-  </div>
-
-  <div class="menu" onclick="logout()">
-    🚪 Logout
-  </div>
-
-</div>
-
-<div class="main">
-
-<div id="userInfo"></div>
-
-<div id="dashboard">
-
-  <div class="card">
-
-    <input type="date" id="start" onchange="render()">
-    <input type="date" id="end" onchange="render()">
-
-    <select id="filterCabang" onchange="render()"></select>
-
-  </div>
-
-  <div class="grid">
-
-    <div class="stat">
-      <h2 id="total">Rp 0</h2>
-      <p>Total Omset</p>
-    </div>
-
-    <div class="stat">
-      <h2 id="trx">0</h2>
-      <p>Total Transaksi</p>
-    </div>
-
-    <div class="stat">
-      <h2 id="avg">Rp 0</h2>
-      <p>Rata-rata Omset</p>
-    </div>
-
-  </div>
-
-  <div class="grid">
-
-    <div class="card">
-      <h3>📈 Omset Harian</h3>
-      <canvas id="chart"></canvas>
-    </div>
-
-    <div class="card">
-      <h3>👤 Per Sales</h3>
-      <canvas id="chartSales"></canvas>
-    </div>
-
-  </div>
-
-</div>
-
-<div id="input" class="hidden">
-
-  <div class="card">
-
-    <h3 style="margin-bottom:15px;">Input Data Sales</h3>
-
-    <input id="toko" placeholder="Nama Toko">
-
-    <input type="date" id="tanggal">
-
-    <input id="omset" type="number" placeholder="Nominal Omset">
-
-    <div class="small">
-      Sales:
-      <b id="infoCabang"></b>
-    </div>
-
-    <button onclick="simpan()">Simpan Data</button>
-
-  </div>
-
-  <div class="card" id="boxCabang" style="display:none">
-
-    <h3>Tambah Sales</h3>
-
-    <input id="newCabang" placeholder="Nama Sales">
-
-    <button onclick="tambahCabang()">
-      Tambah Sales
+    <button onclick="register()">
+      Register
     </button>
 
   </div>
 
 </div>
 
-<div id="laporan" class="hidden">
+<div id="app" class="hidden">
 
-  <div class="card">
+  <div class="sidebar">
 
-    <table class="table">
+    <h3>Sales Pro</h3>
 
-      <thead>
-        <tr>
-          <th>Tanggal</th>
-          <th>Toko</th>
-          <th>Sales</th>
-          <th>Omset</th>
-          <th>Aksi</th>
-        </tr>
-      </thead>
+    <div class="menu active" onclick="show('dashboard')">
+      📊 Dashboard
+    </div>
 
-      <tbody id="table"></tbody>
+    <div class="menu" onclick="show('input')">
+      ➕ Input
+    </div>
 
-    </table>
+    <div class="menu" onclick="show('laporan')">
+      📑 Laporan
+    </div>
+
+    <div class="menu" onclick="logout()">
+      🚪 Logout
+    </div>
 
   </div>
 
-</div>
+  <div class="main">
 
-</div>
+    <div id="userInfo"></div>
+
+    <div id="dashboard">
+
+      <div class="card">
+
+        <input
+          type="date"
+          id="start"
+          onchange="render()"
+        >
+
+        <input
+          type="date"
+          id="end"
+          onchange="render()"
+        >
+
+        <select
+          id="filterCabang"
+          onchange="render()"
+        ></select>
+
+      </div>
+
+      <div class="grid">
+
+        <div class="stat">
+          <h2 id="total">Rp 0</h2>
+          <p>Total Omset</p>
+        </div>
+
+        <div class="stat">
+          <h2 id="trx">0</h2>
+          <p>Total Transaksi</p>
+        </div>
+
+        <div class="stat">
+          <h2 id="avg">Rp 0</h2>
+          <p>Rata-rata Omset</p>
+        </div>
+
+      </div>
+
+      <div class="grid">
+
+        <div class="card">
+          <h3>📈 Omset Harian</h3>
+          <canvas id="chart"></canvas>
+        </div>
+
+        <div class="card">
+          <h3>👤 Per Sales</h3>
+          <canvas id="chartSales"></canvas>
+        </div>
+
+      </div>
+
+    </div>
+
+    <div id="input" class="hidden">
+
+      <div class="card">
+
+        <h3 style="margin-bottom:15px;">
+          Input Data Sales
+        </h3>
+
+        <input id="toko" placeholder="Nama Toko">
+
+        <input type="date" id="tanggal">
+
+        <input
+          id="omset"
+          type="number"
+          placeholder="Nominal Omset"
+        >
+
+        <div class="small">
+          Sales:
+          <b id="infoCabang"></b>
+        </div>
+
+        <button onclick="simpan()">
+          Simpan Data
+        </button>
+
+      </div>
+
+      <div
+        class="card"
+        id="boxCabang"
+        style="display:none"
+      >
+
+        <h3>Tambah Sales</h3>
+
+        <input
+          id="newCabang"
+          placeholder="Nama Sales"
+        >
+
+        <button onclick="tambahCabang()">
+          Tambah Sales
+        </button>
+
+      </div>
+
+    </div>
+
+    <div id="laporan" class="hidden">
+
+      <div class="card">
+
+        <table class="table">
+
+          <thead>
+            <tr>
+              <th>Tanggal</th>
+              <th>Toko</th>
+              <th>Sales</th>
+              <th>Omset</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+
+          <tbody id="table"></tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </div>
+
 </div>
 
 <script>
@@ -759,6 +846,11 @@ function render(){
         borderWidth:3,
         tension:.4
       }]
+    },
+
+    options:{
+      responsive:true,
+      maintainAspectRatio:false
     }
 
   });
@@ -785,6 +877,11 @@ function render(){
         data:Object.values(perSales),
         borderRadius:10
       }]
+    },
+
+    options:{
+      responsive:true,
+      maintainAspectRatio:false
     }
 
   });
