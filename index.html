@@ -1,6 +1,3 @@
-# Sales Pro Dashboard — Final 1 File
-
-```html
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -363,6 +360,8 @@ canvas{
 
     <div id="userInfo"></div>
 
+    <!-- DASHBOARD -->
+
     <div id="dashboard">
 
       <div class="card">
@@ -420,6 +419,8 @@ canvas{
 
     </div>
 
+    <!-- INPUT -->
+
     <div id="input" class="hidden">
 
       <div class="card">
@@ -458,6 +459,8 @@ canvas{
       </div>
 
     </div>
+
+    <!-- LAPORAN -->
 
     <div id="laporan" class="hidden">
 
@@ -514,24 +517,9 @@ let cabangList = [];
 let chartInstance;
 let chartSalesInstance;
 
-function fixCabang(n){
-
-  if(!n) return "Sales 1";
-
-  if(n.includes("Sales"))
-  return n;
-
-  const map={
-    "Cabang A":"Sales 1",
-    "Cabang B":"Sales 2"
-  };
-
-  return map[n]||"Sales 1";
-}
-
 window.onload=()=>{
 
-  tanggal.value=
+  tanggal.value =
   new Date()
   .toISOString()
   .split("T")[0];
@@ -553,7 +541,8 @@ auth.onAuthStateChanged(async user=>{
     role = doc.data().role;
     userCabang = doc.data().cabang;
 
-    userInfo.innerText = user.email + " (" + role + ")";
+    userInfo.innerText =
+    user.email + " (" + role + ")";
 
     infoCabang.innerText = userCabang;
 
@@ -602,7 +591,7 @@ async function register(){
       password.value
     );
 
-    let isAdmin=
+    let isAdmin =
     email.value.includes("admin");
 
     await db.collection("users")
@@ -611,13 +600,13 @@ async function register(){
 
       role:
       isAdmin
-      ?"admin"
-      :"staff",
+      ? "admin"
+      : "staff",
 
       cabang:
       isAdmin
-      ?"ALL"
-      :"Sales 1"
+      ? "ALL"
+      : "Sales 1"
 
     });
 
@@ -655,46 +644,65 @@ function showPage(id,el){
 }
 
 db.collection("cabang")
-.onSnapshot(snap=>{
+.onSnapshot(async snap=>{
 
   cabangList =
   snap.docs.map(d=>d.data().nama);
 
-  inputSales.innerHTML=
+  // AUTO DEFAULT SALES
+  if(cabangList.length === 0){
+
+    await db.collection("cabang").add({
+      nama:"Sales 1"
+    });
+
+    await db.collection("cabang").add({
+      nama:"Sales 2"
+    });
+
+    return;
+  }
+
+  inputSales.innerHTML =
   cabangList.map(c=>
-  `<option value="${c}">${c}</option>`
+  `<option value="${c}">
+    ${c}
+  </option>`
   ).join("");
 
   if(role === "admin"){
 
-    filterCabang.innerHTML=
-    '<option value="">Semua</option>'+
+    filterCabang.innerHTML =
+    '<option value="">Semua Sales</option>' +
     cabangList.map(c=>
-    `<option>${c}</option>`
+    `<option value="${c}">
+      ${c}
+    </option>`
     ).join("");
-
-    if(cabangList.length){
-      inputSales.value=cabangList[0];
-    }
 
   }else{
 
-    filterCabang.innerHTML=
-    `<option>${userCabang}</option>`;
+    filterCabang.innerHTML =
+    `<option value="${userCabang}">
+      ${userCabang}
+    </option>`;
 
-    filterCabang.disabled=true;
+    filterCabang.disabled = true;
 
-    inputSales.innerHTML=
-    `<option>${userCabang}</option>`;
+    inputSales.innerHTML =
+    `<option value="${userCabang}">
+      ${userCabang}
+    </option>`;
 
   }
 
 });
 
- db.collection("sales")
+db.collection("sales")
 .onSnapshot(snap=>{
 
-  data=snap.docs.map(d=>({
+  data =
+  snap.docs.map(d=>({
     ...d.data(),
     id:d.id
   }));
@@ -707,8 +715,8 @@ async function simpan(){
 
   if(
     !toko.value ||
-    !omset.value ||
-    (role === "admin" && !inputSales.value)
+    !tanggal.value ||
+    !omset.value
   ){
 
     alert("Lengkapi data");
@@ -732,8 +740,8 @@ async function simpan(){
 
   });
 
-  toko.value="";
-  omset.value="";
+  toko.value = "";
+  omset.value = "";
 
   alert("Data berhasil disimpan");
 
@@ -748,16 +756,8 @@ function render(){
   let startDate = start.value;
   let endDate = end.value;
 
-  let f = data
-  .map(d=>{
-
-    d.cabang = fixCabang(d.cabang);
-
-    return d;
-
-  })
-
-  .filter(d=>{
+  let filtered =
+  data.filter(d=>{
 
     if(
       role !== "admin" &&
@@ -783,25 +783,28 @@ function render(){
   });
 
   let totalVal =
-  f.reduce((a,b)=>
-  a + (b.omset||0),0);
+  filtered.reduce((a,b)=>
+  a + b.omset,0);
 
   total.innerText = rp(totalVal);
 
-  trx.innerText = f.length;
+  trx.innerText = filtered.length;
 
-  avg.innerText = rp(
-    f.length
-    ? totalVal / f.length
+  avg.innerText =
+  rp(
+    filtered.length
+    ? totalVal / filtered.length
     : 0
   );
 
-  let perHari={};
+  // CHART HARIAN
 
-  f.forEach(d=>{
+  let perHari = {};
 
-    perHari[d.tanggal]=
-    (perHari[d.tanggal]||0)
+  filtered.forEach(d=>{
+
+    perHari[d.tanggal] =
+    (perHari[d.tanggal] || 0)
     + d.omset;
 
   });
@@ -818,13 +821,9 @@ function render(){
       labels:Object.keys(perHari),
 
       datasets:[{
-
         data:Object.values(perHari),
-
         borderWidth:3,
-
         tension:.4
-
       }]
     },
 
@@ -835,12 +834,14 @@ function render(){
 
   });
 
-  let perSales={};
+  // CHART SALES
 
-  f.forEach(d=>{
+  let perSales = {};
 
-    perSales[d.cabang]=
-    (perSales[d.cabang]||0)
+  filtered.forEach(d=>{
+
+    perSales[d.cabang] =
+    (perSales[d.cabang] || 0)
     + d.omset;
 
   });
@@ -857,11 +858,8 @@ function render(){
       labels:Object.keys(perSales),
 
       datasets:[{
-
         data:Object.values(perSales),
-
         borderRadius:10
-
       }]
     },
 
@@ -872,8 +870,10 @@ function render(){
 
   });
 
+  // TABLE
+
   table.innerHTML =
-  f.map(d=>`
+  filtered.map(d=>`
 
     <tr>
 
@@ -891,8 +891,8 @@ function render(){
         role === "admin"
 
         ? `<button onclick="del('${d.id}')">
-        Hapus
-        </button>`
+            Hapus
+          </button>`
 
         : "-"
       }
@@ -908,7 +908,7 @@ function render(){
 function rp(a){
 
   return "Rp " +
-  Number(a||0)
+  Number(a || 0)
   .toLocaleString("id-ID");
 
 }
@@ -926,8 +926,12 @@ async function del(id){
 
 async function tambahCabang(){
 
-  if(!newCabang.value)
-  return;
+  if(!newCabang.value){
+
+    alert("Nama sales kosong");
+    return;
+
+  }
 
   await db.collection("cabang")
   .add({
@@ -936,7 +940,9 @@ async function tambahCabang(){
 
   });
 
-  newCabang.value="";
+  newCabang.value = "";
+
+  alert("Sales berhasil ditambahkan");
 
 }
 
@@ -944,4 +950,3 @@ async function tambahCabang(){
 
 </body>
 </html>
-```
