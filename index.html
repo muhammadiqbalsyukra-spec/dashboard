@@ -286,7 +286,7 @@ canvas{
 
   <div class="sidebar">
 
-    <h3>IQBAL</h3>
+    <h3>I Q B A L</h3>
 
     <div class="menu active" onclick="showPage('dashboard',this)">
       📊 Dashboard
@@ -333,6 +333,21 @@ canvas{
         <div class="stat">
           <h2 id="avg">Rp 0</h2>
           <p>Rata-rata Omset</p>
+        </div>
+
+        <div class="stat">
+          <h2 id="targetCard">Rp 0</h2>
+          <p>Target Bulanan</p>
+        </div>
+
+        <div class="stat">
+          <h2 id="gapCard">Rp 0</h2>
+          <p>Sisa Target</p>
+        </div>
+
+        <div class="stat">
+          <h2 id="progressCard">0%</h2>
+          <p>Progress Target</p>
         </div>
 
       </div>
@@ -760,9 +775,14 @@ function render(){
   )
   : 0;
 
-  console.log("TARGET:", monthlyTarget);
-  console.log("GAP:", gap);
-  console.log("PROGRESS:", progress + "%");
+  targetCard.innerText =
+  rp(monthlyTarget);
+
+  gapCard.innerText =
+  rp(gap);
+
+  progressCard.innerText =
+  progress + "%";
 
   // CHART HARIAN
 
