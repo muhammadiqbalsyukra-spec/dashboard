@@ -1,21 +1,8 @@
-<!DOCTYPE html>
-<html lang="id">
+<!DOCTYPE html><html lang="id">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sales Dashboard</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-
-<style>
-
+<title>Sales Dashboard</title><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"><script src="https://cdn.jsdelivr.net/npm/chart.js"></script><script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script><script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script><style>
 *{
   margin:0;
   padding:0;
@@ -32,6 +19,10 @@ body{
   overflow-x:hidden;
 }
 
+.hidden{
+  display:none !important;
+}
+
 #loginPage{
   min-height:100vh;
   display:flex;
@@ -40,214 +31,113 @@ body{
   padding:20px;
 }
 
-.login-card{
-  width:100%;
-  max-width:420px;
+.login-card,
+.card{
   background:rgba(15,23,42,.75);
   border:1px solid rgba(255,255,255,.06);
   backdrop-filter:blur(15px);
   border-radius:24px;
-  padding:30px;
+  padding:24px;
   box-shadow:0 15px 35px rgba(0,0,0,.35);
 }
 
-.login-title{
-  font-size:32px;
-  font-weight:700;
-  margin-bottom:25px;
+.login-card{
+  width:100%;
+  max-width:420px;
 }
 
 #app{
   display:none;
-  opacity:0;
-  transition:.3s;
-  width:100%;
-  min-height:100vh;
 }
 
 #app.show{
   display:flex;
-  opacity:1;
 }
 
 .sidebar{
   width:260px;
-  flex-shrink:0;
-  background:rgba(15,23,42,.75);
-  backdrop-filter:blur(18px);
-  border-right:1px solid rgba(255,255,255,.08);
+  min-height:100vh;
   padding:25px 18px;
-  position:sticky;
-  top:0;
-  height:100vh;
+  background:rgba(15,23,42,.75);
+  border-right:1px solid rgba(255,255,255,.08);
 }
 
 .sidebar h3{
-  font-size:26px;
-  margin-bottom:35px;
-  font-weight:700;
+  margin-bottom:30px;
 }
 
 .menu{
-  padding:14px 16px;
+  padding:14px;
   border-radius:14px;
   margin-bottom:10px;
   cursor:pointer;
-  transition:.3s;
-  font-weight:600;
-  color:#cbd5e1;
-}
-
-.menu:hover{
-  background:rgba(59,130,246,.15);
-  transform:translateX(4px);
 }
 
 .menu.active{
   background:linear-gradient(135deg,#2563eb,#06b6d4);
-  color:white;
-  box-shadow:0 10px 25px rgba(37,99,235,.35);
 }
 
 .main{
   flex:1;
-  width:100%;
-  min-width:0;
-  padding:30px;
-}
-
-#userInfo{
-  display:inline-block;
-  margin-bottom:20px;
-  padding:14px 18px;
-  border-radius:14px;
-  background:rgba(255,255,255,.05);
-  font-size:14px;
-}
-
-.card{
-  width:100%;
-  background:rgba(15,23,42,.65);
-  border:1px solid rgba(255,255,255,.06);
-  backdrop-filter:blur(15px);
   padding:24px;
-  border-radius:22px;
-  margin-bottom:20px;
-  box-shadow:
-  0 10px 30px rgba(0,0,0,.25),
-  inset 0 1px 1px rgba(255,255,255,.04);
-}
-
-.card h3{
-  font-size:28px;
-  font-weight:700;
-  margin-bottom:20px;
 }
 
 .grid{
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
   gap:20px;
   margin-bottom:20px;
 }
 
 .stat{
-  position:relative;
-  overflow:hidden;
+  padding:24px;
   border-radius:22px;
-  padding:28px;
-  background:linear-gradient(135deg,rgba(59,130,246,.9),rgba(6,182,212,.8));
-  box-shadow:0 15px 35px rgba(59,130,246,.25);
+  background:linear-gradient(135deg,#2563eb,#06b6d4);
 }
 
 .stat h2{
-  font-size:32px;
-  margin-bottom:10px;
-}
-
-.progress-wrap{
-  margin-top:16px;
-}
-
-.progress-bar{
-  width:100%;
-  height:14px;
-  border-radius:999px;
-  background:rgba(255,255,255,.12);
-  overflow:hidden;
-  margin-top:10px;
-}
-
-.progress-fill{
-  height:100%;
-  width:0%;
-  border-radius:999px;
-  transition:1s;
-}
-
-.progress-red{
-  background:linear-gradient(90deg,#ef4444,#f87171);
-  box-shadow:0 0 20px rgba(239,68,68,.45);
-}
-
-.progress-yellow{
-  background:linear-gradient(90deg,#f59e0b,#facc15);
-  box-shadow:0 0 20px rgba(245,158,11,.45);
-}
-
-.progress-green{
-  background:linear-gradient(90deg,#22c55e,#4ade80);
-  box-shadow:0 0 20px rgba(34,197,94,.45);
+  font-size:30px;
+  margin-bottom:8px;
 }
 
 input,
-select{
-  width:100%;
-  padding:14px;
-  margin-top:12px;
-  border:none;
-  outline:none;
-  border-radius:14px;
-  background:rgba(255,255,255,.06);
-  color:white;
-  font-size:14px;
-}
-
+select,
 button{
   width:100%;
   padding:14px;
   border:none;
   border-radius:14px;
-  margin-top:14px;
-  cursor:pointer;
-  font-weight:600;
-  color:white;
-  background:linear-gradient(135deg,#2563eb,#06b6d4);
+  margin-top:12px;
 }
 
-.table-wrapper{
-  overflow-x:auto;
+input,
+select{
+  background:rgba(255,255,255,.06);
+  color:white;
+}
+
+button{
+  cursor:pointer;
+  color:white;
+  background:linear-gradient(135deg,#2563eb,#06b6d4);
 }
 
 .table{
   width:100%;
   border-collapse:collapse;
-  min-width:700px;
 }
 
 .table th,
 .table td{
-  padding:16px;
-  font-size:14px;
-}
-
-.table td{
+  padding:14px;
   border-bottom:1px solid rgba(255,255,255,.06);
 }
 
+.table-wrapper{
+  overflow:auto;
+}
+
 .chart-box{
-  position:relative;
-  width:100%;
   height:340px;
 }
 
@@ -256,249 +146,167 @@ canvas{
   height:100% !important;
 }
 
-.small{
-  font-size:13px;
-  margin-top:10px;
-  opacity:.7;
+.progress-bar{
+  width:100%;
+  height:12px;
+  background:rgba(255,255,255,.12);
+  border-radius:999px;
+  overflow:hidden;
+  margin-top:12px;
 }
 
-#scanStatus{
+.progress-fill{
+  width:0%;
+  height:100%;
+  transition:1s;
+  border-radius:999px;
+}
+
+.progress-red{
+  background:#ef4444;
+}
+
+.progress-yellow{
+  background:#f59e0b;
+}
+
+.progress-green{
+  background:#22c55e;
+}
+
+.small{
   margin-top:10px;
   font-size:13px;
   opacity:.8;
 }
 
-.hidden{
-  display:none !important;
+#previewBox{
+  margin-top:20px;
+  overflow:auto;
+  max-height:400px;
 }
 
 @media(max-width:900px){
-
   #app{
     flex-direction:column;
   }
 
   .sidebar{
     width:100%;
-    height:auto;
-    position:relative;
+    min-height:auto;
     display:flex;
     gap:10px;
-    overflow-x:auto;
+    overflow:auto;
   }
-
-  .sidebar h3{
-    display:none;
-  }
-
-  .main{
-    padding:16px;
-  }
-
 }
+</style></head>
+<body><div id="loginPage">
+  <div class="login-card"><h1 style="margin-bottom:20px;">
+  Sales Login
+</h1>
 
-</style>
-</head>
-<body>
+<input id="email" placeholder="Email">
 
-<div id="loginPage">
+<input
+  id="password"
+  type="password"
+  placeholder="Password">
 
-  <div class="login-card">
+<button onclick="login()">
+  Login
+</button>
 
-    <div class="login-title">
-      Sales Login
-    </div>
-
-    <input id="email" placeholder="Email">
-
-    <input id="password" type="password" placeholder="Password">
-
-    <button onclick="login()">
-      Login
-    </button>
-
-    <button onclick="register()">
-      Register
-    </button>
+<button onclick="register()">
+  Register
+</button>
 
   </div>
+</div><div id="app">  <div class="sidebar"><h3>IQBAL</h3>
 
+<div class="menu active" onclick="showPage('dashboard',this)">
+  📊 Dashboard
 </div>
 
-<div id="app">
+<div class="menu" onclick="showPage('input',this)">
+  ➕ Input
+</div>
 
-  <div class="sidebar">
+<div class="menu" onclick="showPage('laporan',this)">
+  📑 Laporan
+</div>
 
-    <h3>IQBAL</h3>
+<div class="menu" onclick="logout()">
+  🚪 Logout
+</div>
 
-    <div class="menu active" onclick="showPage('dashboard',this)">
-      📊 Dashboard
+  </div>  <div class="main"><div id="dashboard">
+
+  <div class="card">
+    <select id="filterCabang" onchange="render()"></select>
+  </div>
+
+  <div class="grid">
+
+    <div class="stat">
+      <h2 id="total">Rp 0</h2>
+      <p>Total Omset</p>
     </div>
 
-    <div class="menu" onclick="showPage('input',this)">
-      ➕ Input
+    <div class="stat">
+      <h2 id="trx">0</h2>
+      <p>Total Transaksi</p>
     </div>
 
-    <div class="menu" onclick="showPage('laporan',this)">
-      📑 Laporan
+    <div class="stat">
+      <h2 id="avg">Rp 0</h2>
+      <p>Rata-rata Omset</p>
     </div>
 
-    <div class="menu" onclick="logout()">
-      🚪 Logout
+    <div class="stat">
+      <h2 id="targetCard">Rp 0</h2>
+      <p>Target Bulanan</p>
+    </div>
+
+    <div class="stat">
+      <h2 id="gapCard">Rp 0</h2>
+      <p>Sisa Target</p>
+    </div>
+
+    <div class="stat">
+
+      <h2 id="progressCard">0%</h2>
+      <p>Progress Target</p>
+
+      <div class="progress-bar">
+        <div id="progressFill" class="progress-fill"></div>
+      </div>
+
     </div>
 
   </div>
 
-  <div class="main">
+  <div class="grid">
 
-    <div id="userInfo"></div>
+    <div class="card">
 
-    <div id="dashboard">
+      <h3 style="margin-bottom:20px;">
+        📊 Omset Harian
+      </h3>
 
-      <div class="card">
-
-        <select id="filterCabang" onchange="render()"></select>
-
-      </div>
-
-      <div class="grid">
-
-        <div class="stat">
-          <h2 id="total">Rp 0</h2>
-          <p>Total Omset</p>
-        </div>
-
-        <div class="stat">
-          <h2 id="trx">0</h2>
-          <p>Total Transaksi</p>
-        </div>
-
-        <div class="stat">
-          <h2 id="avg">Rp 0</h2>
-          <p>Rata-rata Omset</p>
-        </div>
-
-        <div class="stat">
-          <h2 id="targetCard">Rp 0</h2>
-          <p>Target Bulanan</p>
-        </div>
-
-        <div class="stat">
-          <h2 id="gapCard">Rp 0</h2>
-          <p>Sisa Target</p>
-        </div>
-
-        <div class="stat" id="progressStat">
-
-          <h2 id="progressCard">0%</h2>
-
-          <p>Progress Target</p>
-
-          <div class="progress-wrap">
-
-            <div class="progress-bar">
-
-              <div
-                id="progressFill"
-                class="progress-fill">
-              </div>
-
-            </div>
-
-          </div>
-
-        </div>
-
-      </div>
-
-      <div class="grid">
-
-        <div class="card">
-
-          <h3>📊 Omset Harian</h3>
-
-          <div class="chart-box">
-            <canvas id="chart"></canvas>
-          </div>
-
-        </div>
-
-        <div class="card">
-
-          <h3>👤 Per Sales</h3>
-
-          <div class="chart-box">
-            <canvas id="chartSales"></canvas>
-          </div>
-
-        </div>
-
+      <div class="chart-box">
+        <canvas id="chart"></canvas>
       </div>
 
     </div>
 
-    <div id="input" class="hidden">
+    <div class="card">
 
-      <div class="card">
+      <h3 style="margin-bottom:20px;">
+        👤 Per Sales
+      </h3>
 
-        <h3>Input Data Sales</h3>
-
-        <input id="toko" placeholder="Nama Toko">
-
-        <input type="date" id="tanggal">
-
-        <input id="omset" type="number" placeholder="Nominal Omset">
-
-        <select id="inputSales"></select>
-
-        <input
-          type="file"
-          id="notaFile"
-          accept="image/*">
-
-        <button onclick="scanNota()">
-          📷 Scan Nota
-        </button>
-
-        <div id="scanStatus"></div>
-
-        <div class="small">
-          Sales aktif:
-          <b id="infoCabang"></b>
-        </div>
-
-        <button onclick="simpan()">
-          Simpan Data
-        </button>
-
-      </div>
-
-    </div>
-
-    <div id="laporan" class="hidden">
-
-      <div class="card">
-
-        <div class="table-wrapper">
-
-          <table class="table">
-
-            <thead>
-              <tr>
-                <th>Tanggal</th>
-                <th>Toko</th>
-                <th>Sales</th>
-                <th>Omset</th>
-                <th>Aksi</th>
-              </tr>
-            </thead>
-
-            <tbody id="table"></tbody>
-
-          </table>
-
-        </div>
-
+      <div class="chart-box">
+        <canvas id="chartSales"></canvas>
       </div>
 
     </div>
@@ -507,7 +315,81 @@ canvas{
 
 </div>
 
-<script>
+<div id="input" class="hidden">
+
+  <div class="card">
+
+    <h3>Input Data Sales</h3>
+
+    <input id="toko" placeholder="Nama Toko">
+
+    <input type="date" id="tanggal">
+
+    <input id="omset" type="number" placeholder="Nominal Omset">
+
+    <select id="inputSales"></select>
+
+    <input type="file" id="notaFile" accept="image/*">
+
+    <button onclick="scanNota()">
+      📷 Scan Nota
+    </button>
+
+    <div id="scanStatus" class="small"></div>
+
+    <button onclick="simpan()">
+      Simpan Data
+    </button>
+
+  </div>
+
+  <div class="card">
+
+    <h3>📄 OCR Rekap Multi Toko</h3>
+
+    <input type="file" id="rekapFile" accept="image/*">
+
+    <button onclick="scanRekap()">
+      🚀 Scan Rekap Sales
+    </button>
+
+    <div id="rekapStatus" class="small"></div>
+
+    <div id="previewBox"></div>
+
+    <button id="saveMassBtn" onclick="saveMassal()" class="hidden">
+      💾 Simpan Semua Data
+    </button>
+
+  </div>
+
+</div>
+
+<div id="laporan" class="hidden">
+
+  <div class="card table-wrapper">
+
+    <table class="table">
+
+      <thead>
+        <tr>
+          <th>Tanggal</th>
+          <th>Toko</th>
+          <th>Sales</th>
+          <th>Omset</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+
+      <tbody id="table"></tbody>
+
+    </table>
+
+  </div>
+
+</div>
+
+  </div></div><script>
 
 const firebaseConfig = {
   apiKey: "AIzaSyC-dtWEgB6FcHeVqD5PfzC_AFZoZ0eXRtI",
@@ -525,11 +407,11 @@ const auth = firebase.auth();
 
 let data = [];
 let salesList = [];
+let monthlyTarget = 0;
+let hasilOCR = [];
 
 let chartInstance;
 let chartSalesInstance;
-
-let monthlyTarget = 0;
 
 window.onload = ()=>{
 
@@ -540,44 +422,32 @@ window.onload = ()=>{
 
 };
 
-auth.onAuthStateChanged(async user=>{
+function showPage(id,el){
 
-  if(user){
+  ["dashboard","input","laporan"]
+  .forEach(x=>{
+    document
+    .getElementById(x)
+    .classList.add("hidden");
+  });
 
-    loginPage.classList.add("hidden");
-    app.classList.add("show");
+  document
+  .getElementById(id)
+  .classList.remove("hidden");
 
-    let doc = await db
-    .collection("users")
-    .doc(user.uid)
-    .get();
+  document
+  .querySelectorAll(".menu")
+  .forEach(m=>m.classList.remove("active"));
 
-    let sales =
-    doc.data()?.sales || "Sales 1";
+  el.classList.add("active");
 
-    userInfo.innerText =
-    user.email;
-
-    infoCabang.innerText =
-    sales;
-
-    render();
-
-  }else{
-
-    loginPage.classList.remove("hidden");
-    app.classList.remove("show");
-
-  }
-
-});
+}
 
 async function login(){
 
   try{
 
-    await auth
-    .signInWithEmailAndPassword(
+    await auth.signInWithEmailAndPassword(
       email.value,
       password.value
     );
@@ -594,23 +464,10 @@ async function register(){
 
   try{
 
-    let user =
-    await auth
-    .createUserWithEmailAndPassword(
+    await auth.createUserWithEmailAndPassword(
       email.value,
       password.value
     );
-
-    await db
-    .collection("users")
-    .doc(user.user.uid)
-    .set({
-
-      role:"staff",
-
-      sales:"Sales 1"
-
-    });
 
     alert("Register berhasil");
 
@@ -623,35 +480,26 @@ async function register(){
 }
 
 function logout(){
-
   auth.signOut();
-
 }
 
-function showPage(id,el){
+auth.onAuthStateChanged(user=>{
 
-  ["dashboard","input","laporan"]
-  .forEach(x=>{
+  if(user){
 
-    document
-    .getElementById(x)
-    .classList.add("hidden");
+    loginPage.classList.add("hidden");
+    app.classList.add("show");
 
-  });
+    render();
 
-  document
-  .getElementById(id)
-  .classList.remove("hidden");
+  }else{
 
-  document
-  .querySelectorAll(".menu")
-  .forEach(m=>
-    m.classList.remove("active")
-  );
+    loginPage.classList.remove("hidden");
+    app.classList.remove("show");
 
-  el.classList.add("active");
+  }
 
-}
+});
 
 db.collection("salesList")
 .onSnapshot(async snap=>{
@@ -661,13 +509,11 @@ db.collection("salesList")
 
   if(salesList.length === 0){
 
-    await db.collection("salesList")
-    .add({
+    await db.collection("salesList").add({
       nama:"Sales 1"
     });
 
-    await db.collection("salesList")
-    .add({
+    await db.collection("salesList").add({
       nama:"Sales 2"
     });
 
@@ -684,7 +530,6 @@ db.collection("salesList")
 
   filterCabang.innerHTML =
   '<option value="">Semua Sales</option>' +
-
   salesList.map(c=>`
     <option value="${c}">
       ${c}
@@ -692,8 +537,6 @@ db.collection("salesList")
   `).join("");
 
 });
-
-// TARGET BULANAN
 
 db.collection("targets")
 .onSnapshot(snap=>{
@@ -710,10 +553,7 @@ db.collection("targets")
     let d = doc.data();
 
     if(d.bulan === bulanSekarang){
-
-      monthlyTarget =
-      Number(d.target || 0);
-
+      monthlyTarget = Number(d.target || 0);
     }
 
   });
@@ -721,52 +561,26 @@ db.collection("targets")
   render();
 
 });
-
-// DATA SALES
 
 db.collection("sales")
 .onSnapshot(snap=>{
 
-  data =
-  snap.docs.map(d=>{
-
-    let item = {
-      ...d.data(),
-      id:d.id
-    };
-
-    if(item.cabang && !item.sales){
-
-      item.sales = item.cabang;
-
-    }
-
-    if(item.sales === "Cabang A"){
-
-      item.sales = "Sales 1";
-
-    }
-
-    return item;
-
-  });
+  data = snap.docs.map(d=>({
+    ...d.data(),
+    id:d.id
+  }));
 
   render();
 
 });
 
-// OCR NOTA
-
 async function scanNota(){
 
-  const file =
-  notaFile.files[0];
+  const file = notaFile.files[0];
 
   if(!file){
-
     alert("Pilih foto nota dulu");
     return;
-
   }
 
   scanStatus.innerText =
@@ -775,15 +589,9 @@ async function scanNota(){
   try{
 
     const result =
-    await Tesseract.recognize(
-      file,
-      'eng'
-    );
+    await Tesseract.recognize(file,'eng');
 
-    const text =
-    result.data.text;
-
-    console.log(text);
+    const text = result.data.text;
 
     bacaNominal(text);
 
@@ -791,8 +599,6 @@ async function scanNota(){
     "✅ Scan berhasil";
 
   }catch(err){
-
-    console.log(err);
 
     scanStatus.innerText =
     "❌ Scan gagal";
@@ -806,12 +612,7 @@ function bacaNominal(text){
   let angka =
   text.match(/\d+[.,]?\d+/g);
 
-  if(!angka){
-
-    alert("Nominal tidak ditemukan");
-    return;
-
-  }
+  if(!angka) return;
 
   let terbesar = 0;
 
@@ -823,22 +624,161 @@ function bacaNominal(text){
     );
 
     if(val > terbesar){
-
       terbesar = val;
-
     }
 
   });
 
   if(terbesar > 0){
-
     omset.value = terbesar;
+  }
+
+}
+
+async function scanRekap(){
+
+  const file = rekapFile.files[0];
+
+  if(!file){
+    alert("Pilih file rekap dulu");
+    return;
+  }
+
+  rekapStatus.innerText =
+  "Scanning rekap sales...";
+
+  try{
+
+    const result =
+    await Tesseract.recognize(file,'eng');
+
+    const text = result.data.text;
+
+    parseRekap(text);
+
+    rekapStatus.innerText =
+    "✅ Rekap berhasil dibaca";
+
+  }catch(err){
+
+    rekapStatus.innerText =
+    "❌ OCR gagal";
 
   }
 
 }
 
-// SIMPAN
+function parseRekap(text){
+
+  hasilOCR = [];
+
+  text.split("\n")
+  .forEach(line=>{
+
+    const nominalMatch =
+    line.match(/(\d{1,3}(\.\d{3})+)/);
+
+    if(!nominalMatch) return;
+
+    const nominal = nominalMatch[0];
+
+    const toko = line
+    .replace(nominal,'')
+    .replace(/[0-9]/g,'')
+    .trim();
+
+    if(toko.length < 3) return;
+
+    hasilOCR.push({
+      toko:toko,
+      omset:Number(
+        nominal.replace(/\./g,'')
+      )
+    });
+
+  });
+
+  renderPreview();
+
+}
+
+function renderPreview(){
+
+  if(hasilOCR.length === 0){
+
+    previewBox.innerHTML =
+    "Tidak ada data";
+
+    return;
+
+  }
+
+  saveMassBtn.classList.remove(
+    "hidden"
+  );
+
+  previewBox.innerHTML = `
+
+    <table class="table">
+
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Toko</th>
+          <th>Omset</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        ${hasilOCR.map((d,i)=>`
+
+          <tr>
+            <td>${i+1}</td>
+            <td>${d.toko}</td>
+            <td>${rp(d.omset)}</td>
+          </tr>
+
+        `).join('')}
+
+      </tbody>
+
+    </table>
+
+  `;
+
+}
+
+async function saveMassal(){
+
+  const tanggalHariIni =
+  new Date()
+  .toISOString()
+  .split("T")[0];
+
+  for(let d of hasilOCR){
+
+    await db.collection("sales")
+    .add({
+      toko:d.toko,
+      tanggal:tanggalHariIni,
+      omset:d.omset,
+      sales:inputSales.value
+    });
+
+  }
+
+  hasilOCR = [];
+
+  previewBox.innerHTML = "";
+
+  saveMassBtn.classList.add(
+    "hidden"
+  );
+
+  alert("Import selesai");
+
+}
 
 async function simpan(){
 
@@ -857,11 +797,8 @@ async function simpan(){
   .add({
 
     toko:toko.value,
-
     tanggal:tanggal.value,
-
     omset:Number(omset.value),
-
     sales:inputSales.value
 
   });
@@ -869,21 +806,15 @@ async function simpan(){
   toko.value = "";
   omset.value = "";
 
-  scanStatus.innerText = "";
-
   alert("Data berhasil disimpan");
 
 }
 
-// RENDER
-
 function render(){
 
-  let sales =
-  filterCabang.value;
+  let sales = filterCabang.value;
 
-  let filtered =
-  data.filter(d=>{
+  let filtered = data.filter(d=>{
 
     if(sales && d.sales !== sales)
     return false;
@@ -897,134 +828,69 @@ function render(){
     - new Date(a.tanggal)
   );
 
-  let totalVal =
-  filtered.reduce((a,b)=>
+  let totalVal = filtered.reduce((a,b)=>
     a + b.omset
   ,0);
 
-  total.innerText =
-  rp(totalVal);
+  total.innerText = rp(totalVal);
 
-  trx.innerText =
-  filtered.length;
+  trx.innerText = filtered.length;
 
-  avg.innerText =
-  rp(
+  avg.innerText = rp(
     filtered.length
     ? totalVal / filtered.length
     : 0
   );
 
-  // TARGET
+  let gap = monthlyTarget - totalVal;
 
-  let gap =
-  monthlyTarget - totalVal;
+  if(gap < 0) gap = 0;
 
-  if(gap < 0)
-  gap = 0;
-
-  let progress =
-  monthlyTarget
-  ? Math.round(
-    (totalVal / monthlyTarget) * 100
-  )
+  let progress = monthlyTarget
+  ? Math.round((totalVal / monthlyTarget) * 100)
   : 0;
 
-  targetCard.innerText =
-  rp(monthlyTarget);
-
-  gapCard.innerText =
-  rp(gap);
-
-  progressCard.innerText =
-  progress + "%";
+  targetCard.innerText = rp(monthlyTarget);
+  gapCard.innerText = rp(gap);
+  progressCard.innerText = progress + "%";
 
   progressFill.className =
   "progress-fill";
 
   if(progress < 50){
-
-    progressFill.classList.add(
-      "progress-red"
-    );
-
-    progressStat.style.background =
-    "linear-gradient(135deg,#7f1d1d,#ef4444)";
-
+    progressFill.classList.add("progress-red");
   }
-
   else if(progress < 80){
-
-    progressFill.classList.add(
-      "progress-yellow"
-    );
-
-    progressStat.style.background =
-    "linear-gradient(135deg,#854d0e,#f59e0b)";
-
+    progressFill.classList.add("progress-yellow");
   }
-
   else{
-
-    progressFill.classList.add(
-      "progress-green"
-    );
-
-    progressStat.style.background =
-    "linear-gradient(135deg,#14532d,#22c55e)";
-
+    progressFill.classList.add("progress-green");
   }
 
-  setTimeout(()=>{
-
-    progressFill.style.width =
-    progress + "%";
-
-  },100);
-
-  // CHART HARIAN
+  progressFill.style.width =
+  progress + "%";
 
   let perHari = {};
 
   filtered.forEach(d=>{
-
     perHari[d.tanggal] =
     (perHari[d.tanggal] || 0)
     + d.omset;
-
   });
 
   let sortedTanggal =
   Object.keys(perHari)
   .sort((a,b)=>
-    new Date(a)
-    - new Date(b)
+    new Date(a)-new Date(b)
   );
 
   let sortedValues =
   sortedTanggal.map(t=>perHari[t]);
 
-  let warnaBars =
-  sortedValues.map(v=>{
-
-    if(v >= 10000000)
-    return '#22c55e';
-
-    if(v >= 5000000)
-    return '#3b82f6';
-
-    if(v >= 1000000)
-    return '#f59e0b';
-
-    return '#ef4444';
-
-  });
-
   if(chartInstance)
   chartInstance.destroy();
 
-  chartInstance =
-  new Chart(chart,{
+  chartInstance = new Chart(chart,{
 
     type:'bar',
 
@@ -1035,60 +901,44 @@ function render(){
       datasets:[{
 
         data:sortedValues,
+        borderRadius:12,
 
-        borderRadius:14,
-        borderSkipped:false,
+        backgroundColor:
+        sortedValues.map(v=>{
 
-        backgroundColor:warnaBars
+          if(v >= 10000000)
+          return '#22c55e';
+
+          if(v >= 5000000)
+          return '#3b82f6';
+
+          if(v >= 1000000)
+          return '#f59e0b';
+
+          return '#ef4444';
+
+        })
 
       }]
 
     },
 
     options:{
-
       responsive:true,
       maintainAspectRatio:false,
-
       plugins:{
-        legend:{
-          display:false
-        }
+        legend:{display:false}
       }
-
     }
 
   });
 
-  // CHART SALES
-
   let perSales = {};
 
   filtered.forEach(d=>{
-
     perSales[d.sales] =
     (perSales[d.sales] || 0)
     + d.omset;
-
-  });
-
-  let salesValues =
-  Object.values(perSales);
-
-  let salesColors =
-  salesValues.map(v=>{
-
-    if(v >= 10000000)
-    return '#22c55e';
-
-    if(v >= 5000000)
-    return '#3b82f6';
-
-    if(v >= 1000000)
-    return '#f59e0b';
-
-    return '#ef4444';
-
   });
 
   if(chartSalesInstance)
@@ -1105,56 +955,56 @@ function render(){
 
       datasets:[{
 
-        data:salesValues,
-
+        data:Object.values(perSales),
         borderRadius:12,
-        borderSkipped:false,
 
-        backgroundColor:salesColors
+        backgroundColor:
+        Object.values(perSales)
+        .map(v=>{
+
+          if(v >= 10000000)
+          return '#22c55e';
+
+          if(v >= 5000000)
+          return '#3b82f6';
+
+          if(v >= 1000000)
+          return '#f59e0b';
+
+          return '#ef4444';
+
+        })
 
       }]
 
     },
 
     options:{
-
       responsive:true,
       maintainAspectRatio:false,
-
       plugins:{
-        legend:{
-          display:false
-        }
+        legend:{display:false}
       }
-
     }
 
   });
-
-  // TABLE
 
   table.innerHTML =
   filtered.map(d=>`
 
     <tr>
-
       <td>${d.tanggal}</td>
-
       <td>${d.toko}</td>
-
       <td>${d.sales}</td>
-
       <td>${rp(d.omset)}</td>
-
       <td>
         <button onclick="del('${d.id}')">
           Hapus
         </button>
       </td>
-
     </tr>
 
-  `).join("");
+  `).join('');
 
 }
 
@@ -1162,7 +1012,7 @@ function rp(a){
 
   return "Rp " +
   Number(a || 0)
-  .toLocaleString("id-ID");
+  .toLocaleString('id-ID');
 
 }
 
@@ -1174,7 +1024,5 @@ async function del(id){
 
 }
 
-</script>
-
-</body>
+</script></body>
 </html>
