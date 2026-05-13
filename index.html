@@ -495,7 +495,10 @@ canvas{
 </div>
 
 <script>
-
+  <!-- =========================
+GANTI SELURUH <script> LAMA
+DENGAN SCRIPT INI
+========================= -->
 const firebaseConfig = {
   apiKey: "AIzaSyC-dtWEgB6FcHeVqD5PfzC_AFZoZ0eXRtI",
   authDomain: "gudang-app-pro.firebaseapp.com",
@@ -517,7 +520,7 @@ let cabangList = [];
 let chartInstance;
 let chartSalesInstance;
 
-window.onload=()=>{
+window.onload = () => {
 
   tanggal.value =
   new Date()
@@ -538,8 +541,21 @@ auth.onAuthStateChanged(async user=>{
     .doc(user.uid)
     .get();
 
-    role = doc.data().role;
-    userCabang = doc.data().cabang;
+    role = doc.data().role || "staff";
+
+    userCabang =
+    doc.data().cabang || "Sales 1";
+
+    // NORMALISASI DATA LAMA
+    if(
+      userCabang === "" ||
+      userCabang === "Cabang" ||
+      userCabang === "Cabang A" ||
+      userCabang === null ||
+      userCabang === undefined
+    ){
+      userCabang = "Sales 1";
+    }
 
     userInfo.innerText =
     user.email + " (" + role + ")";
@@ -603,12 +619,15 @@ async function register(){
       ? "admin"
       : "staff",
 
+      // DEFAULT SALES
       cabang:
       isAdmin
       ? "ALL"
       : "Sales 1"
 
     });
+
+    alert("Register berhasil");
 
   }catch(err){
 
@@ -619,16 +638,20 @@ async function register(){
 }
 
 function logout(){
+
   auth.signOut();
+
 }
 
 function showPage(id,el){
 
   ["dashboard","input","laporan"]
   .forEach(x=>{
+
     document
     .getElementById(x)
     .classList.add("hidden");
+
   });
 
   document
@@ -637,7 +660,9 @@ function showPage(id,el){
 
   document
   .querySelectorAll(".menu")
-  .forEach(m=>m.classList.remove("active"));
+  .forEach(m=>
+    m.classList.remove("active")
+  );
 
   el.classList.add("active");
 
@@ -661,51 +686,95 @@ db.collection("cabang")
     });
 
     return;
+
   }
 
+  // NORMALISASI CABANG
+  cabangList = cabangList.map(c=>{
+
+    if(
+      c === "" ||
+      c === "Cabang" ||
+      c === "Cabang A" ||
+      c === null ||
+      c === undefined
+    ){
+      return "Sales 1";
+    }
+
+    return c;
+
+  });
+
+  // HAPUS DUPLIKAT
+  cabangList =
+  [...new Set(cabangList)];
+
   inputSales.innerHTML =
-  cabangList.map(c=>
-  `<option value="${c}">
-    ${c}
-  </option>`
-  ).join("");
+  cabangList.map(c=>`
+    <option value="${c}">
+      ${c}
+    </option>
+  `).join("");
 
   if(role === "admin"){
 
     filterCabang.innerHTML =
     '<option value="">Semua Sales</option>' +
-    cabangList.map(c=>
-    `<option value="${c}">
-      ${c}
-    </option>`
-    ).join("");
+
+    cabangList.map(c=>`
+      <option value="${c}">
+        ${c}
+      </option>
+    `).join("");
 
   }else{
 
     filterCabang.innerHTML =
-    `<option value="${userCabang}">
+    `
+    <option value="${userCabang}">
       ${userCabang}
-    </option>`;
+    </option>
+    `;
 
     filterCabang.disabled = true;
 
     inputSales.innerHTML =
-    `<option value="${userCabang}">
+    `
+    <option value="${userCabang}">
       ${userCabang}
-    </option>`;
+    </option>
+    `;
 
   }
 
 });
 
 db.collection("sales")
-.onSnapshot(snap=>{
+.onSnapshot(async snap=>{
 
   data =
-  snap.docs.map(d=>({
-    ...d.data(),
-    id:d.id
-  }));
+  snap.docs.map(d=>{
+
+    let item = d.data();
+
+    // NORMALISASI DATA LAMA
+    if(
+      item.cabang === "" ||
+      item.cabang === "Cabang" ||
+      item.cabang === "Cabang A" ||
+      item.cabang === null ||
+      item.cabang === undefined
+    ){
+      item.cabang = "Sales 1";
+    }
+
+    return{
+      ...item,
+      id:d.id
+    };
+
+  });
 
   render();
 
@@ -724,6 +793,22 @@ async function simpan(){
 
   }
 
+  let selectedSales =
+  role === "admin"
+  ? inputSales.value
+  : userCabang;
+
+  // AUTO SALES 1
+  if(
+    selectedSales === "" ||
+    selectedSales === "Cabang" ||
+    selectedSales === "Cabang A" ||
+    selectedSales === null ||
+    selectedSales === undefined
+  ){
+    selectedSales = "Sales 1";
+  }
+
   await db.collection("sales")
   .add({
 
@@ -733,10 +818,7 @@ async function simpan(){
 
     omset:Number(omset.value),
 
-    cabang:
-    role === "admin"
-    ? inputSales.value
-    : userCabang
+    cabang:selectedSales
 
   });
 
@@ -749,7 +831,8 @@ async function simpan(){
 
 function render(){
 
-  if(!filterCabang) return;
+  if(!filterCabang)
+  return;
 
   let cab = filterCabang.value;
 
@@ -758,6 +841,15 @@ function render(){
 
   let filtered =
   data.filter(d=>{
+
+    // NORMALISASI
+    if(
+      d.cabang === "" ||
+      d.cabang === "Cabang" ||
+      d.cabang === "Cabang A"
+    ){
+      d.cabang = "Sales 1";
+    }
 
     if(
       role !== "admin" &&
@@ -772,10 +864,16 @@ function render(){
     )
     return false;
 
-    if(startDate && d.tanggal < startDate)
+    if(
+      startDate &&
+      d.tanggal < startDate
+    )
     return false;
 
-    if(endDate && d.tanggal > endDate)
+    if(
+      endDate &&
+      d.tanggal > endDate
+    )
     return false;
 
     return true;
@@ -784,11 +882,14 @@ function render(){
 
   let totalVal =
   filtered.reduce((a,b)=>
-  a + b.omset,0);
+    a + b.omset
+  ,0);
 
-  total.innerText = rp(totalVal);
+  total.innerText =
+  rp(totalVal);
 
-  trx.innerText = filtered.length;
+  trx.innerText =
+  filtered.length;
 
   avg.innerText =
   rp(
@@ -890,10 +991,11 @@ function render(){
       ${
         role === "admin"
 
-        ? `<button onclick="del('${d.id}')">
+        ? `
+          <button onclick="del('${d.id}')">
             Hapus
-          </button>`
-
+          </button>
+          `
         : "-"
       }
 
@@ -933,10 +1035,21 @@ async function tambahCabang(){
 
   }
 
+  // NORMALISASI
+  let namaSales =
+  newCabang.value.trim();
+
+  if(
+    namaSales === "Cabang" ||
+    namaSales === "Cabang A"
+  ){
+    namaSales = "Sales 1";
+  }
+
   await db.collection("cabang")
   .add({
 
-    nama:newCabang.value
+    nama:namaSales
 
   });
 
@@ -945,7 +1058,7 @@ async function tambahCabang(){
   alert("Sales berhasil ditambahkan");
 
 }
-
+                          
 </script>
 
 </body>
