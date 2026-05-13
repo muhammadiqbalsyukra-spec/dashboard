@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sales Pro Dashboard</title>
+<title>Sales Dashboard</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
@@ -263,7 +263,7 @@ canvas{
   <div class="login-card">
 
     <div class="login-title">
-      Sales Pro Login
+      Sales Login
     </div>
 
     <input id="email" placeholder="Email">
@@ -286,7 +286,7 @@ canvas{
 
   <div class="sidebar">
 
-    <h3>Sales Pro</h3>
+    <h3>Iqbal</h3>
 
     <div class="menu active" onclick="showPage('dashboard',this)">
       📊 Dashboard
@@ -693,6 +693,12 @@ function render(){
 
   });
 
+  // SORT LAPORAN TERBARU
+  filtered.sort((a,b)=>
+    new Date(b.tanggal)
+    - new Date(a.tanggal)
+  );
+
   let totalVal =
   filtered.reduce((a,b)=>
     a + b.omset
@@ -723,6 +729,34 @@ function render(){
 
   });
 
+  // SORT TANGGAL GRAFIK
+  let sortedTanggal =
+  Object.keys(perHari)
+  .sort((a,b)=>
+    new Date(a)
+    - new Date(b)
+  );
+
+  let sortedValues =
+  sortedTanggal.map(t=>perHari[t]);
+
+  // WARNA BERDASARKAN NILAI
+  let warnaBars =
+  sortedValues.map(v=>{
+
+    if(v >= 10000000)
+    return '#22c55e';
+
+    if(v >= 5000000)
+    return '#3b82f6';
+
+    if(v >= 1000000)
+    return '#f59e0b';
+
+    return '#ef4444';
+
+  });
+
   if(chartInstance)
   chartInstance.destroy();
 
@@ -733,15 +767,16 @@ function render(){
 
     data:{
 
-      labels:Object.keys(perHari),
+      labels:sortedTanggal,
 
       datasets:[{
 
-        data:Object.values(perHari),
+        data:sortedValues,
 
         borderRadius:14,
+        borderSkipped:false,
 
-        backgroundColor:'#3b82f6'
+        backgroundColor:warnaBars
 
       }]
 
@@ -774,6 +809,25 @@ function render(){
 
   });
 
+  let salesValues =
+  Object.values(perSales);
+
+  let salesColors =
+  salesValues.map(v=>{
+
+    if(v >= 10000000)
+    return '#22c55e';
+
+    if(v >= 5000000)
+    return '#3b82f6';
+
+    if(v >= 1000000)
+    return '#f59e0b';
+
+    return '#ef4444';
+
+  });
+
   if(chartSalesInstance)
   chartSalesInstance.destroy();
 
@@ -788,11 +842,12 @@ function render(){
 
       datasets:[{
 
-        data:Object.values(perSales),
+        data:salesValues,
 
         borderRadius:12,
+        borderSkipped:false,
 
-        backgroundColor:'#06b6d4'
+        backgroundColor:salesColors
 
       }]
 
