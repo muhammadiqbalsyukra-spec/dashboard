@@ -8,6 +8,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
@@ -260,6 +262,12 @@ canvas{
   opacity:.7;
 }
 
+#scanStatus{
+  margin-top:10px;
+  font-size:13px;
+  opacity:.8;
+}
+
 .hidden{
   display:none !important;
 }
@@ -442,6 +450,17 @@ canvas{
         <input id="omset" type="number" placeholder="Nominal Omset">
 
         <select id="inputSales"></select>
+
+        <input
+          type="file"
+          id="notaFile"
+          accept="image/*">
+
+        <button onclick="scanNota()">
+          📷 Scan Nota
+        </button>
+
+        <div id="scanStatus"></div>
 
         <div class="small">
           Sales aktif:
@@ -736,6 +755,89 @@ db.collection("sales")
 
 });
 
+// OCR NOTA
+
+async function scanNota(){
+
+  const file =
+  notaFile.files[0];
+
+  if(!file){
+
+    alert("Pilih foto nota dulu");
+    return;
+
+  }
+
+  scanStatus.innerText =
+  "Scanning nota...";
+
+  try{
+
+    const result =
+    await Tesseract.recognize(
+      file,
+      'eng'
+    );
+
+    const text =
+    result.data.text;
+
+    console.log(text);
+
+    bacaNominal(text);
+
+    scanStatus.innerText =
+    "✅ Scan berhasil";
+
+  }catch(err){
+
+    console.log(err);
+
+    scanStatus.innerText =
+    "❌ Scan gagal";
+
+  }
+
+}
+
+function bacaNominal(text){
+
+  let angka =
+  text.match(/\d+[.,]?\d+/g);
+
+  if(!angka){
+
+    alert("Nominal tidak ditemukan");
+    return;
+
+  }
+
+  let terbesar = 0;
+
+  angka.forEach(a=>{
+
+    let val = Number(
+      a.replace(/\./g,'')
+       .replace(',','')
+    );
+
+    if(val > terbesar){
+
+      terbesar = val;
+
+    }
+
+  });
+
+  if(terbesar > 0){
+
+    omset.value = terbesar;
+
+  }
+
+}
+
 // SIMPAN
 
 async function simpan(){
@@ -766,6 +868,8 @@ async function simpan(){
 
   toko.value = "";
   omset.value = "";
+
+  scanStatus.innerText = "";
 
   alert("Data berhasil disimpan");
 
@@ -835,12 +939,8 @@ function render(){
   progressCard.innerText =
   progress + "%";
 
-  // RESET CLASS
-
   progressFill.className =
   "progress-fill";
-
-  // WARNA BERDASARKAN PROGRESS
 
   if(progress < 50){
 
@@ -874,8 +974,6 @@ function render(){
     "linear-gradient(135deg,#14532d,#22c55e)";
 
   }
-
-  // ANIMASI BAR
 
   setTimeout(()=>{
 
