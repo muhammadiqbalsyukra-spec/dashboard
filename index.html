@@ -163,6 +163,41 @@ body{
   margin-bottom:10px;
 }
 
+.progress-wrap{
+  margin-top:16px;
+}
+
+.progress-bar{
+  width:100%;
+  height:14px;
+  border-radius:999px;
+  background:rgba(255,255,255,.12);
+  overflow:hidden;
+  margin-top:10px;
+}
+
+.progress-fill{
+  height:100%;
+  width:0%;
+  border-radius:999px;
+  transition:1s;
+}
+
+.progress-red{
+  background:linear-gradient(90deg,#ef4444,#f87171);
+  box-shadow:0 0 20px rgba(239,68,68,.45);
+}
+
+.progress-yellow{
+  background:linear-gradient(90deg,#f59e0b,#facc15);
+  box-shadow:0 0 20px rgba(245,158,11,.45);
+}
+
+.progress-green{
+  background:linear-gradient(90deg,#22c55e,#4ade80);
+  box-shadow:0 0 20px rgba(34,197,94,.45);
+}
+
 input,
 select{
   width:100%;
@@ -286,7 +321,7 @@ canvas{
 
   <div class="sidebar">
 
-    <h3>I Q B A L</h3>
+    <h3>IQBAL</h3>
 
     <div class="menu active" onclick="showPage('dashboard',this)">
       📊 Dashboard
@@ -345,9 +380,25 @@ canvas{
           <p>Sisa Target</p>
         </div>
 
-        <div class="stat">
+        <div class="stat" id="progressStat">
+
           <h2 id="progressCard">0%</h2>
+
           <p>Progress Target</p>
+
+          <div class="progress-wrap">
+
+            <div class="progress-bar">
+
+              <div
+                id="progressFill"
+                class="progress-fill">
+              </div>
+
+            </div>
+
+          </div>
+
         </div>
 
       </div>
@@ -783,6 +834,55 @@ function render(){
 
   progressCard.innerText =
   progress + "%";
+
+  // RESET CLASS
+
+  progressFill.className =
+  "progress-fill";
+
+  // WARNA BERDASARKAN PROGRESS
+
+  if(progress < 50){
+
+    progressFill.classList.add(
+      "progress-red"
+    );
+
+    progressStat.style.background =
+    "linear-gradient(135deg,#7f1d1d,#ef4444)";
+
+  }
+
+  else if(progress < 80){
+
+    progressFill.classList.add(
+      "progress-yellow"
+    );
+
+    progressStat.style.background =
+    "linear-gradient(135deg,#854d0e,#f59e0b)";
+
+  }
+
+  else{
+
+    progressFill.classList.add(
+      "progress-green"
+    );
+
+    progressStat.style.background =
+    "linear-gradient(135deg,#14532d,#22c55e)";
+
+  }
+
+  // ANIMASI BAR
+
+  setTimeout(()=>{
+
+    progressFill.style.width =
+    progress + "%";
+
+  },100);
 
   // CHART HARIAN
 
