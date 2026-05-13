@@ -158,17 +158,6 @@ body{
   box-shadow:0 15px 35px rgba(59,130,246,.25);
 }
 
-.stat::before{
-  content:'';
-  position:absolute;
-  width:120px;
-  height:120px;
-  background:rgba(255,255,255,.08);
-  border-radius:50%;
-  top:-30px;
-  right:-30px;
-}
-
 .stat h2{
   font-size:32px;
   margin-bottom:10px;
@@ -185,18 +174,6 @@ select{
   background:rgba(255,255,255,.06);
   color:white;
   font-size:14px;
-  border:1px solid transparent;
-  transition:.2s;
-}
-
-input:focus,
-select:focus{
-  border-color:#3b82f6;
-  box-shadow:0 0 0 4px rgba(59,130,246,.15);
-}
-
-input::placeholder{
-  color:#94a3b8;
 }
 
 button{
@@ -207,22 +184,8 @@ button{
   margin-top:14px;
   cursor:pointer;
   font-weight:600;
-  font-size:14px;
   color:white;
   background:linear-gradient(135deg,#2563eb,#06b6d4);
-  transition:.25s;
-  box-shadow:0 10px 20px rgba(37,99,235,.25);
-}
-
-button:hover{
-  transform:translateY(-2px);
-}
-
-.table button{
-  width:auto;
-  padding:8px 12px;
-  margin:0;
-  font-size:12px;
 }
 
 .table-wrapper{
@@ -233,10 +196,6 @@ button:hover{
   width:100%;
   border-collapse:collapse;
   min-width:700px;
-}
-
-.table thead{
-  background:rgba(255,255,255,.05);
 }
 
 .table th,
@@ -253,7 +212,6 @@ button:hover{
   position:relative;
   width:100%;
   height:340px;
-  padding:10px;
 }
 
 canvas{
@@ -284,25 +242,14 @@ canvas{
     display:flex;
     gap:10px;
     overflow-x:auto;
-    border-right:none;
-    border-bottom:1px solid rgba(255,255,255,.08);
   }
 
   .sidebar h3{
     display:none;
   }
 
-  .menu{
-    white-space:nowrap;
-    margin:0;
-  }
-
   .main{
     padding:16px;
-  }
-
-  .grid{
-    grid-template-columns:1fr;
   }
 
 }
@@ -366,10 +313,6 @@ canvas{
     <div id="dashboard">
 
       <div class="card">
-
-        <input type="date" id="start" onchange="render()">
-
-        <input type="date" id="end" onchange="render()">
 
         <select id="filterCabang" onchange="render()"></select>
 
@@ -496,13 +439,12 @@ const db = firebase.firestore();
 const auth = firebase.auth();
 
 let data = [];
-let role = "staff";
-let userCabang = "";
-let cabangList = [];
+let salesList = [];
+
 let chartInstance;
 let chartSalesInstance;
 
-window.onload = () => {
+window.onload = ()=>{
 
   tanggal.value =
   new Date()
@@ -523,15 +465,14 @@ auth.onAuthStateChanged(async user=>{
     .doc(user.uid)
     .get();
 
-    role = doc.data().role || "staff";
-
-    userCabang =
-    doc.data().cabang || "Sales 1";
+    let sales =
+    doc.data()?.sales || "Sales 1";
 
     userInfo.innerText =
-    user.email + " (" + role + ")";
+    user.email;
 
-    infoCabang.innerText = userCabang;
+    infoCabang.innerText =
+    sales;
 
     render();
 
@@ -573,22 +514,14 @@ async function register(){
       password.value
     );
 
-    let isAdmin =
-    email.value.includes("admin");
-
-    await db.collection("users")
+    await db
+    .collection("users")
     .doc(user.user.uid)
     .set({
 
-      role:
-      isAdmin
-      ? "admin"
-      : "staff",
+      role:"staff",
 
-      cabang:
-      isAdmin
-      ? "ALL"
-      : "Sales 1"
+      sales:"Sales 1"
 
     });
 
@@ -633,19 +566,23 @@ function showPage(id,el){
 
 }
 
-db.collection("cabang")
+// SALES LIST
+
+db.collection("salesList")
 .onSnapshot(async snap=>{
 
-  cabangList =
+  salesList =
   snap.docs.map(d=>d.data().nama);
 
-  if(cabangList.length === 0){
+  if(salesList.length === 0){
 
-    await db.collection("cabang").add({
+    await db.collection("salesList")
+    .add({
       nama:"Sales 1"
     });
 
-    await db.collection("cabang").add({
+    await db.collection("salesList")
+    .add({
       nama:"Sales 2"
     });
 
@@ -653,11 +590,8 @@ db.collection("cabang")
 
   }
 
-  cabangList =
-  [...new Set(cabangList)];
-
   inputSales.innerHTML =
-  cabangList.map(c=>`
+  salesList.map(c=>`
     <option value="${c}">
       ${c}
     </option>
@@ -666,7 +600,7 @@ db.collection("cabang")
   filterCabang.innerHTML =
   '<option value="">Semua Sales</option>' +
 
-  cabangList.map(c=>`
+  salesList.map(c=>`
     <option value="${c}">
       ${c}
     </option>
@@ -674,18 +608,40 @@ db.collection("cabang")
 
 });
 
+// DATA SALES
+
 db.collection("sales")
-.onSnapshot(async snap=>{
+.onSnapshot(snap=>{
 
   data =
-  snap.docs.map(d=>({
-    ...d.data(),
-    id:d.id
-  }));
+  snap.docs.map(d=>{
+
+    let item = {
+      ...d.data(),
+      id:d.id
+    };
+
+    if(item.cabang && !item.sales){
+
+      item.sales = item.cabang;
+
+    }
+
+    if(item.sales === "Cabang A"){
+
+      item.sales = "Sales 1";
+
+    }
+
+    return item;
+
+  });
 
   render();
 
 });
+
+// SIMPAN
 
 async function simpan(){
 
@@ -709,7 +665,7 @@ async function simpan(){
 
     omset:Number(omset.value),
 
-    cabang:inputSales.value
+    sales:inputSales.value
 
   });
 
@@ -720,14 +676,17 @@ async function simpan(){
 
 }
 
+// RENDER
+
 function render(){
 
-  let cab = filterCabang.value;
+  let sales =
+  filterCabang.value;
 
   let filtered =
   data.filter(d=>{
 
-    if(cab && d.cabang !== cab)
+    if(sales && d.sales !== sales)
     return false;
 
     return true;
@@ -752,7 +711,7 @@ function render(){
     : 0
   );
 
-  // CHART OMSET HARIAN
+  // CHART HARIAN
 
   let perHari = {};
 
@@ -764,30 +723,6 @@ function render(){
 
   });
 
-  const labelsHari =
-  Object.keys(perHari);
-
-  const dataHari =
-  Object.values(perHari);
-
-  function getBarColor(value){
-
-    if(value >= 10000000){
-      return '#00E676';
-    }
-
-    if(value >= 7000000){
-      return '#29B6F6';
-    }
-
-    if(value >= 3000000){
-      return '#FFA726';
-    }
-
-    return '#EF5350';
-
-  }
-
   if(chartInstance)
   chartInstance.destroy();
 
@@ -798,25 +733,15 @@ function render(){
 
     data:{
 
-      labels:labelsHari,
+      labels:Object.keys(perHari),
 
       datasets:[{
 
-        label:'Omset',
-
-        data:dataHari,
+        data:Object.values(perHari),
 
         borderRadius:14,
 
-        borderSkipped:false,
-
-        backgroundColor:
-        dataHari.map(v=>getBarColor(v)),
-
-        hoverBackgroundColor:
-        dataHari.map(v=>getBarColor(v)),
-
-        barThickness:34
+        backgroundColor:'#3b82f6'
 
       }]
 
@@ -825,84 +750,12 @@ function render(){
     options:{
 
       responsive:true,
-
       maintainAspectRatio:false,
 
-      animation:{
-        duration:1200
-      },
-
       plugins:{
-
         legend:{
           display:false
-        },
-
-        tooltip:{
-
-          backgroundColor:'#0f172a',
-
-          titleColor:'#fff',
-
-          bodyColor:'#fff',
-
-          padding:12,
-
-          cornerRadius:12,
-
-          callbacks:{
-
-            label:function(context){
-
-              return ' ' +
-              rp(context.raw);
-
-            }
-
-          }
-
         }
-
-      },
-
-      scales:{
-
-        x:{
-
-          ticks:{
-            color:'#cbd5e1'
-          },
-
-          grid:{
-            display:false
-          }
-
-        },
-
-        y:{
-
-          beginAtZero:true,
-
-          ticks:{
-
-            color:'#94a3b8',
-
-            callback:function(value){
-
-              return 'Rp ' +
-              (value / 1000000)
-              + 'jt';
-
-            }
-
-          },
-
-          grid:{
-            color:'rgba(255,255,255,.05)'
-          }
-
-        }
-
       }
 
     }
@@ -915,8 +768,8 @@ function render(){
 
   filtered.forEach(d=>{
 
-    perSales[d.cabang] =
-    (perSales[d.cabang] || 0)
+    perSales[d.sales] =
+    (perSales[d.sales] || 0)
     + d.omset;
 
   });
@@ -930,16 +783,23 @@ function render(){
     type:'bar',
 
     data:{
+
       labels:Object.keys(perSales),
 
       datasets:[{
+
         data:Object.values(perSales),
+
         borderRadius:12,
-        backgroundColor:'#3b82f6'
+
+        backgroundColor:'#06b6d4'
+
       }]
+
     },
 
     options:{
+
       responsive:true,
       maintainAspectRatio:false,
 
@@ -948,6 +808,7 @@ function render(){
           display:false
         }
       }
+
     }
 
   });
@@ -963,7 +824,7 @@ function render(){
 
       <td>${d.toko}</td>
 
-      <td>${d.cabang}</td>
+      <td>${d.sales}</td>
 
       <td>${rp(d.omset)}</td>
 
