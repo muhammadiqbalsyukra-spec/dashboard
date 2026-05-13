@@ -286,7 +286,7 @@ canvas{
 
   <div class="sidebar">
 
-    <h3>Iqbal</h3>
+    <h3>IQBAL</h3>
 
     <div class="menu active" onclick="showPage('dashboard',this)">
       📊 Dashboard
@@ -444,6 +444,8 @@ let salesList = [];
 let chartInstance;
 let chartSalesInstance;
 
+let monthlyTarget = 0;
+
 window.onload = ()=>{
 
   tanggal.value =
@@ -566,8 +568,6 @@ function showPage(id,el){
 
 }
 
-// SALES LIST
-
 db.collection("salesList")
 .onSnapshot(async snap=>{
 
@@ -605,6 +605,35 @@ db.collection("salesList")
       ${c}
     </option>
   `).join("");
+
+});
+
+// TARGET BULANAN
+
+db.collection("targets")
+.onSnapshot(snap=>{
+
+  let bulanSekarang =
+  new Date()
+  .toISOString()
+  .slice(0,7);
+
+  monthlyTarget = 0;
+
+  snap.docs.forEach(doc=>{
+
+    let d = doc.data();
+
+    if(d.bulan === bulanSekarang){
+
+      monthlyTarget =
+      Number(d.target || 0);
+
+    }
+
+  });
+
+  render();
 
 });
 
@@ -693,7 +722,6 @@ function render(){
 
   });
 
-  // SORT LAPORAN TERBARU
   filtered.sort((a,b)=>
     new Date(b.tanggal)
     - new Date(a.tanggal)
@@ -717,6 +745,25 @@ function render(){
     : 0
   );
 
+  // TARGET
+
+  let gap =
+  monthlyTarget - totalVal;
+
+  if(gap < 0)
+  gap = 0;
+
+  let progress =
+  monthlyTarget
+  ? Math.round(
+    (totalVal / monthlyTarget) * 100
+  )
+  : 0;
+
+  console.log("TARGET:", monthlyTarget);
+  console.log("GAP:", gap);
+  console.log("PROGRESS:", progress + "%");
+
   // CHART HARIAN
 
   let perHari = {};
@@ -729,7 +776,6 @@ function render(){
 
   });
 
-  // SORT TANGGAL GRAFIK
   let sortedTanggal =
   Object.keys(perHari)
   .sort((a,b)=>
@@ -740,7 +786,6 @@ function render(){
   let sortedValues =
   sortedTanggal.map(t=>perHari[t]);
 
-  // WARNA BERDASARKAN NILAI
   let warnaBars =
   sortedValues.map(v=>{
 
