@@ -452,43 +452,69 @@ function showPage(id,el){
 
 async function login(){
 
-  const email = document.getElementById("email");
-const password = document.getElementById("password");
-  
-  try{
+const emailInput = document.getElementById("email");
+const passwordInput = document.getElementById("password");
 
-    await auth.signInWithEmailAndPassword(
-      email.value,
-      password.value
-    );
+const email = emailInput.value.trim();
+const password = passwordInput.value.trim();
 
-  }catch(err){
+if(!email || !password){
+alert("Email dan password wajib diisi");
+return;
+}
 
-    alert(err.message);
+try{
 
-  }
+await firebase.auth().signInWithEmailAndPassword(
+email,
+password
+);
+
+console.log("LOGIN BERHASIL");
+
+}catch(err){
+
+console.log(err);
+
+alert(err.message);
+
+}
 
 }
 
 async function register(){
 
-  try{
+const emailInput = document.getElementById("email");
+const passwordInput = document.getElementById("password");
 
-    await auth.createUserWithEmailAndPassword(
-      email.value,
-      password.value
-    );
+const email = emailInput.value.trim();
+const password = passwordInput.value.trim();
 
-    alert("Register berhasil");
+if(!email || !password){
+alert("Email dan password wajib diisi");
+return;
+}
 
-  }catch(err){
+try{
 
-    alert(err.message);
+await firebase.auth().createUserWithEmailAndPassword(
+email,
+password
+);
 
-  }
+alert("Register berhasil");
+
+console.log("REGISTER BERHASIL");
+
+}catch(err){
+
+console.log(err);
+
+alert(err.message);
 
 }
 
+}
 function logout(){
   auth.signOut();
 }
