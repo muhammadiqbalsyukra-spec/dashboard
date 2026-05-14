@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Sales Dashboard</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sales Pro Dashboard</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
@@ -24,9 +24,8 @@
 
 body{
   font-family:'Inter',sans-serif;
-  background:#020617;
-  color:#e2e8f0;
-  overflow-x:hidden;
+  background:#0f172a;
+  color:#fff;
 }
 
 .hidden{
@@ -39,8 +38,8 @@ button{
 }
 
 button:hover{
+  opacity:.9;
   transform:translateY(-1px);
-  opacity:.95;
 }
 
 input,
@@ -51,25 +50,27 @@ button{
   border:none;
   border-radius:14px;
   margin-top:12px;
+  font-size:14px;
 }
 
 input,
 select{
-  background:rgba(255,255,255,.06);
-  color:white;
+  background:#1e293b;
+  color:#fff;
+  border:1px solid rgba(255,255,255,.08);
 }
 
 button{
   background:linear-gradient(135deg,#2563eb,#06b6d4);
   color:white;
+  font-weight:600;
 }
 
 .card{
-  background:rgba(15,23,42,.75);
-  border:1px solid rgba(255,255,255,.06);
-  border-radius:24px;
-  padding:24px;
-  backdrop-filter:blur(14px);
+  background:#111827;
+  border-radius:22px;
+  padding:22px;
+  box-shadow:0 10px 30px rgba(0,0,0,.25);
 }
 
 #loginPage{
@@ -80,9 +81,9 @@ button{
   padding:20px;
 }
 
-.login-card{
+.login-box{
   width:100%;
-  max-width:420px;
+  max-width:400px;
 }
 
 #app{
@@ -94,10 +95,16 @@ button{
 }
 
 .sidebar{
-  width:250px;
+  width:240px;
   min-height:100vh;
+  background:#111827;
   padding:20px;
-  background:#0f172a;
+}
+
+.logo{
+  font-size:22px;
+  font-weight:700;
+  margin-bottom:25px;
 }
 
 .menu{
@@ -105,6 +112,11 @@ button{
   border-radius:14px;
   margin-bottom:10px;
   cursor:pointer;
+  transition:.2s;
+}
+
+.menu:hover{
+  background:rgba(255,255,255,.05);
 }
 
 .menu.active{
@@ -116,6 +128,10 @@ button{
   padding:24px;
 }
 
+.top-title{
+  margin-bottom:20px;
+}
+
 .grid{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
@@ -123,10 +139,15 @@ button{
   margin-bottom:20px;
 }
 
-.stat{
+.stat-card{
   padding:24px;
   border-radius:22px;
   background:linear-gradient(135deg,#2563eb,#06b6d4);
+}
+
+.stat-card h2{
+  font-size:28px;
+  margin-bottom:8px;
 }
 
 .chart-box{
@@ -137,15 +158,29 @@ button{
   overflow:auto;
 }
 
-.table{
+table{
   width:100%;
   border-collapse:collapse;
 }
 
-.table th,
-.table td{
+th,
+td{
   padding:14px;
+  text-align:left;
   border-bottom:1px solid rgba(255,255,255,.06);
+}
+
+th{
+  background:#1e293b;
+}
+
+.action-btn{
+  padding:8px 12px;
+  border:none;
+  border-radius:10px;
+  background:#ef4444;
+  color:white;
+  width:auto;
 }
 
 .loading{
@@ -154,20 +189,12 @@ button{
   opacity:.8;
 }
 
-.progress-bar{
-  width:100%;
-  height:12px;
-  background:rgba(255,255,255,.12);
-  border-radius:999px;
-  overflow:hidden;
-  margin-top:12px;
+.success{
+  color:#22c55e;
 }
 
-.progress-fill{
-  height:100%;
-  width:0%;
-  transition:.4s;
-  background:#22c55e;
+.error{
+  color:#ef4444;
 }
 
 @media(max-width:900px){
@@ -180,8 +207,12 @@ button{
     width:100%;
     min-height:auto;
     display:flex;
-    gap:10px;
     overflow:auto;
+    gap:10px;
+  }
+
+  .logo{
+    display:none;
   }
 
 }
@@ -190,34 +221,50 @@ button{
 </head>
 <body>
 
+<!-- LOGIN -->
+
 <div id="loginPage">
 
-  <div class="card login-card">
+  <div class="card login-box">
 
-    <h1>Sales Dashboard</h1>
+    <h1 style="margin-bottom:20px;">
+      Sales Pro Dashboard
+    </h1>
 
     <input id="email" placeholder="Email">
 
     <input id="password" type="password" placeholder="Password">
 
-    <button onclick="login()">Login</button>
+    <button onclick="login()">
+      Login
+    </button>
 
-    <button onclick="register()">Register</button>
+    <button onclick="register()">
+      Register
+    </button>
 
   </div>
 
 </div>
 
+<!-- APP -->
+
 <div id="app">
 
+  <!-- SIDEBAR -->
+
   <div class="sidebar">
+
+    <div class="logo">
+      SALES PRO
+    </div>
 
     <div class="menu active" onclick="showPage('dashboard',this)">
       Dashboard
     </div>
 
     <div class="menu" onclick="showPage('inputPage',this)">
-      Input
+      Input Data
     </div>
 
     <div class="menu" onclick="showPage('laporanPage',this)">
@@ -230,18 +277,26 @@ button{
 
   </div>
 
+  <!-- MAIN -->
+
   <div class="main">
+
+    <div class="top-title">
+      <h1>Dashboard Penjualan</h1>
+    </div>
+
+    <!-- DASHBOARD -->
 
     <div id="dashboard">
 
       <div class="grid">
 
-        <div class="stat">
+        <div class="stat-card">
           <h2 id="totalOmset">Rp 0</h2>
           <p>Total Omset</p>
         </div>
 
-        <div class="stat">
+        <div class="stat-card">
           <h2 id="totalTrx">0</h2>
           <p>Total Transaksi</p>
         </div>
@@ -249,6 +304,10 @@ button{
       </div>
 
       <div class="card">
+
+        <h3 style="margin-bottom:16px;">
+          Grafik Omset
+        </h3>
 
         <div class="chart-box">
           <canvas id="chartOmset"></canvas>
@@ -258,11 +317,15 @@ button{
 
     </div>
 
+    <!-- INPUT -->
+
     <div id="inputPage" class="hidden">
 
       <div class="card">
 
-        <h3>Input Penjualan</h3>
+        <h2 style="margin-bottom:20px;">
+          Input Penjualan
+        </h2>
 
         <input id="toko" placeholder="Nama toko">
 
@@ -270,7 +333,11 @@ button{
 
         <input id="omset" type="number" placeholder="Nominal omset">
 
-        <select id="salesSelect"></select>
+        <select id="salesSelect">
+          <option value="Sales 1">Sales 1</option>
+          <option value="Sales 2">Sales 2</option>
+          <option value="Sales 3">Sales 3</option>
+        </select>
 
         <input type="file" id="notaFile" accept="image/*">
 
@@ -288,11 +355,17 @@ button{
 
     </div>
 
+    <!-- LAPORAN -->
+
     <div id="laporanPage" class="hidden">
 
       <div class="card table-wrapper">
 
-        <table class="table">
+        <h2 style="margin-bottom:20px;">
+          Laporan Penjualan
+        </h2>
+
+        <table>
 
           <thead>
             <tr>
@@ -318,17 +391,24 @@ button{
 
 <script>
 
-// =========================
-// FIREBASE CONFIG
-// =========================
+// ======================
+// FIREBASE
+// ======================
 
 const firebaseConfig = {
+
   apiKey: "AIzaSyC-dtWEgB6FcHeVqD5PfzC_AFZoZ0eXRtI",
+
   authDomain: "gudang-app-pro.firebaseapp.com",
+
   projectId: "gudang-app-pro",
+
   storageBucket: "gudang-app-pro.firebasestorage.app",
+
   messagingSenderId: "795043382766",
+
   appId: "1:795043382766:web:9d908c909fb6a2774dfaff"
+
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -336,17 +416,12 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const auth = firebase.auth();
 
-// =========================
-// GLOBAL STATE
-// =========================
-
 let salesData = [];
-let salesList = [];
 let chartInstance;
 
-// =========================
+// ======================
 // INITIAL
-// =========================
+// ======================
 
 window.onload = ()=>{
 
@@ -356,9 +431,9 @@ window.onload = ()=>{
 
 };
 
-// =========================
+// ======================
 // AUTH
-// =========================
+// ======================
 
 async function login(){
 
@@ -418,17 +493,19 @@ auth.onAuthStateChanged(user=>{
 
 });
 
-// =========================
+// ======================
 // PAGE
-// =========================
+// ======================
 
 function showPage(id,el){
 
   ['dashboard','inputPage','laporanPage']
   .forEach(page=>{
+
     document
     .getElementById(page)
     .classList.add('hidden');
+
   });
 
   document
@@ -439,56 +516,63 @@ function showPage(id,el){
   .querySelectorAll('.menu')
   .forEach(m=>m.classList.remove('active'));
 
-  el.classList.add('active');
+  if(el){
+    el.classList.add('active');
+  }
 
 }
 
-// =========================
+// ======================
 // OCR
-// =========================
+// ======================
 
 async function scanNota(){
 
   const file = notaFile.files[0];
 
   if(!file){
+
     alert('Pilih foto nota');
     return;
+
   }
 
-  ocrStatus.innerText = 'Scanning OCR...';
+  ocrStatus.innerHTML =
+  '🔍 Scanning OCR...';
 
   try{
 
-    const result = await Tesseract.recognize(
+    const result =
+    await Tesseract.recognize(
       file,
       'eng'
     );
 
     const text = result.data.text;
 
-    const nominal = extractNominal(text);
+    const nominal =
+    extractNominal(text);
 
     if(nominal > 0){
 
       omset.value = nominal;
 
-      ocrStatus.innerText =
-      '✅ OCR berhasil membaca nominal';
+      ocrStatus.innerHTML =
+      '<span class="success">✅ OCR berhasil membaca nominal</span>';
 
     }else{
 
-      ocrStatus.innerText =
-      '⚠️ Nominal tidak ditemukan';
+      ocrStatus.innerHTML =
+      '<span class="error">⚠️ Nominal tidak ditemukan</span>';
 
     }
 
   }catch(err){
 
-    console.error(err);
+    console.log(err);
 
-    ocrStatus.innerText =
-    '❌ OCR gagal';
+    ocrStatus.innerHTML =
+    '<span class="error">❌ OCR gagal</span>';
 
   }
 
@@ -496,7 +580,8 @@ async function scanNota(){
 
 function extractNominal(text){
 
-  const numbers = text.match(/\d+[.,]?\d+/g);
+  const numbers =
+  text.match(/\d+[.,]?\d+/g);
 
   if(!numbers) return 0;
 
@@ -506,11 +591,13 @@ function extractNominal(text){
 
     const val = Number(
       num.replace(/\./g,'')
-         .replace(/,/g,'')
+      .replace(/,/g,'')
     );
 
     if(val > terbesar){
+
       terbesar = val;
+
     }
 
   });
@@ -519,9 +606,9 @@ function extractNominal(text){
 
 }
 
-// =========================
+// ======================
 // DATABASE
-// =========================
+// ======================
 
 async function saveData(){
 
@@ -530,11 +617,14 @@ async function saveData(){
     !tanggal.value ||
     !omset.value
   ){
+
     alert('Lengkapi data');
     return;
+
   }
 
-  await db.collection('sales').add({
+  await db.collection('sales')
+  .add({
 
     toko:toko.value,
     tanggal:tanggal.value,
@@ -545,6 +635,8 @@ async function saveData(){
 
   toko.value = '';
   omset.value = '';
+  notaFile.value = '';
+  ocrStatus.innerHTML = '';
 
   alert('Data berhasil disimpan');
 
@@ -553,11 +645,15 @@ async function saveData(){
 function loadData(){
 
   db.collection('sales')
+  .orderBy('tanggal','desc')
   .onSnapshot(snap=>{
 
-    salesData = snap.docs.map(doc=>({
+    salesData =
+    snap.docs.map(doc=>({
+
       ...doc.data(),
       id:doc.id
+
     }));
 
     renderDashboard();
@@ -567,18 +663,21 @@ function loadData(){
 
 }
 
-// =========================
-// RENDER
-// =========================
+// ======================
+// DASHBOARD
+// ======================
 
 function renderDashboard(){
 
-  const total = salesData
-  .reduce((a,b)=>a+b.omset,0);
+  const total =
+  salesData.reduce((a,b)=>
+  a + b.omset,0);
 
-  totalOmset.innerText = rp(total);
+  totalOmset.innerText =
+  rp(total);
 
-  totalTrx.innerText = salesData.length;
+  totalTrx.innerText =
+  salesData.length;
 
   renderChart();
 
@@ -596,14 +695,20 @@ function renderChart(){
 
   });
 
-  const labels = Object.keys(perHari);
-  const values = Object.values(perHari);
+  const labels =
+  Object.keys(perHari);
+
+  const values =
+  Object.values(perHari);
 
   if(chartInstance){
+
     chartInstance.destroy();
+
   }
 
-  chartInstance = new Chart(chartOmset,{
+  chartInstance =
+  new Chart(chartOmset,{
 
     type:'bar',
 
@@ -613,7 +718,10 @@ function renderChart(){
 
       datasets:[{
 
+        label:'Omset',
+
         data:values,
+
         borderRadius:12
 
       }]
@@ -621,32 +729,78 @@ function renderChart(){
     },
 
     options:{
+
       responsive:true,
+
       maintainAspectRatio:false,
+
       plugins:{
-        legend:{display:false}
+        legend:{
+          display:false
+        }
+      },
+
+      scales:{
+
+        y:{
+
+          ticks:{
+            color:'#fff'
+          },
+
+          grid:{
+            color:'rgba(255,255,255,.05)'
+          }
+
+        },
+
+        x:{
+
+          ticks:{
+            color:'#fff'
+          },
+
+          grid:{
+            display:false
+          }
+
+        }
+
       }
+
     }
 
   });
 
 }
 
+// ======================
+// TABLE
+// ======================
+
 function renderTable(){
 
-  tableBody.innerHTML = salesData.map(item=>`
+  tableBody.innerHTML =
+  salesData.map(item=>`
 
     <tr>
 
       <td>${item.tanggal}</td>
+
       <td>${item.toko}</td>
+
       <td>${item.sales}</td>
+
       <td>${rp(item.omset)}</td>
 
       <td>
 
-        <button onclick="hapus('${item.id}')">
+        <button
+        class="action-btn"
+        onclick="hapus('${item.id}')">
+
           Hapus
+
         </button>
 
       </td>
@@ -657,15 +811,14 @@ function renderTable(){
 
 }
 
-// =========================
+// ======================
 // DELETE
-// =========================
+// ======================
 
 async function hapus(id){
 
-  const ok = confirm(
-    'Yakin ingin hapus data?'
-  );
+  const ok =
+  confirm('Hapus data ini?');
 
   if(!ok) return;
 
@@ -675,14 +828,14 @@ async function hapus(id){
 
 }
 
-// =========================
+// ======================
 // HELPER
-// =========================
+// ======================
 
-function rp(nominal){
+function rp(n){
 
   return 'Rp ' +
-  Number(nominal || 0)
+  Number(n || 0)
   .toLocaleString('id-ID');
 
 }
