@@ -492,13 +492,24 @@ function logout(){
 
 auth.onAuthStateChanged(user=>{
 
-  if(user){
+ if(user){
 
-    loginPage.classList.add("hidden");
-    app.classList.add("show");
+  loginPage.classList.add("hidden");
+  app.classList.add("show");
+
+  userSales()
+  .onSnapshot(snap=>{
+
+    data = snap.docs.map(d=>({
+      ...d.data(),
+      id:d.id
+    }));
 
     render();
 
+  });
+
+}
   }else{
 
     loginPage.classList.remove("hidden");
@@ -508,22 +519,41 @@ auth.onAuthStateChanged(user=>{
 
 });
 
-db.collection("salesList")
+userSales()
 .onSnapshot(async snap=>{
 
   salesList =
-  snap.docs.map(d=>d.data().nama);
+  [...new Set(
+    snap.docs.map(d=>
+      (d.data().sales || "Sales 1").trim()
+    )
+  )];
 
   if(salesList.length === 0){
 
-    await db.collection("salesList").add({
-      nama:"Sales 1"
-    });
+    salesList = [
+      "Sales 1",
+      "Sales 2"
+    ];
 
-    await db.collection("salesList").add({
-      nama:"Sales 2"
-    });
+  }
 
+  inputSales.innerHTML =
+  salesList.map(c=>`
+    <option value="${c}">
+      ${c}
+    </option>
+  `).join("");
+
+  filterCabang.innerHTML =
+  '<option value="">Semua Sales</option>' +
+  salesList.map(c=>`
+    <option value="${c}">
+      ${c}
+    </option>
+  `).join("");
+
+});
     return;
 
   }
@@ -569,19 +599,6 @@ db.collection("targets")
 
 });
 
-db.collection("users")
-.doc(auth.currentUser.uid)
-.collection("sales")
-.onSnapshot(snap=>{
-
-  data = snap.docs.map(d=>({
-    ...d.data(),
-    id:d.id
-  }));
-
-  render();
-
-});
 
 async function scanNota(){
 
@@ -1156,7 +1173,7 @@ function rp(a){
 
 async function del(id){
 
-  await db.collection("sales")
+  await userSales()
   .doc(id)
   .delete();
 
