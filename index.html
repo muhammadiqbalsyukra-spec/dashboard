@@ -825,38 +825,67 @@ function parseRekap(text){
 
   lines.forEach(line=>{
 
-    const clean = line.trim();
+    let clean = line.trim();
 
-    if(clean.length < 3) return;
+    if(clean.length < 4) return;
 
+    // buang karakter aneh
+    clean = clean.replace(/[|[\]{}]/g,'');
+
+    // ambil nominal
     const nominalMatch =
-    clean.match(/(\d[\d.,]+)/);
+    clean.match(/(\d[\d.,]+)/g);
 
     if(!nominalMatch) return;
 
-    const nominalRaw =
-    nominalMatch[0];
+    // ambil angka terbesar
+    let terbesar = 0;
 
-    const nominal = Number(
-      nominalRaw
-      .replace(/\./g,'')
-      .replace(/,/g,'')
-    );
+    nominalMatch.forEach(n=>{
 
-    const toko = clean
-    .replace(nominalRaw,'')
-    .replace(/[:\-]/g,'')
-    .trim();
+      let val = Number(
+        n.replace(/\./g,'')
+         .replace(/,/g,'')
+      );
 
+      if(val > terbesar){
+        terbesar = val;
+      }
+
+    });
+
+    // skip nominal kecil
+    if(terbesar < 100000) return;
+
+    // hapus nominal dari text
+    let toko = clean;
+
+    nominalMatch.forEach(n=>{
+      toko = toko.replace(n,'');
+    });
+
+    // bersihkan text toko
+    toko = toko
+      .replace(/[:\-]/g,'')
+      .replace(/\s+/g,' ')
+      .trim();
+
+    // filter text aneh
     if(
-      !toko ||
-      toko.length < 2 ||
-      isNaN(nominal)
+      toko.length < 3 ||
+      toko.length > 40
+    ) return;
+
+    // skip kalimat aneh
+    if(
+      toko.toLowerCase().includes('period') ||
+      toko.toLowerCase().includes('total') ||
+      toko.toLowerCase().includes('subtotal')
     ) return;
 
     hasilOCR.push({
       toko:toko,
-      omset:nominal
+      omset:terbesar
     });
 
   });
