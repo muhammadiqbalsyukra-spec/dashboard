@@ -492,29 +492,29 @@ function logout(){
 
 auth.onAuthStateChanged(user=>{
 
- if(user){
+if(user){
 
-  loginPage.classList.add("hidden");
-  app.classList.add("show");
+loginPage.classList.add("hidden");
+app.classList.add("show");
 
-  userSales()
-  .onSnapshot(snap=>{
+userSales()
+.onSnapshot(snap=>{
 
-    data = snap.docs.map(d=>({
-      ...d.data(),
-      id:d.id
-    }));
+data = snap.docs.map(d=>({
+...d.data(),
+id:d.id
+}));
 
-    render();
+render();
 
-  });
-   
-  }else{
+});
 
-    loginPage.classList.remove("hidden");
-    app.classList.remove("show");
+}else{
 
-  }
+loginPage.classList.remove("hidden");
+app.classList.remove("show");
+
+}
 
 });
 
