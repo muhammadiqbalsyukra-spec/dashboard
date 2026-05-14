@@ -256,6 +256,222 @@ display:none;
 }
 
 }
+  /* =========================
+RESPONSIVE MOBILE PREMIUM
+========================= */
+
+@media(max-width:900px){
+
+#app{
+flex-direction:column;
+}
+
+.sidebar{
+width:100%;
+min-height:auto;
+padding:12px;
+display:flex;
+gap:10px;
+overflow-x:auto;
+position:sticky;
+top:0;
+z-index:999;
+backdrop-filter:blur(12px);
+border-right:none;
+border-bottom:1px solid rgba(255,255,255,.08);
+}
+
+.logo{
+display:none;
+}
+
+.menu{
+min-width:max-content;
+margin-bottom:0;
+font-size:14px;
+padding:12px 16px;
+white-space:nowrap;
+flex-shrink:0;
+}
+
+.main{
+padding:14px;
+}
+
+.grid{
+grid-template-columns:1fr;
+gap:14px;
+}
+
+.stat{
+padding:20px;
+border-radius:22px;
+}
+
+.stat h2{
+font-size:24px;
+}
+
+.card{
+padding:18px;
+border-radius:22px;
+}
+
+.chart-box{
+height:260px;
+}
+
+input,
+select,
+button{
+font-size:16px;
+padding:16px;
+}
+
+.table{
+min-width:650px;
+}
+
+.table th,
+.table td{
+padding:12px;
+font-size:13px;
+}
+
+.login-card{
+padding:22px;
+border-radius:24px;
+}
+
+}
+
+/* =========================
+EXTRA SMALL PHONE
+========================= */
+
+@media(max-width:480px){
+
+body{
+font-size:14px;
+}
+
+.login-card,
+.card,
+.stat{
+border-radius:20px;
+}
+
+.login-title{
+font-size:24px;
+}
+
+.stat h2{
+font-size:22px;
+}
+
+.chart-box{
+height:220px;
+}
+
+button{
+font-size:15px;
+}
+
+.main{
+padding:12px;
+}
+
+.sidebar{
+padding:10px;
+gap:8px;
+}
+
+.menu{
+padding:10px 14px;
+font-size:13px;
+}
+
+.table th,
+.table td{
+font-size:12px;
+padding:10px;
+}
+
+}
+
+/* =========================
+SMOOTH SCROLLBAR
+========================= */
+
+::-webkit-scrollbar{
+height:8px;
+width:8px;
+}
+
+::-webkit-scrollbar-track{
+background:rgba(255,255,255,.05);
+}
+
+::-webkit-scrollbar-thumb{
+background:rgba(255,255,255,.18);
+border-radius:999px;
+}
+
+/* =========================
+ANIMATION
+========================= */
+
+.card,
+.stat,
+.menu,
+button{
+transition:.25s ease;
+}
+
+.card:hover,
+.stat:hover{
+transform:translateY(-2px);
+box-shadow:0 20px 35px rgba(0,0,0,.25);
+}
+
+/* =========================
+GLASS EFFECT
+========================= */
+
+.card,
+.login-card,
+.sidebar{
+backdrop-filter:blur(16px);
+-webkit-backdrop-filter:blur(16px);
+}
+
+/* =========================
+BETTER MOBILE TABLE
+========================= */
+
+.table-wrapper{
+overflow:auto;
+border-radius:20px;
+}
+
+/* =========================
+BETTER INPUT FOCUS
+========================= */
+
+input:focus,
+select:focus{
+outline:none;
+border:1px solid rgba(59,130,246,.5);
+box-shadow:0 0 0 3px rgba(59,130,246,.15);
+}
+
+/* =========================
+BUTTON EFFECT
+========================= */
+
+button:active{
+transform:scale(.98);
+}
 
 </style>
 </head>
