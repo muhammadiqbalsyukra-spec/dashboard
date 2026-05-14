@@ -404,7 +404,14 @@ firebase.initializeApp(firebaseConfig);
 
 const db = firebase.firestore();
 const auth = firebase.auth();
+function userSales(){
 
+  return db
+  .collection("users")
+  .doc(auth.currentUser.uid)
+  .collection("sales");
+
+}
 let data = [];
 let salesList = [];
 let monthlyTarget = 0;
@@ -562,7 +569,9 @@ db.collection("targets")
 
 });
 
-db.collection("sales")
+db.collection("users")
+.doc(auth.currentUser.uid)
+.collection("sales")
 .onSnapshot(snap=>{
 
   data = snap.docs.map(d=>({
