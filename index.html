@@ -633,7 +633,7 @@ function bacaNominal(text){
     omset.value = terbesar;
   }
 
-}
+}<script>
 
 async function scanRekap(){
 
@@ -645,7 +645,11 @@ async function scanRekap(){
   }
 
   rekapStatus.innerText =
-  "Scanning rekap sales...";
+  "⏳ Scanning rekap sales...";
+
+  previewBox.innerHTML = "";
+
+  saveMassBtn.classList.add("hidden");
 
   try{
 
@@ -654,12 +658,25 @@ async function scanRekap(){
 
     const text = result.data.text;
 
+    console.log(text);
+
     parseRekap(text);
 
-    rekapStatus.innerText =
-    "✅ Rekap berhasil dibaca";
+    if(hasilOCR.length > 0){
+
+      rekapStatus.innerText =
+      "✅ Rekap berhasil dibaca";
+
+    }else{
+
+      rekapStatus.innerText =
+      "⚠️ OCR berhasil tapi data tidak ditemukan";
+
+    }
 
   }catch(err){
+
+    console.error(err);
 
     rekapStatus.innerText =
     "❌ OCR gagal";
@@ -672,28 +689,37 @@ function parseRekap(text){
 
   hasilOCR = [];
 
-  text.split("\n")
-  .forEach(line=>{
+  const lines = text.split("\n");
+
+  lines.forEach(line=>{
+
+    const clean = line.trim();
+
+    if(clean.length < 3) return;
 
     const nominalMatch =
-    line.match(/(\d{1,3}(\.\d{3})+)/);
+    clean.match(/(\d[\d.,]+)/);
 
     if(!nominalMatch) return;
 
-    const nominal = nominalMatch[0];
+    const nominalRaw = nominalMatch[0];
 
-    const toko = line
-    .replace(nominal,'')
-    .replace(/[0-9]/g,'')
+    const nominal = Number(
+      nominalRaw
+      .replace(/\./g,'')
+      .replace(/,/g,'')
+    );
+
+    const toko = clean
+    .replace(nominalRaw,'')
+    .replace(/[:\-]/g,'')
     .trim();
 
-    if(toko.length < 3) return;
+    if(!toko || toko.length < 2 || isNaN(nominal)) return;
 
     hasilOCR.push({
       toko:toko,
-      omset:Number(
-        nominal.replace(/\./g,'')
-      )
+      omset:nominal
     });
 
   });
@@ -706,16 +732,57 @@ function renderPreview(){
 
   if(hasilOCR.length === 0){
 
-    previewBox.innerHTML =
-    "Tidak ada data";
+    previewBox.innerHTML = `
+      <div class="small">
+        ❌ Tidak ada data yang berhasil dibaca
+      </div>
+    `;
+
+    saveMassBtn.classList.add("hidden");
 
     return;
 
   }
 
-  saveMassBtn.classList.remove(
-    "hidden"
-  );
+  saveMassBtn.classList.remove("hidden");
+
+  previewBox.innerHTML = `
+
+    <table class="table">
+
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Toko</th>
+          <th>Omset</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        \${hasilOCR.map((d,i)=>`
+
+          <tr>
+            <td>\${i+1}</td>
+            <td>\${d.toko}</td>
+            <td>\${rp(d.omset)}</td>
+          </tr>
+
+        `).join('')}
+
+      </tbody>
+
+    </table>
+
+    <div class="small">
+      ✅ \${hasilOCR.length} data berhasil dibaca
+    </div>
+
+  `;
+
+}
+
+</script>
 
   previewBox.innerHTML = `
 
@@ -749,34 +816,29 @@ function renderPreview(){
 
 }
 
-async function saveMassal(){
+function saveMassal(){
 
-  const tanggalHariIni =
-  new Date()
-  .toISOString()
-  .split("T")[0];
+    if(!window.hasilOCRMassal) return;
 
-  for(let d of hasilOCR){
+    hasilOCRMassal.forEach(item => {
 
-    await db.collection("sales")
-    .add({
-      toko:d.toko,
-      tanggal:tanggalHariIni,
-      omset:d.omset,
-      sales:inputSales.value
+        salesData.push({
+            toko: item.toko,
+            omzet: item.omzet,
+            tanggal: new Date().toISOString().split('T')[0],
+            sales: 'Sales 1'
+        });
+
     });
 
-  }
+    localStorage.setItem(
+        'salesData',
+        JSON.stringify(salesData)
+    );
 
-  hasilOCR = [];
+    renderTable();
 
-  previewBox.innerHTML = "";
-
-  saveMassBtn.classList.add(
-    "hidden"
-  );
-
-  alert("Import selesai");
+    alert('✅ Semua data berhasil disimpan');
 
 }
 
