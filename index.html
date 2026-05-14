@@ -647,10 +647,13 @@ async function scanRekap(){
   rekapStatus.innerText =
   "⏳ Scanning rekap sales...";
 
-  previewBox.innerHTML = "";
+ document.getElementById(
+  "previewBox"
+).innerHTML = "";
 
-  saveMassBtn.classList.add("hidden");
-
+ document.getElementById(
+  "saveMassBtn"
+).classList.add("hidden");
   try{
 
     const result =
