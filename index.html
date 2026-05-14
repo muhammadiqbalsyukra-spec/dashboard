@@ -887,7 +887,7 @@ async function saveMassal(){
 
   for(let d of hasilOCR){
 
-    await db.collection("sales")
+    await userSales()
     .add({
       toko:d.toko,
       tanggal:tanggalHariIni,
@@ -922,7 +922,7 @@ async function simpan(){
 
   }
 
-  await db.collection("sales")
+  await userSales()
   .add({
 
     toko:toko.value,
