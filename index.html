@@ -452,6 +452,9 @@ function showPage(id,el){
 
 async function login(){
 
+  const email = document.getElementById("email");
+const password = document.getElementById("password");
+  
   try{
 
     await auth.signInWithEmailAndPassword(
