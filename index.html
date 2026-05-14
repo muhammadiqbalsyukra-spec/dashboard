@@ -821,27 +821,42 @@ function parseRekap(text){
 
   hasilOCR = [];
 
-  const lines = text.split("\n");
+  const lines = text.split('\n');
+
+  const blacklist = [
+    'period',
+    'periode',
+    'total',
+    'subtotal',
+    'cash',
+    'debit',
+    'credit',
+    'rekap',
+    'sales',
+    'tanggal'
+  ];
 
   lines.forEach(line=>{
 
     let clean = line.trim();
 
-    if(clean.length < 3) return;
+    if(clean.length < 4) return;
 
     // bersihkan karakter aneh
-    clean = clean.replace(/[|[\]{}]/g,'');
+    clean = clean
+      .replace(/[|[\]{}]/g,'')
+      .replace(/\s+/g,' ');
 
-    // ambil semua angka
-    const numbers =
+    // cari semua angka
+    const nums =
     clean.match(/\d[\d.,]*/g);
 
-    if(!numbers) return;
+    if(!nums) return;
 
     // cari nominal terbesar
     let terbesar = 0;
 
-    numbers.forEach(n=>{
+    nums.forEach(n=>{
 
       let val = Number(
         n.replace(/\./g,'')
@@ -854,23 +869,41 @@ function parseRekap(text){
 
     });
 
-    // skip jika benar-benar kecil
-    if(terbesar < 1000) return;
+    // minimal nominal
+    if(terbesar < 50000) return;
 
     // hapus angka dari text
     let toko = clean;
 
-    numbers.forEach(n=>{
+    nums.forEach(n=>{
       toko = toko.replace(n,'');
     });
 
+    // bersihkan nama toko
     toko = toko
       .replace(/[:\-]/g,' ')
+      .replace(/[^a-zA-Z\s]/g,'')
       .replace(/\s+/g,' ')
       .trim();
 
-    // filter seperlunya saja
-    if(toko.length < 2) return;
+    // validasi nama toko
+    if(toko.length < 3) return;
+
+    if(toko.length > 30) return;
+
+    // blacklist
+    const lower = toko.toLowerCase();
+
+    for(let word of blacklist){
+
+      if(lower.includes(word)){
+        return;
+      }
+
+    }
+
+    // harus ada huruf
+    if(!/[a-zA-Z]/.test(toko)) return;
 
     hasilOCR.push({
       toko:toko,
@@ -884,8 +917,7 @@ function parseRekap(text){
 
     index === self.findIndex(t=>
 
-      t.toko === item.toko &&
-      t.omset === item.omset
+      t.toko === item.toko
 
     )
 
