@@ -827,21 +827,21 @@ function parseRekap(text){
 
     let clean = line.trim();
 
-    if(clean.length < 4) return;
+    if(clean.length < 3) return;
 
-    // buang karakter aneh
+    // bersihkan karakter aneh
     clean = clean.replace(/[|[\]{}]/g,'');
 
-    // ambil nominal
-    const nominalMatch =
-    clean.match(/(\d[\d.,]+)/g);
+    // ambil semua angka
+    const numbers =
+    clean.match(/\d[\d.,]*/g);
 
-    if(!nominalMatch) return;
+    if(!numbers) return;
 
-    // ambil angka terbesar
+    // cari nominal terbesar
     let terbesar = 0;
 
-    nominalMatch.forEach(n=>{
+    numbers.forEach(n=>{
 
       let val = Number(
         n.replace(/\./g,'')
@@ -854,34 +854,23 @@ function parseRekap(text){
 
     });
 
-    // skip nominal kecil
-    if(terbesar < 100000) return;
+    // skip jika benar-benar kecil
+    if(terbesar < 1000) return;
 
-    // hapus nominal dari text
+    // hapus angka dari text
     let toko = clean;
 
-    nominalMatch.forEach(n=>{
+    numbers.forEach(n=>{
       toko = toko.replace(n,'');
     });
 
-    // bersihkan text toko
     toko = toko
-      .replace(/[:\-]/g,'')
+      .replace(/[:\-]/g,' ')
       .replace(/\s+/g,' ')
       .trim();
 
-    // filter text aneh
-    if(
-      toko.length < 3 ||
-      toko.length > 40
-    ) return;
-
-    // skip kalimat aneh
-    if(
-      toko.toLowerCase().includes('period') ||
-      toko.toLowerCase().includes('total') ||
-      toko.toLowerCase().includes('subtotal')
-    ) return;
+    // filter seperlunya saja
+    if(toko.length < 2) return;
 
     hasilOCR.push({
       toko:toko,
@@ -889,6 +878,18 @@ function parseRekap(text){
     });
 
   });
+
+  // hapus duplikat
+  hasilOCR = hasilOCR.filter((item,index,self)=>
+
+    index === self.findIndex(t=>
+
+      t.toko === item.toko &&
+      t.omset === item.omset
+
+    )
+
+  );
 
   renderPreview();
 
