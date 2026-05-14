@@ -541,10 +541,7 @@ return "Rp " + Number(n || 0)
 
 function userSales(){
 
-return db
-.collection("users")
-.doc(auth.currentUser.uid)
-.collection("sales");
+return db.collection("sales");
 
 }
 
