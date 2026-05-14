@@ -814,14 +814,17 @@ function render(){
 
   let sales = filterCabang.value;
 
-  let filtered = data.filter(d=>{
+ let filtered = data.filter(d=>{
 
-    if(sales && d.sales !== sales)
-    return false;
+  let salesData =
+  (d.sales || "Sales 1").trim();
 
-    return true;
+  if(sales && salesData !== sales)
+  return false;
 
-  });
+  return true;
+
+});
 
   filtered.sort((a,b)=>
     new Date(b.tanggal)
@@ -933,13 +936,19 @@ function render(){
 
   });
 
-  let perSales = {};
+ let perSales = {};
 
-  filtered.forEach(d=>{
-    perSales[d.sales] =
-    (perSales[d.sales] || 0)
-    + d.omset;
-  });
+filtered.forEach(d=>{
+
+  let salesName =
+  (d.sales || "Sales 1").trim();
+
+  perSales[salesName] =
+  (perSales[salesName] || 0)
+  + d.omset;
+
+});
+  
 
   if(chartSalesInstance)
   chartSalesInstance.destroy();
