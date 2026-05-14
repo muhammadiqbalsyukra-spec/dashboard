@@ -2,8 +2,7 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Sales Dashboard</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -25,16 +24,52 @@
 
 body{
   font-family:'Inter',sans-serif;
-  background:
-  radial-gradient(circle at top left,#1e3a8a,#020617 40%),
-  radial-gradient(circle at bottom right,#0f172a,#020617 50%);
+  background:#020617;
   color:#e2e8f0;
-  min-height:100vh;
   overflow-x:hidden;
 }
 
 .hidden{
-  display:none !important;
+  display:none!important;
+}
+
+button{
+  cursor:pointer;
+  transition:.2s;
+}
+
+button:hover{
+  transform:translateY(-1px);
+  opacity:.95;
+}
+
+input,
+select,
+button{
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:14px;
+  margin-top:12px;
+}
+
+input,
+select{
+  background:rgba(255,255,255,.06);
+  color:white;
+}
+
+button{
+  background:linear-gradient(135deg,#2563eb,#06b6d4);
+  color:white;
+}
+
+.card{
+  background:rgba(15,23,42,.75);
+  border:1px solid rgba(255,255,255,.06);
+  border-radius:24px;
+  padding:24px;
+  backdrop-filter:blur(14px);
 }
 
 #loginPage{
@@ -43,16 +78,6 @@ body{
   justify-content:center;
   align-items:center;
   padding:20px;
-}
-
-.login-card,
-.card{
-  background:rgba(15,23,42,.75);
-  border:1px solid rgba(255,255,255,.08);
-  backdrop-filter:blur(15px);
-  border-radius:24px;
-  padding:24px;
-  box-shadow:0 15px 35px rgba(0,0,0,.35);
 }
 
 .login-card{
@@ -69,16 +94,10 @@ body{
 }
 
 .sidebar{
-  width:260px;
+  width:250px;
   min-height:100vh;
-  padding:25px 18px;
-  background:rgba(15,23,42,.75);
-  border-right:1px solid rgba(255,255,255,.08);
-}
-
-.sidebar h3{
-  margin-bottom:30px;
-  font-size:24px;
+  padding:20px;
+  background:#0f172a;
 }
 
 .menu{
@@ -86,11 +105,6 @@ body{
   border-radius:14px;
   margin-bottom:10px;
   cursor:pointer;
-  transition:.3s;
-}
-
-.menu:hover{
-  background:rgba(255,255,255,.08);
 }
 
 .menu.active{
@@ -104,7 +118,7 @@ body{
 
 .grid{
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
   gap:20px;
   margin-bottom:20px;
 }
@@ -115,43 +129,12 @@ body{
   background:linear-gradient(135deg,#2563eb,#06b6d4);
 }
 
-.stat h2{
-  font-size:28px;
-  margin-bottom:8px;
+.chart-box{
+  height:320px;
 }
 
-input,
-select,
-button{
-  width:100%;
-  padding:14px;
-  border:none;
-  border-radius:14px;
-  margin-top:12px;
-  font-size:15px;
-}
-
-input,
-select{
-  background:rgba(255,255,255,.06);
-  color:white;
-}
-
-input::placeholder{
-  color:#cbd5e1;
-}
-
-button{
-  cursor:pointer;
-  color:white;
-  font-weight:600;
-  background:linear-gradient(135deg,#2563eb,#06b6d4);
-  transition:.3s;
-}
-
-button:hover{
-  transform:translateY(-2px);
-  opacity:.92;
+.table-wrapper{
+  overflow:auto;
 }
 
 .table{
@@ -162,61 +145,29 @@ button:hover{
 .table th,
 .table td{
   padding:14px;
-  border-bottom:1px solid rgba(255,255,255,.08);
-  text-align:left;
+  border-bottom:1px solid rgba(255,255,255,.06);
 }
 
-.table-wrapper{
-  overflow:auto;
-}
-
-.chart-box{
-  height:340px;
-}
-
-canvas{
-  width:100% !important;
-  height:100% !important;
+.loading{
+  margin-top:10px;
+  font-size:13px;
+  opacity:.8;
 }
 
 .progress-bar{
   width:100%;
   height:12px;
-  background:rgba(255,255,255,.15);
+  background:rgba(255,255,255,.12);
   border-radius:999px;
   overflow:hidden;
   margin-top:12px;
 }
 
 .progress-fill{
-  width:0%;
   height:100%;
-  transition:1s;
-  border-radius:999px;
-}
-
-.progress-red{
-  background:#ef4444;
-}
-
-.progress-yellow{
-  background:#f59e0b;
-}
-
-.progress-green{
+  width:0%;
+  transition:.4s;
   background:#22c55e;
-}
-
-.small{
-  margin-top:12px;
-  font-size:13px;
-  opacity:.85;
-}
-
-#previewBox{
-  margin-top:20px;
-  overflow:auto;
-  max-height:400px;
 }
 
 @media(max-width:900px){
@@ -237,205 +188,107 @@ canvas{
 
 </style>
 </head>
-
 <body>
-
-<!-- LOGIN -->
 
 <div id="loginPage">
 
-  <div class="login-card">
+  <div class="card login-card">
 
-    <h1 style="margin-bottom:20px;">
-      Sales Login
-    </h1>
+    <h1>Sales Dashboard</h1>
 
     <input id="email" placeholder="Email">
 
-    <input
-      id="password"
-      type="password"
-      placeholder="Password">
+    <input id="password" type="password" placeholder="Password">
 
-    <button onclick="login()">
-      Login
-    </button>
+    <button onclick="login()">Login</button>
 
-    <button onclick="register()">
-      Register
-    </button>
+    <button onclick="register()">Register</button>
 
   </div>
 
 </div>
 
-<!-- APP -->
-
 <div id="app">
-
-  <!-- SIDEBAR -->
 
   <div class="sidebar">
 
-    <h3>IQBAL</h3>
-
     <div class="menu active" onclick="showPage('dashboard',this)">
-      📊 Dashboard
+      Dashboard
     </div>
 
-    <div class="menu" onclick="showPage('input',this)">
-      ➕ Input
+    <div class="menu" onclick="showPage('inputPage',this)">
+      Input
     </div>
 
-    <div class="menu" onclick="showPage('laporan',this)">
-      📑 Laporan
+    <div class="menu" onclick="showPage('laporanPage',this)">
+      Laporan
     </div>
 
     <div class="menu" onclick="logout()">
-      🚪 Logout
+      Logout
     </div>
 
   </div>
 
-  <!-- MAIN -->
-
   <div class="main">
 
-    <!-- DASHBOARD -->
-
     <div id="dashboard">
-
-      <div class="card">
-
-        <select id="filterCabang" onchange="render()"></select>
-
-      </div>
 
       <div class="grid">
 
         <div class="stat">
-          <h2 id="total">Rp 0</h2>
+          <h2 id="totalOmset">Rp 0</h2>
           <p>Total Omset</p>
         </div>
 
         <div class="stat">
-          <h2 id="trx">0</h2>
+          <h2 id="totalTrx">0</h2>
           <p>Total Transaksi</p>
-        </div>
-
-        <div class="stat">
-          <h2 id="avg">Rp 0</h2>
-          <p>Rata-rata Omset</p>
-        </div>
-
-        <div class="stat">
-          <h2 id="targetCard">Rp 0</h2>
-          <p>Target Bulanan</p>
-        </div>
-
-        <div class="stat">
-          <h2 id="gapCard">Rp 0</h2>
-          <p>Sisa Target</p>
-        </div>
-
-        <div class="stat">
-
-          <h2 id="progressCard">0%</h2>
-          <p>Progress Target</p>
-
-          <div class="progress-bar">
-            <div id="progressFill" class="progress-fill"></div>
-          </div>
-
         </div>
 
       </div>
 
-      <div class="grid">
+      <div class="card">
 
-        <div class="card">
-
-          <h3 style="margin-bottom:20px;">
-            📊 Omset Harian
-          </h3>
-
-          <div class="chart-box">
-            <canvas id="chart"></canvas>
-          </div>
-
-        </div>
-
-        <div class="card">
-
-          <h3 style="margin-bottom:20px;">
-            👤 Per Sales
-          </h3>
-
-          <div class="chart-box">
-            <canvas id="chartSales"></canvas>
-          </div>
-
+        <div class="chart-box">
+          <canvas id="chartOmset"></canvas>
         </div>
 
       </div>
 
     </div>
 
-    <!-- INPUT -->
-
-    <div id="input" class="hidden">
+    <div id="inputPage" class="hidden">
 
       <div class="card">
 
-        <h3>Input Data Sales</h3>
+        <h3>Input Penjualan</h3>
 
-        <input id="toko" placeholder="Nama Toko">
+        <input id="toko" placeholder="Nama toko">
 
-        <input type="date" id="tanggal">
+        <input id="tanggal" type="date">
 
-        <input id="omset" type="number" placeholder="Nominal Omset">
+        <input id="omset" type="number" placeholder="Nominal omset">
 
-        <select id="inputSales"></select>
+        <select id="salesSelect"></select>
 
         <input type="file" id="notaFile" accept="image/*">
 
         <button onclick="scanNota()">
-          📷 Scan Nota
+          Scan Nota OCR
         </button>
 
-        <div id="scanStatus" class="small"></div>
+        <div id="ocrStatus" class="loading"></div>
 
-        <button onclick="simpan()">
-          💾 Simpan Data
-        </button>
-
-      </div>
-
-      <div class="card">
-
-        <h3>📄 OCR Rekap Multi Toko</h3>
-
-        <input type="file" id="rekapFile" accept="image/*">
-
-        <button onclick="scanRekap()">
-          🚀 Scan Rekap Sales
-        </button>
-
-        <div id="rekapStatus" class="small"></div>
-
-        <div id="previewBox"></div>
-
-        <button id="saveMassBtn" onclick="saveMassal()" class="hidden">
-          💾 Simpan Semua Data
+        <button onclick="saveData()">
+          Simpan Data
         </button>
 
       </div>
 
     </div>
 
-    <!-- LAPORAN -->
-
-    <div id="laporan" class="hidden">
+    <div id="laporanPage" class="hidden">
 
       <div class="card table-wrapper">
 
@@ -451,7 +304,7 @@ canvas{
             </tr>
           </thead>
 
-          <tbody id="table"></tbody>
+          <tbody id="tableBody"></tbody>
 
         </table>
 
@@ -465,17 +318,17 @@ canvas{
 
 <script>
 
-/* =========================
-   FIREBASE
-========================= */
+// =========================
+// FIREBASE CONFIG
+// =========================
 
 const firebaseConfig = {
-  apiKey: "AIzaSyC-dtWEgB6FcHeVqD5PfzC_AFZoZ0eXRtI",
-  authDomain: "gudang-app-pro.firebaseapp.com",
-  projectId: "gudang-app-pro",
-  storageBucket: "gudang-app-pro.firebasestorage.app",
-  messagingSenderId: "795043382766",
-  appId: "1:795043382766:web:9d908c909fb6a2774dfaff"
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_DOMAIN",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_BUCKET",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -483,59 +336,29 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const auth = firebase.auth();
 
-/* =========================
-   GLOBAL
-========================= */
+// =========================
+// GLOBAL STATE
+// =========================
 
-let data = [];
+let salesData = [];
 let salesList = [];
-let monthlyTarget = 0;
-let hasilOCR = [];
-
 let chartInstance;
-let chartSalesInstance;
 
-/* =========================
-   INIT
-========================= */
+// =========================
+// INITIAL
+// =========================
 
 window.onload = ()=>{
 
-  tanggal.value =
-  new Date()
+  tanggal.value = new Date()
   .toISOString()
-  .split("T")[0];
+  .split('T')[0];
 
 };
 
-/* =========================
-   MENU
-========================= */
-
-function showPage(id,el){
-
-  ["dashboard","input","laporan"]
-  .forEach(x=>{
-    document
-    .getElementById(x)
-    .classList.add("hidden");
-  });
-
-  document
-  .getElementById(id)
-  .classList.remove("hidden");
-
-  document
-  .querySelectorAll(".menu")
-  .forEach(m=>m.classList.remove("active"));
-
-  el.classList.add("active");
-
-}
-
-/* =========================
-   AUTH
-========================= */
+// =========================
+// AUTH
+// =========================
 
 async function login(){
 
@@ -563,7 +386,7 @@ async function register(){
       password.value
     );
 
-    alert("Register berhasil");
+    alert('Register berhasil');
 
   }catch(err){
 
@@ -581,168 +404,109 @@ auth.onAuthStateChanged(user=>{
 
   if(user){
 
-    loginPage.classList.add("hidden");
+    loginPage.classList.add('hidden');
+    app.classList.add('show');
 
-    app.classList.add("show");
-
-    render();
+    loadData();
 
   }else{
 
-    loginPage.classList.remove("hidden");
-
-    app.classList.remove("show");
+    loginPage.classList.remove('hidden');
+    app.classList.remove('show');
 
   }
 
 });
 
-/* =========================
-   SALES LIST
-========================= */
+// =========================
+// PAGE
+// =========================
 
-db.collection("salesList")
-.onSnapshot(async snap=>{
+function showPage(id,el){
 
-  salesList =
-  snap.docs.map(d=>d.data().nama);
-
-  if(salesList.length === 0){
-
-    await db.collection("salesList").add({
-      nama:"Sales 1"
-    });
-
-    await db.collection("salesList").add({
-      nama:"Sales 2"
-    });
-
-    return;
-
-  }
-
-  inputSales.innerHTML =
-  salesList.map(c=>`
-    <option value="${c}">
-      ${c}
-    </option>
-  `).join("");
-
-  filterCabang.innerHTML =
-  '<option value="">Semua Sales</option>' +
-  salesList.map(c=>`
-    <option value="${c}">
-      ${c}
-    </option>
-  `).join("");
-
-});
-
-/* =========================
-   TARGET
-========================= */
-
-db.collection("targets")
-.onSnapshot(snap=>{
-
-  let bulanSekarang =
-  new Date()
-  .toISOString()
-  .slice(0,7);
-
-  monthlyTarget = 0;
-
-  snap.docs.forEach(doc=>{
-
-    let d = doc.data();
-
-    if(d.bulan === bulanSekarang){
-
-      monthlyTarget =
-      Number(d.target || 0);
-
-    }
-
+  ['dashboard','inputPage','laporanPage']
+  .forEach(page=>{
+    document
+    .getElementById(page)
+    .classList.add('hidden');
   });
 
-  render();
+  document
+  .getElementById(id)
+  .classList.remove('hidden');
 
-});
+  document
+  .querySelectorAll('.menu')
+  .forEach(m=>m.classList.remove('active'));
 
-/* =========================
-   SALES DATA
-========================= */
+  el.classList.add('active');
 
-db.collection("sales")
-.onSnapshot(snap=>{
+}
 
-  data = snap.docs.map(d=>({
-    ...d.data(),
-    id:d.id
-  }));
-
-  render();
-
-});
-
-/* =========================
-   OCR NOTA
-========================= */
+// =========================
+// OCR
+// =========================
 
 async function scanNota(){
 
   const file = notaFile.files[0];
 
   if(!file){
-
-    alert("Pilih foto nota dulu");
+    alert('Pilih foto nota');
     return;
-
   }
 
-  scanStatus.innerText =
-  "⏳ Scanning nota...";
+  ocrStatus.innerText = 'Scanning OCR...';
 
   try{
 
-    const result =
-    await Tesseract.recognize(
+    const result = await Tesseract.recognize(
       file,
       'eng'
     );
 
     const text = result.data.text;
 
-    bacaNominal(text);
+    const nominal = extractNominal(text);
 
-    scanStatus.innerText =
-    "✅ Scan berhasil";
+    if(nominal > 0){
+
+      omset.value = nominal;
+
+      ocrStatus.innerText =
+      '✅ OCR berhasil membaca nominal';
+
+    }else{
+
+      ocrStatus.innerText =
+      '⚠️ Nominal tidak ditemukan';
+
+    }
 
   }catch(err){
 
-    console.log(err);
+    console.error(err);
 
-    scanStatus.innerText =
-    "❌ Scan gagal";
+    ocrStatus.innerText =
+    '❌ OCR gagal';
 
   }
 
 }
 
-function bacaNominal(text){
+function extractNominal(text){
 
-  let angka =
-  text.match(/\d+[.,]?\d+/g);
+  const numbers = text.match(/\d+[.,]?\d+/g);
 
-  if(!angka) return;
+  if(!numbers) return 0;
 
   let terbesar = 0;
 
-  angka.forEach(a=>{
+  numbers.forEach(num=>{
 
-    let val = Number(
-      a.replace(/\./g,'')
-       .replace(',','')
+    const val = Number(
+      num.replace(/\./g,'')
+         .replace(/,/g,'')
     );
 
     if(val > terbesar){
@@ -751,474 +515,106 @@ function bacaNominal(text){
 
   });
 
-  if(terbesar > 0){
-
-    omset.value = terbesar;
-
-  }
+  return terbesar;
 
 }
 
-/* =========================
-   OCR REKAP
-========================= */
-
-async function scanRekap(){
-
-  const file =
-  rekapFile.files[0];
-
-  if(!file){
-
-    alert("Pilih file rekap dulu");
-    return;
-
-  }
-
-  rekapStatus.innerText =
-  "⏳ Scanning rekap sales...";
-
-  previewBox.innerHTML = "";
-
-  saveMassBtn.classList.add("hidden");
-
-  try{
-
-    const result =
-    await Tesseract.recognize(
-      file,
-      'eng'
-    );
-
-    const text = result.data.text;
-
-    parseRekap(text);
-
-    if(hasilOCR.length > 0){
-
-      rekapStatus.innerText =
-      "✅ Rekap berhasil dibaca";
-
-    }else{
-
-      rekapStatus.innerText =
-      "⚠️ Data tidak ditemukan";
-
-    }
-
-  }catch(err){
-
-    console.log(err);
-
-    rekapStatus.innerText =
-    "❌ OCR gagal";
-
-  }
-
-}
-
-function parseRekap(text){
-
-  hasilOCR = [];
-
-  const lines = text.split('\n');
-
-  const blacklist = [
-    'period',
-    'periode',
-    'total',
-    'subtotal',
-    'cash',
-    'debit',
-    'credit',
-    'rekap',
-    'sales',
-    'tanggal'
-  ];
-
-  lines.forEach(line=>{
-
-    let clean = line.trim();
-
-    if(clean.length < 4) return;
-
-    // bersihkan karakter aneh
-    clean = clean
-      .replace(/[|[\]{}]/g,'')
-      .replace(/\s+/g,' ');
-
-    // cari semua angka
-    const nums =
-    clean.match(/\d[\d.,]*/g);
-
-    if(!nums) return;
-
-    // cari nominal terbesar
-    let terbesar = 0;
-
-    nums.forEach(n=>{
-
-      let val = Number(
-        n.replace(/\./g,'')
-         .replace(/,/g,'')
-      );
-
-      if(val > terbesar){
-        terbesar = val;
-      }
-
-    });
-
-    // minimal nominal
-    if(terbesar < 50000) return;
-
-    // hapus angka dari text
-    let toko = clean;
-
-    nums.forEach(n=>{
-      toko = toko.replace(n,'');
-    });
-
-    // bersihkan nama toko
-    toko = toko
-      .replace(/[:\-]/g,' ')
-      .replace(/[^a-zA-Z\s]/g,'')
-      .replace(/\s+/g,' ')
-      .trim();
-
-    // validasi nama toko
-    if(toko.length < 3) return;
-
-    if(toko.length > 30) return;
-
-    // blacklist
-    const lower = toko.toLowerCase();
-
-    for(let word of blacklist){
-
-      if(lower.includes(word)){
-        return;
-      }
-
-    }
-
-    // harus ada huruf
-    if(!/[a-zA-Z]/.test(toko)) return;
-
-    hasilOCR.push({
-      toko:toko,
-      omset:terbesar
-    });
-
-  });
-
-  // hapus duplikat
-  hasilOCR = hasilOCR.filter((item,index,self)=>
-
-    index === self.findIndex(t=>
-
-      t.toko === item.toko
-
-    )
-
-  );
-
-  renderPreview();
-
-}
-
-function renderPreview(){
-
-  if(hasilOCR.length === 0){
-
-    previewBox.innerHTML = `
-      <div class="small">
-        ❌ Tidak ada data yang terbaca
-      </div>
-    `;
-
-    saveMassBtn.classList.add("hidden");
-
-    return;
-
-  }
-
-  saveMassBtn.classList.remove("hidden");
-
-  previewBox.innerHTML = `
-
-    <table class="table">
-
-      <thead>
-        <tr>
-          <th>No</th>
-          <th>Toko</th>
-          <th>Omset</th>
-        </tr>
-      </thead>
-
-      <tbody>
-
-        ${hasilOCR.map((d,i)=>`
-
-          <tr>
-            <td>${i+1}</td>
-            <td>${d.toko}</td>
-            <td>${rp(d.omset)}</td>
-          </tr>
-
-        `).join('')}
-
-      </tbody>
-
-    </table>
-
-    <div class="small">
-      ✅ ${hasilOCR.length} data berhasil dibaca
-    </div>
-
-  `;
-
-}
-
-async function saveMassal(){
-
-  if(hasilOCR.length === 0){
-
-    alert("Tidak ada data");
-    return;
-
-  }
-
-  try{
-
-    for(const item of hasilOCR){
-
-      await db.collection("sales").add({
-
-        toko:item.toko,
-
-        tanggal:
-        new Date()
-        .toISOString()
-        .split('T')[0],
-
-        omset:item.omset,
-
-        sales:inputSales.value || "Sales 1"
-
-      });
-
-    }
-
-    alert("✅ Semua data berhasil disimpan");
-
-    hasilOCR = [];
-
-    previewBox.innerHTML = "";
-
-    saveMassBtn.classList.add("hidden");
-
-  }catch(err){
-
-    console.log(err);
-
-    alert("❌ Gagal simpan data");
-
-  }
-
-}
-
-/* =========================
-   SIMPAN
-========================= */
-
-async function simpan(){
+// =========================
+// DATABASE
+// =========================
+
+async function saveData(){
 
   if(
     !toko.value ||
     !tanggal.value ||
     !omset.value
   ){
-
-    alert("Lengkapi data");
+    alert('Lengkapi data');
     return;
-
   }
 
-  await db.collection("sales")
-  .add({
+  await db.collection('sales').add({
 
     toko:toko.value,
-
     tanggal:tanggal.value,
-
     omset:Number(omset.value),
-
-    sales:inputSales.value
+    sales:salesSelect.value
 
   });
 
-  toko.value = "";
-  omset.value = "";
+  toko.value = '';
+  omset.value = '';
 
-  alert("✅ Data berhasil disimpan");
+  alert('Data berhasil disimpan');
 
 }
 
-/* =========================
-   RENDER
-========================= */
+function loadData(){
 
-function render(){
+  db.collection('sales')
+  .onSnapshot(snap=>{
 
-  if(!filterCabang) return;
+    salesData = snap.docs.map(doc=>({
+      ...doc.data(),
+      id:doc.id
+    }));
 
-  let sales =
-  filterCabang.value;
-
-  let filtered =
-  data.filter(d=>{
-
-    if(
-      sales &&
-      d.sales !== sales
-    ) return false;
-
-    return true;
+    renderDashboard();
+    renderTable();
 
   });
 
-  filtered.sort((a,b)=>
-    new Date(b.tanggal)
-    - new Date(a.tanggal)
-  );
+}
 
-  let totalVal =
-  filtered.reduce((a,b)=>
-    a + b.omset
-  ,0);
+// =========================
+// RENDER
+// =========================
 
-  total.innerText = rp(totalVal);
+function renderDashboard(){
 
-  trx.innerText =
-  filtered.length;
+  const total = salesData
+  .reduce((a,b)=>a+b.omset,0);
 
-  avg.innerText = rp(
+  totalOmset.innerText = rp(total);
 
-    filtered.length
-    ? totalVal / filtered.length
-    : 0
+  totalTrx.innerText = salesData.length;
 
-  );
+  renderChart();
 
-  let gap =
-  monthlyTarget - totalVal;
+}
 
-  if(gap < 0) gap = 0;
-
-  let progress =
-  monthlyTarget
-  ? Math.round(
-      (totalVal / monthlyTarget)
-      * 100
-    )
-  : 0;
-
-  targetCard.innerText =
-  rp(monthlyTarget);
-
-  gapCard.innerText =
-  rp(gap);
-
-  progressCard.innerText =
-  progress + "%";
-
-  progressFill.className =
-  "progress-fill";
-
-  if(progress < 50){
-
-    progressFill.classList.add(
-      "progress-red"
-    );
-
-  }
-  else if(progress < 80){
-
-    progressFill.classList.add(
-      "progress-yellow"
-    );
-
-  }
-  else{
-
-    progressFill.classList.add(
-      "progress-green"
-    );
-
-  }
-
-  progressFill.style.width =
-  progress + "%";
-
-  /* ========= PER HARI ========= */
+function renderChart(){
 
   let perHari = {};
 
-  filtered.forEach(d=>{
+  salesData.forEach(item=>{
 
-    perHari[d.tanggal] =
-    (perHari[d.tanggal] || 0)
-    + d.omset;
+    perHari[item.tanggal] =
+    (perHari[item.tanggal] || 0)
+    + item.omset;
 
   });
 
-  let sortedTanggal =
-  Object.keys(perHari)
-  .sort((a,b)=>
-    new Date(a)
-    - new Date(b)
-  );
+  const labels = Object.keys(perHari);
+  const values = Object.values(perHari);
 
-  let sortedValues =
-  sortedTanggal.map(
-    t=>perHari[t]
-  );
+  if(chartInstance){
+    chartInstance.destroy();
+  }
 
-  if(chartInstance)
-  chartInstance.destroy();
-
-  chartInstance =
-  new Chart(chart,{
+  chartInstance = new Chart(chartOmset,{
 
     type:'bar',
 
     data:{
 
-      labels:sortedTanggal,
+      labels:labels,
 
       datasets:[{
 
-        data:sortedValues,
-
-        borderRadius:12,
-
-        backgroundColor:
-        sortedValues.map(v=>{
-
-          if(v >= 10000000)
-          return '#22c55e';
-
-          if(v >= 5000000)
-          return '#3b82f6';
-
-          if(v >= 1000000)
-          return '#f59e0b';
-
-          return '#ef4444';
-
-        })
+        data:values,
+        borderRadius:12
 
       }]
 
@@ -1228,95 +624,28 @@ function render(){
       responsive:true,
       maintainAspectRatio:false,
       plugins:{
-        legend:{
-          display:false
-        }
+        legend:{display:false}
       }
     }
 
   });
 
-  /* ========= PER SALES ========= */
+}
 
-  let perSales = {};
+function renderTable(){
 
-  filtered.forEach(d=>{
-
-    perSales[d.sales] =
-    (perSales[d.sales] || 0)
-    + d.omset;
-
-  });
-
-  if(chartSalesInstance)
-  chartSalesInstance.destroy();
-
-  chartSalesInstance =
-  new Chart(chartSales,{
-
-    type:'bar',
-
-    data:{
-
-      labels:Object.keys(perSales),
-
-      datasets:[{
-
-        data:Object.values(perSales),
-
-        borderRadius:12,
-
-        backgroundColor:
-        Object.values(perSales)
-        .map(v=>{
-
-          if(v >= 10000000)
-          return '#22c55e';
-
-          if(v >= 5000000)
-          return '#3b82f6';
-
-          if(v >= 1000000)
-          return '#f59e0b';
-
-          return '#ef4444';
-
-        })
-
-      }]
-
-    },
-
-    options:{
-      responsive:true,
-      maintainAspectRatio:false,
-      plugins:{
-        legend:{
-          display:false
-        }
-      }
-    }
-
-  });
-
-  /* ========= TABLE ========= */
-
-  table.innerHTML =
-  filtered.map(d=>`
+  tableBody.innerHTML = salesData.map(item=>`
 
     <tr>
 
-      <td>${d.tanggal}</td>
-
-      <td>${d.toko}</td>
-
-      <td>${d.sales}</td>
-
-      <td>${rp(d.omset)}</td>
+      <td>${item.tanggal}</td>
+      <td>${item.toko}</td>
+      <td>${item.sales}</td>
+      <td>${rp(item.omset)}</td>
 
       <td>
 
-        <button onclick="del('${d.id}')">
+        <button onclick="hapus('${item.id}')">
           Hapus
         </button>
 
@@ -1328,31 +657,36 @@ function render(){
 
 }
 
-/* =========================
-   DELETE
-========================= */
+// =========================
+// DELETE
+// =========================
 
-async function del(id){
+async function hapus(id){
 
-  await db.collection("sales")
+  const ok = confirm(
+    'Yakin ingin hapus data?'
+  );
+
+  if(!ok) return;
+
+  await db.collection('sales')
   .doc(id)
   .delete();
 
 }
 
-/* =========================
-   FORMAT RUPIAH
-========================= */
+// =========================
+// HELPER
+// =========================
 
-function rp(a){
+function rp(nominal){
 
-  return "Rp " +
-  Number(a || 0)
+  return 'Rp ' +
+  Number(nominal || 0)
   .toLocaleString('id-ID');
 
 }
 
 </script>
-
 </body>
 </html>
