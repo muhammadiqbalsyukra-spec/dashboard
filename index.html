@@ -712,22 +712,23 @@ async function scanRekap(){
 
       for(let i=0;i<data.length;i+=4){
 
-        // grayscale
-        let avg =
-        (
-          data[i] +
-          data[i+1] +
-          data[i+2]
-        ) / 3;
+  let avg =
+  (
+    data[i] +
+    data[i+1] +
+    data[i+2]
+  ) / 3;
 
-        // contrast boost
-        avg = avg > 140 ? 255 : 0;
+  // contrast natural
+  avg = avg * 1.25;
 
-        data[i] = avg;
-        data[i+1] = avg;
-        data[i+2] = avg;
+  if(avg > 255) avg = 255;
 
-      }
+  data[i] = avg;
+  data[i+1] = avg;
+  data[i+2] = avg;
+
+}
 
       ctx.putImageData(
         imageData,
