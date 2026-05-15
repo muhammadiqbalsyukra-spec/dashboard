@@ -837,7 +837,351 @@ app.classList.remove("show");
 });
 
 /* LANJUTKAN SCRIPT LAMA KAMU DI SINI TANPA DIUBAH */
+/* =========================
+LOAD DATA
+========================= */
 
+function loadData(){
+
+userSales()
+.onSnapshot(snapshot=>{
+
+data = snapshot.docs.map(doc=>({
+
+id:doc.id,
+...doc.data()
+
+}));
+
+loadSales();
+render();
+
+});
+
+db.collection("targets")
+.onSnapshot(snapshot=>{
+
+monthlyTarget = 0;
+
+const bulanSekarang = new Date()
+.toISOString()
+.slice(0,7);
+
+snapshot.docs.forEach(doc=>{
+
+const d = doc.data();
+
+if(d.bulan === bulanSekarang){
+
+monthlyTarget = Number(d.target || 0);
+
+}
+
+});
+
+render();
+
+});
+
+}
+
+/* =========================
+LOAD SALES
+========================= */
+
+function loadSales(){
+
+salesList = [
+...new Set(
+data.map(d=>(d.sales || "Sales 1").trim())
+)
+];
+
+if(salesList.length === 0){
+
+salesList = [
+"Sales 1",
+"Sales 2"
+];
+
+}
+
+inputSales.innerHTML =
+salesList.map(s=>`
+<option value="${s}">
+${s}
+</option>
+`).join("");
+
+filterCabang.innerHTML =
+`<option value="">Semua Sales</option>` +
+salesList.map(s=>`
+<option value="${s}">
+${s}
+</option>
+`).join("");
+
+}
+
+/* =========================
+SIMPAN
+========================= */
+
+async function simpan(){
+
+if(
+!toko.value ||
+!tanggal.value ||
+!omset.value
+){
+
+alert("Lengkapi data");
+return;
+
+}
+
+await userSales().add({
+
+toko:toko.value,
+tanggal:tanggal.value,
+omset:Number(omset.value),
+sales:inputSales.value
+
+});
+
+toko.value = "";
+omset.value = "";
+
+alert("Data berhasil disimpan");
+
+}
+
+/* =========================
+DELETE
+========================= */
+
+async function del(id){
+
+if(!confirm("Hapus data ini?"))
+return;
+
+await userSales()
+.doc(id)
+.delete();
+
+}
+
+/* =========================
+RENDER
+========================= */
+
+function render(){
+
+let sales = filterCabang.value;
+
+let filtered = data.filter(d=>{
+
+let salesData =
+(d.sales || "Sales 1").trim();
+
+if(sales && salesData !== sales)
+return false;
+
+return true;
+
+});
+
+filtered.sort((a,b)=>
+new Date(b.tanggal)
+- new Date(a.tanggal)
+);
+
+let totalVal = filtered.reduce((a,b)=>
+a + Number(b.omset || 0)
+,0);
+
+total.innerText = rp(totalVal);
+trx.innerText = filtered.length;
+
+avg.innerText = rp(
+filtered.length
+? totalVal / filtered.length
+: 0
+);
+
+let gap = monthlyTarget - totalVal;
+
+if(gap < 0)
+gap = 0;
+
+let progress = monthlyTarget
+? Math.round((totalVal / monthlyTarget) * 100)
+: 0;
+
+targetCard.innerText = rp(monthlyTarget);
+gapCard.innerText = rp(gap);
+progressCard.innerText = progress + "%";
+
+progressFill.className = "progress-fill";
+
+if(progress < 50){
+
+progressFill.classList.add("progress-red");
+
+}else if(progress < 80){
+
+progressFill.classList.add("progress-yellow");
+
+}else{
+
+progressFill.classList.add("progress-green");
+
+}
+
+progressFill.style.width =
+Math.min(progress,100) + "%";
+
+/* =========================
+CHART HARIAN
+========================= */
+
+let perHari = {};
+
+filtered.forEach(d=>{
+
+perHari[d.tanggal] =
+(perHari[d.tanggal] || 0)
++ Number(d.omset || 0);
+
+});
+
+let sortedTanggal = Object.keys(perHari)
+.sort((a,b)=>new Date(a)-new Date(b));
+
+let sortedValues =
+sortedTanggal.map(t=>perHari[t]);
+
+if(chartInstance)
+chartInstance.destroy();
+
+chartInstance = new Chart(chart,{
+
+type:'bar',
+
+data:{
+labels:sortedTanggal,
+datasets:[{
+data:sortedValues,
+borderRadius:12,
+backgroundColor:
+sortedValues.map(v=>{
+
+if(v >= 10000000)
+return '#22c55e';
+
+if(v >= 5000000)
+return '#3b82f6';
+
+if(v >= 1000000)
+return '#f59e0b';
+
+return '#ef4444';
+
+})
+}]
+},
+
+options:{
+responsive:true,
+maintainAspectRatio:false,
+plugins:{
+legend:{display:false}
+}
+}
+
+});
+
+/* =========================
+CHART SALES
+========================= */
+
+let perSales = {};
+
+filtered.forEach(d=>{
+
+let s =
+(d.sales || "Sales 1").trim();
+
+perSales[s] =
+(perSales[s] || 0)
++ Number(d.omset || 0);
+
+});
+
+if(chartSalesInstance)
+chartSalesInstance.destroy();
+
+chartSalesInstance =
+new Chart(chartSales,{
+
+type:'bar',
+
+data:{
+labels:Object.keys(perSales),
+datasets:[{
+data:Object.values(perSales),
+borderRadius:12,
+backgroundColor:
+Object.values(perSales)
+.map(v=>{
+
+if(v >= 10000000)
+return '#22c55e';
+
+if(v >= 5000000)
+return '#3b82f6';
+
+if(v >= 1000000)
+return '#f59e0b';
+
+return '#ef4444';
+
+})
+}]
+},
+
+options:{
+responsive:true,
+maintainAspectRatio:false,
+plugins:{
+legend:{display:false}
+}
+}
+
+});
+
+/* =========================
+TABLE
+========================= */
+
+table.innerHTML =
+filtered.map(d=>`
+
+<tr>
+<td>${d.tanggal}</td>
+<td>${d.toko}</td>
+<td>${d.sales}</td>
+<td>${rp(d.omset)}</td>
+<td>
+<button onclick="del('${d.id}')">
+Hapus
+</button>
+</td>
+</tr>
+
+`).join("");
+
+  }
 </script>
 
 </body>
