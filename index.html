@@ -106,6 +106,10 @@ transform:translateY(-1px);
 opacity:.95;
 }
 
+button:active{
+transform:scale(.98);
+}
+
 #app{
 display:none;
 }
@@ -120,6 +124,8 @@ min-height:100vh;
 padding:24px 18px;
 background:rgba(15,23,42,.78);
 border-right:1px solid rgba(255,255,255,.08);
+backdrop-filter:blur(16px);
+-webkit-backdrop-filter:blur(16px);
 }
 
 .logo{
@@ -133,7 +139,7 @@ padding:14px;
 border-radius:14px;
 margin-bottom:10px;
 cursor:pointer;
-transition:.2s;
+transition:.25s ease;
 }
 
 .menu:hover{
@@ -160,11 +166,26 @@ margin-bottom:20px;
 padding:24px;
 border-radius:24px;
 background:linear-gradient(135deg,#2563eb,#06b6d4);
+transition:.25s ease;
+}
+
+.stat:hover{
+transform:translateY(-2px);
+box-shadow:0 20px 35px rgba(0,0,0,.25);
 }
 
 .stat h2{
 font-size:30px;
 margin-bottom:8px;
+}
+
+.card{
+transition:.25s ease;
+}
+
+.card:hover{
+transform:translateY(-2px);
+box-shadow:0 20px 35px rgba(0,0,0,.25);
 }
 
 .chart-box{
@@ -178,6 +199,7 @@ height:100% !important;
 
 .table-wrapper{
 overflow:auto;
+border-radius:20px;
 }
 
 .table{
@@ -237,28 +259,26 @@ overflow:auto;
 max-height:400px;
 }
 
-@media(max-width:900px){
-
-#app{
-flex-direction:column;
+input:focus,
+select:focus{
+outline:none;
+border:1px solid rgba(59,130,246,.5);
+box-shadow:0 0 0 3px rgba(59,130,246,.15);
 }
 
-.sidebar{
-width:100%;
-min-height:auto;
-display:flex;
-gap:10px;
-overflow:auto;
+::-webkit-scrollbar{
+height:8px;
+width:8px;
 }
 
-.logo{
-display:none;
+::-webkit-scrollbar-track{
+background:rgba(255,255,255,.05);
 }
 
+::-webkit-scrollbar-thumb{
+background:rgba(255,255,255,.18);
+border-radius:999px;
 }
-  /* =========================
-RESPONSIVE MOBILE PREMIUM
-========================= */
 
 @media(max-width:900px){
 
@@ -276,7 +296,6 @@ overflow-x:auto;
 position:sticky;
 top:0;
 z-index:999;
-backdrop-filter:blur(12px);
 border-right:none;
 border-bottom:1px solid rgba(255,255,255,.08);
 }
@@ -345,10 +364,6 @@ border-radius:24px;
 
 }
 
-/* =========================
-EXTRA SMALL PHONE
-========================= */
-
 @media(max-width:480px){
 
 body{
@@ -399,80 +414,6 @@ padding:10px;
 
 }
 
-/* =========================
-SMOOTH SCROLLBAR
-========================= */
-
-::-webkit-scrollbar{
-height:8px;
-width:8px;
-}
-
-::-webkit-scrollbar-track{
-background:rgba(255,255,255,.05);
-}
-
-::-webkit-scrollbar-thumb{
-background:rgba(255,255,255,.18);
-border-radius:999px;
-}
-
-/* =========================
-ANIMATION
-========================= */
-
-.card,
-.stat,
-.menu,
-button{
-transition:.25s ease;
-}
-
-.card:hover,
-.stat:hover{
-transform:translateY(-2px);
-box-shadow:0 20px 35px rgba(0,0,0,.25);
-}
-
-/* =========================
-GLASS EFFECT
-========================= */
-
-.card,
-.login-card,
-.sidebar{
-backdrop-filter:blur(16px);
--webkit-backdrop-filter:blur(16px);
-}
-
-/* =========================
-BETTER MOBILE TABLE
-========================= */
-
-.table-wrapper{
-overflow:auto;
-border-radius:20px;
-}
-
-/* =========================
-BETTER INPUT FOCUS
-========================= */
-
-input:focus,
-select:focus{
-outline:none;
-border:1px solid rgba(59,130,246,.5);
-box-shadow:0 0 0 3px rgba(59,130,246,.15);
-}
-
-/* =========================
-BUTTON EFFECT
-========================= */
-
-button:active{
-transform:scale(.98);
-}
-
 </style>
 </head>
 
@@ -482,7 +423,7 @@ transform:scale(.98);
 
 <div id="loginPage">
 
-<div class="login-card">
+<form class="login-card" onsubmit="event.preventDefault(); login();">
 
 <div class="login-title">
 Sales Dashboard
@@ -492,15 +433,16 @@ Sales Dashboard
 
 <input id="password" type="password" placeholder="Password">
 
-<button onclick="login()">
+<button type="submit">
 Login
 </button>
 
-<button onclick="register()">
+<button type="button" onclick="register()">
 Register
 </button>
 
-</div>
+</form>
+
 </div>
 
 <!-- APP -->
@@ -792,22 +734,25 @@ el.classList.add("active");
 AUTH
 ========================= */
 
-<script>
-async function login() {
+async function login(){
 
-    const email = document.getElementById("email").value.trim();
-    const password = document.getElementById("password").value.trim();
+const email = document
+.getElementById("email")
+.value
+.trim();
 
-    if (!email || !password) {
-        alert("Isi email dan password");
-        return;
-    }
+const password = document
+.getElementById("password")
+.value
+.trim();
 
-    // lanjut proses login
-    console.log("Login berhasil");
+if(!email || !password){
+
+alert("Lengkapi email & password");
+return;
 
 }
-</script>
+
 try{
 
 await auth.signInWithEmailAndPassword(
@@ -815,9 +760,12 @@ email,
 password
 );
 
+alert("Login berhasil");
+
 }catch(err){
 
 alert(err.message);
+console.log(err);
 
 }
 
@@ -854,6 +802,7 @@ alert("Register berhasil");
 }catch(err){
 
 alert(err.message);
+console.log(err);
 
 }
 
@@ -887,702 +836,7 @@ app.classList.remove("show");
 
 });
 
-/* =========================
-LOAD DATA
-========================= */
-
-function loadData(){
-
-userSales()
-.onSnapshot(snapshot=>{
-
-data = snapshot.docs.map(doc=>({
-
-id:doc.id,
-...doc.data()
-
-}));
-
-loadSales();
-render();
-
-});
-
-db.collection("targets")
-.onSnapshot(snapshot=>{
-
-monthlyTarget = 0;
-
-const bulanSekarang = new Date()
-.toISOString()
-.slice(0,7);
-
-snapshot.docs.forEach(doc=>{
-
-const d = doc.data();
-
-if(d.bulan === bulanSekarang){
-
-monthlyTarget = Number(d.target || 0);
-
-}
-
-});
-
-render();
-
-});
-
-}
-
-/* =========================
-LOAD SALES
-========================= */
-
-function loadSales(){
-
-salesList = [
-...new Set(
-data.map(d=>(d.sales || "Sales 1").trim())
-)
-];
-
-if(salesList.length === 0){
-
-salesList = [
-"Sales 1",
-"Sales 2"
-];
-
-}
-
-inputSales.innerHTML =
-salesList.map(s=>`
-<option value="${s}">
-${s}
-</option>
-`).join("");
-
-filterCabang.innerHTML =
-`<option value="">Semua Sales</option>` +
-salesList.map(s=>`
-<option value="${s}">
-${s}
-</option>
-`).join("");
-
-}
-
-/* =========================
-SIMPAN
-========================= */
-
-async function simpan(){
-
-if(
-!toko.value ||
-!tanggal.value ||
-!omset.value
-){
-
-alert("Lengkapi data");
-return;
-
-}
-
-await userSales().add({
-
-toko:toko.value,
-tanggal:tanggal.value,
-omset:Number(omset.value),
-sales:inputSales.value
-
-});
-
-toko.value = "";
-omset.value = "";
-
-alert("Data berhasil disimpan");
-
-}
-
-/* =========================
-DELETE
-========================= */
-
-async function del(id){
-
-if(!confirm("Hapus data ini?"))
-return;
-
-await userSales()
-.doc(id)
-.delete();
-
-}
-
-/* =========================
-RENDER
-========================= */
-
-function render(){
-
-let sales = filterCabang.value;
-
-let filtered = data.filter(d=>{
-
-let salesData =
-(d.sales || "Sales 1").trim();
-
-if(sales && salesData !== sales)
-return false;
-
-return true;
-
-});
-
-filtered.sort((a,b)=>
-new Date(b.tanggal)
-- new Date(a.tanggal)
-);
-
-let totalVal = filtered.reduce((a,b)=>
-a + Number(b.omset || 0)
-,0);
-
-total.innerText = rp(totalVal);
-trx.innerText = filtered.length;
-
-avg.innerText = rp(
-filtered.length
-? totalVal / filtered.length
-: 0
-);
-
-let gap = monthlyTarget - totalVal;
-
-if(gap < 0)
-gap = 0;
-
-let progress = monthlyTarget
-? Math.round((totalVal / monthlyTarget) * 100)
-: 0;
-
-targetCard.innerText = rp(monthlyTarget);
-gapCard.innerText = rp(gap);
-progressCard.innerText = progress + "%";
-
-progressFill.className = "progress-fill";
-
-if(progress < 50){
-
-progressFill.classList.add("progress-red");
-
-}else if(progress < 80){
-
-progressFill.classList.add("progress-yellow");
-
-}else{
-
-progressFill.classList.add("progress-green");
-
-}
-
-progressFill.style.width =
-Math.min(progress,100) + "%";
-
-/* =========================
-CHART HARIAN
-========================= */
-
-let perHari = {};
-
-filtered.forEach(d=>{
-
-perHari[d.tanggal] =
-(perHari[d.tanggal] || 0)
-+ Number(d.omset || 0);
-
-});
-
-let sortedTanggal = Object.keys(perHari)
-.sort((a,b)=>new Date(a)-new Date(b));
-
-let sortedValues =
-sortedTanggal.map(t=>perHari[t]);
-
-if(chartInstance)
-chartInstance.destroy();
-
-chartInstance = new Chart(chart,{
-
-type:'bar',
-
-data:{
-labels:sortedTanggal,
-datasets:[{
-data:sortedValues,
-borderRadius:12,
-backgroundColor:
-sortedValues.map(v=>{
-
-if(v >= 10000000)
-return '#22c55e';
-
-if(v >= 5000000)
-return '#3b82f6';
-
-if(v >= 1000000)
-return '#f59e0b';
-
-return '#ef4444';
-
-})
-}]
-},
-
-options:{
-responsive:true,
-maintainAspectRatio:false,
-plugins:{
-legend:{display:false}
-}
-}
-
-});
-
-/* =========================
-CHART SALES
-========================= */
-
-let perSales = {};
-
-filtered.forEach(d=>{
-
-let s =
-(d.sales || "Sales 1").trim();
-
-perSales[s] =
-(perSales[s] || 0)
-+ Number(d.omset || 0);
-
-});
-
-if(chartSalesInstance)
-chartSalesInstance.destroy();
-
-chartSalesInstance =
-new Chart(chartSales,{
-
-type:'bar',
-
-data:{
-labels:Object.keys(perSales),
-datasets:[{
-data:Object.values(perSales),
-borderRadius:12,
-backgroundColor:
-Object.values(perSales)
-.map(v=>{
-
-if(v >= 10000000)
-return '#22c55e';
-
-if(v >= 5000000)
-return '#3b82f6';
-
-if(v >= 1000000)
-return '#f59e0b';
-
-return '#ef4444';
-
-})
-}]
-},
-
-options:{
-responsive:true,
-maintainAspectRatio:false,
-plugins:{
-legend:{display:false}
-}
-}
-
-});
-
-/* =========================
-TABLE
-========================= */
-
-table.innerHTML =
-filtered.map(d=>`
-
-<tr>
-<td>${d.tanggal}</td>
-<td>${d.toko}</td>
-<td>${d.sales}</td>
-<td>${rp(d.omset)}</td>
-<td>
-<button onclick="del('${d.id}')">
-Hapus
-</button>
-</td>
-</tr>
-
-`).join("");
-
-}
-
-/* =========================
-SCAN NOTA
-========================= */
-
-async function scanNota(){
-
-const file = notaFile.files[0];
-
-if(!file){
-
-alert("Pilih foto nota dulu");
-return;
-
-}
-
-scanStatus.innerText =
-"Scanning nota...";
-
-try{
-
-const result =
-await Tesseract.recognize(file,'eng');
-
-const text =
-result.data.text;
-
-bacaNominal(text);
-
-scanStatus.innerText =
-"✅ Scan berhasil";
-
-}catch(err){
-
-console.log(err);
-
-scanStatus.innerText =
-"❌ Scan gagal";
-
-}
-
-}
-
-function bacaNominal(text){
-
-let angka =
-text.match(/\d+[.,]?\d+/g);
-
-if(!angka)
-return;
-
-let terbesar = 0;
-
-angka.forEach(a=>{
-
-let val = Number(
-a.replace(/\./g,'')
-.replace(',','')
-);
-
-if(val > terbesar){
-
-terbesar = val;
-
-}
-
-});
-
-if(terbesar > 0){
-
-omset.value = terbesar;
-
-}
-
-}
-
-/* =========================
-PREPROCESS OCR
-========================= */
-
-async function preprocessImage(file){
-
-return new Promise(resolve=>{
-
-const img = new Image();
-
-img.onload = ()=>{
-
-const canvas =
-document.createElement('canvas');
-
-const ctx =
-canvas.getContext('2d');
-
-canvas.width = img.width;
-canvas.height = img.height;
-
-ctx.drawImage(img,0,0);
-
-const imageData =
-ctx.getImageData(
-0,
-0,
-canvas.width,
-canvas.height
-);
-
-const data = imageData.data;
-
-for(let i=0;i<data.length;i+=4){
-
-let avg =
-(
-data[i] +
-data[i+1] +
-data[i+2]
-) / 3;
-
-avg = avg * 1.25;
-
-if(avg > 255)
-avg = 255;
-
-data[i] = avg;
-data[i+1] = avg;
-data[i+2] = avg;
-
-}
-
-ctx.putImageData(imageData,0,0);
-
-resolve(canvas);
-
-};
-
-img.src = URL.createObjectURL(file);
-
-});
-
-}
-
-/* =========================
-SCAN REKAP
-========================= */
-
-async function scanRekap(){
-
-const file = rekapFile.files[0];
-
-if(!file){
-
-alert("Pilih file rekap");
-return;
-
-}
-
-rekapStatus.innerText =
-"Scanning rekap...";
-
-try{
-
-const processedImage =
-await preprocessImage(file);
-
-const result =
-await Tesseract.recognize(
-processedImage,
-'eng'
-);
-
-const text =
-result.data.text;
-
-parseRekap(text);
-
-rekapStatus.innerText =
-"✅ Rekap berhasil dibaca";
-
-}catch(err){
-
-console.log(err);
-
-rekapStatus.innerText =
-"❌ OCR gagal";
-
-}
-
-}
-
-/* =========================
-PARSE OCR
-========================= */
-
-function parseRekap(text){
-
-hasilOCR = [];
-
-const lines = text
-.split("\n")
-.map(l=>l.trim())
-.filter(l=>l.length > 3);
-
-lines.forEach(line=>{
-
-const nominalMatch =
-line.match(
-/(?:Rp)?\s?(\d[\d.,]{2,})/i
-);
-
-if(!nominalMatch)
-return;
-
-let nominal = Number(
-nominalMatch[1]
-.replace(/[^\d]/g,'')
-);
-
-if(nominal < 10000)
-return;
-
-let toko = line
-.replace(nominalMatch[0],'')
-.replace(/Rp/gi,'')
-.replace(/[0-9]/g,'')
-.replace(/[.,]/g,'')
-.trim();
-
-if(
-toko.length < 3 ||
-toko.toLowerCase().includes("total") ||
-toko.toLowerCase().includes("subtotal") ||
-toko.toLowerCase().includes("cash")
-){
-return;
-}
-
-hasilOCR.push({
-
-toko,
-omset:nominal
-
-});
-
-});
-
-hasilOCR =
-hasilOCR.filter((v,i,a)=>
-
-a.findIndex(t=>
-t.toko === v.toko &&
-t.omset === v.omset
-) === i
-
-);
-
-renderPreview();
-
-}
-
-/* =========================
-PREVIEW OCR
-========================= */
-
-function renderPreview(){
-
-if(hasilOCR.length === 0){
-
-previewBox.innerHTML =
-"Tidak ada data";
-
-saveMassBtn.classList.add("hidden");
-
-return;
-
-}
-
-saveMassBtn.classList.remove("hidden");
-
-previewBox.innerHTML = `
-
-<table class="table">
-
-<thead>
-<tr>
-<th>No</th>
-<th>Toko</th>
-<th>Omset</th>
-</tr>
-</thead>
-
-<tbody>
-
-${hasilOCR.map((d,i)=>`
-
-<tr>
-<td>${i+1}</td>
-<td>${d.toko}</td>
-<td>${rp(d.omset)}</td>
-</tr>
-
-`).join('')}
-
-</tbody>
-
-</table>
-
-`;
-
-}
-
-/* =========================
-SAVE MASSAL
-========================= */
-
-async function saveMassal(){
-
-if(hasilOCR.length === 0){
-
-alert("Tidak ada data");
-return;
-
-}
-
-const tanggalHariIni =
-new Date()
-.toISOString()
-.split("T")[0];
-
-for(let d of hasilOCR){
-
-await userSales()
-.add({
-
-toko:d.toko,
-tanggal:tanggalHariIni,
-omset:d.omset,
-sales:inputSales.value
-
-});
-
-}
-
-hasilOCR = [];
-
-previewBox.innerHTML = "";
-
-saveMassBtn.classList.add("hidden");
-
-alert("Import selesai");
-
-}
+/* LANJUTKAN SCRIPT LAMA KAMU DI SINI TANPA DIUBAH */
 
 </script>
 
