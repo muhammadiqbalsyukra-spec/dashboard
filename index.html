@@ -454,17 +454,60 @@ app.classList.remove("show");
 
 function loadData(){
 
-userSales().onSnapshot(snapshot=>{
+if(!currentUser) return;
 
-data = snapshot.docs.map(doc=>({
+/* DATA USER */
+
+userSales().onSnapshot(async snapshot=>{
+
+let userData = snapshot.docs.map(doc=>({
 id:doc.id,
 ...doc.data()
 }));
+
+/* DATA LAMA */
+
+const oldSnapshot =
+await db.collection("sales").get();
+
+let oldData = oldSnapshot.docs.map(doc=>({
+id:doc.id,
+...doc.data()
+}));
+
+/* GABUNGKAN */
+
+data = [...oldData, ...userData];
+
+/* HAPUS DUPLIKAT */
+
+const unique = [];
+
+const map = new Map();
+
+data.forEach(item=>{
+
+const key =
+item.tanggal +
+item.toko +
+item.omset;
+
+if(!map.has(key)){
+
+map.set(key,true);
+unique.push(item);
+
+}
+
+});
+
+data = unique;
 
 loadSales();
 render();
 
 });
+
 }
 
 function loadSales(){
