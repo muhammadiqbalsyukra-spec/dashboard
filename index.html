@@ -1,21 +1,8 @@
-<!DOCTYPE html>
-<html lang="id">
+<!DOCTYPE html><html lang="id">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Sales Dashboard Pro</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-
-<style>
-
+<title>Sales Dashboard Pro</title><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"><script src="https://cdn.jsdelivr.net/npm/chart.js"></script><script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script><script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script><script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script><script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script><style>
 *{
 margin:0;
 padding:0;
@@ -108,10 +95,6 @@ transition:.2s;
 button:hover{
 transform:translateY(-1px);
 opacity:.95;
-}
-
-button:active{
-transform:scale(.98);
 }
 
 #app{
@@ -207,10 +190,6 @@ text-align:left;
 border-bottom:1px solid rgba(255,255,255,.06);
 }
 
-.table th{
-background:rgba(255,255,255,.05);
-}
-
 .progress-bar{
 width:100%;
 height:12px;
@@ -227,17 +206,9 @@ transition:1s;
 border-radius:999px;
 }
 
-.progress-red{
-background:#ef4444;
-}
-
-.progress-yellow{
-background:#f59e0b;
-}
-
-.progress-green{
-background:#22c55e;
-}
+.progress-red{background:#ef4444;}
+.progress-yellow{background:#f59e0b;}
+.progress-green{background:#22c55e;}
 
 .small{
 margin-top:12px;
@@ -250,257 +221,49 @@ margin-top:20px;
 overflow:auto;
 max-height:400px;
 }
-
-@media(max-width:900px){
-
-#app{
-flex-direction:column;
-}
-
-.sidebar{
-width:100%;
-min-height:auto;
-padding:12px;
-display:flex;
-gap:10px;
-overflow-x:auto;
-position:sticky;
-top:0;
-z-index:999;
-border-right:none;
-border-bottom:1px solid rgba(255,255,255,.08);
-}
-
-.logo{
-display:none;
-}
-
-.menu{
-min-width:max-content;
-margin-bottom:0;
-}
-
-.main{
-padding:14px;
-}
-
-.grid{
-grid-template-columns:1fr;
-}
-
-.chart-box{
-height:250px;
-}
-
-}
-
-</style>
-</head>
-
-<body>
-
-<!-- LOGIN -->
-
-<div id="loginPage">
-
-<form class="login-card" onsubmit="event.preventDefault(); login();">
-
-<div class="login-title">
-Sales Dashboard
-</div>
-
-<input id="email" type="email" placeholder="Email">
-
-<input id="password" type="password" placeholder="Password">
-
-<button type="submit">
-Login
-</button>
-
-<button type="button" onclick="register()">
-Register
-</button>
+</style></head><body><div id="loginPage">
+<form class="login-card" onsubmit="event.preventDefault(); login();"><div class="login-title">Sales Dashboard</div><input id="email" type="email" placeholder="Email">
+<input id="password" type="password" placeholder="Password"><button type="submit">Login</button> <button type="button" onclick="register()">Register</button>
 
 </form>
-
-</div>
-
-<!-- APP -->
-
-<div id="app">
-
-<!-- SIDEBAR -->
-
-<div class="sidebar">
-
-<div class="logo">
-IQBAL
-</div>
-
-<div class="menu active" onclick="showPage('dashboard',this)">
-📊 Dashboard
-</div>
-
-<div class="menu" onclick="showPage('input',this)">
-➕ Input
-</div>
-
-<div class="menu" onclick="showPage('laporan',this)">
-📑 Laporan
-</div>
-
-<div class="menu" onclick="logout()">
-🚪 Logout
-</div>
-
-</div>
-
-<!-- MAIN -->
-
-<div class="main">
-
-<!-- DASHBOARD -->
-
-<div id="dashboard">
-
-<div class="card" style="margin-bottom:20px;">
+</div><div id="app"><div class="sidebar">
+<div class="logo">IQBAL</div><div class="menu active" onclick="showPage('dashboard',this)">📊 Dashboard</div>
+<div class="menu" onclick="showPage('input',this)">➕ Input</div>
+<div class="menu" onclick="showPage('laporan',this)">📑 Laporan</div>
+<div class="menu" onclick="logout()">🚪 Logout</div></div><div class="main"><div id="dashboard"><div class="card" style="margin-bottom:20px;">
 <select id="filterCabang" onchange="render()"></select>
-</div>
-
-<div class="grid">
-
-<div class="stat">
-<h2 id="total">Rp 0</h2>
-<p>Total Omset</p>
-</div>
-
-<div class="stat">
-<h2 id="trx">0</h2>
-<p>Total Transaksi</p>
-</div>
-
-<div class="stat">
-<h2 id="avg">Rp 0</h2>
-<p>Rata-rata Omset</p>
-</div>
-
-<div class="stat">
-<h2 id="targetCard">Rp 0</h2>
-<p>Target Bulanan</p>
-</div>
-
-<div class="stat">
-<h2 id="gapCard">Rp 0</h2>
-<p>Sisa Target</p>
-</div>
-
-<div class="stat">
-
+</div><div class="grid">
+<div class="stat"><h2 id="total">Rp 0</h2><p>Total Omset</p></div>
+<div class="stat"><h2 id="trx">0</h2><p>Total Transaksi</p></div>
+<div class="stat"><h2 id="avg">Rp 0</h2><p>Rata-rata Omset</p></div>
+<div class="stat"><h2 id="targetCard">Rp 0</h2><p>Target Bulanan</p></div>
+<div class="stat"><h2 id="gapCard">Rp 0</h2><p>Sisa Target</p></div><div class="stat">
 <h2 id="progressCard">0%</h2>
 <p>Progress Target</p>
-
 <div class="progress-bar">
 <div id="progressFill" class="progress-fill"></div>
 </div>
-
 </div>
-
-</div>
-
-<div class="grid">
-
+</div><div class="grid">
 <div class="card">
-
-<h3 style="margin-bottom:20px;">
-📊 Omset Harian
-</h3>
-
-<div class="chart-box">
-<canvas id="chart"></canvas>
+<h3 style="margin-bottom:20px;">📊 Omset Harian</h3>
+<div class="chart-box"><canvas id="chart"></canvas></div>
+</div><div class="card">
+<h3 style="margin-bottom:20px;">👤 Per Sales</h3>
+<div class="chart-box"><canvas id="chartSales"></canvas></div>
 </div>
-
 </div>
-
-<div class="card">
-
-<h3 style="margin-bottom:20px;">
-👤 Per Sales
-</h3>
-
-<div class="chart-box">
-<canvas id="chartSales"></canvas>
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-<!-- INPUT -->
-
-<div id="input" class="hidden">
-
-<div class="card" style="margin-bottom:20px;">
-
-<h3 style="margin-bottom:20px;">
-Input Data Sales
-</h3>
-
-<input id="toko" placeholder="Nama Toko">
-
+</div><div id="input" class="hidden"><div class="card" style="margin-bottom:20px;">
+<h3 style="margin-bottom:20px;">Input Data Sales</h3><input id="toko" placeholder="Nama Toko">
 <input type="date" id="tanggal">
-
 <input id="omset" type="number" placeholder="Nominal Omset">
+<select id="inputSales"></select><input type="file" id="notaFile" accept="image/*">
+<button onclick="scanNota()">📷 Scan Nota</button>
+<div id="scanStatus" class="small"></div><button onclick="simpan()">💾 Simpan Data</button>
 
-<select id="inputSales"></select>
-
-<input type="file" id="notaFile" accept="image/*">
-
-<button onclick="scanNota()">
-📷 Scan Nota
-</button>
-
-<div id="scanStatus" class="small"></div>
-
-<button onclick="simpan()">
-💾 Simpan Data
-</button>
-
-</div>
-
-<div class="card">
-
-<h3 style="margin-bottom:20px;">
-📄 OCR Rekap Multi Toko
-</h3>
-
-<input type="file" id="rekapFile" accept="image/*">
-
-<button onclick="scanRekap()">
-🚀 Scan Rekap Sales
-</button>
-
-<div id="rekapStatus" class="small"></div>
-
-<div id="previewBox"></div>
-
-<button id="saveMassBtn" class="hidden" onclick="saveMassal()">
-💾 Simpan Semua Data
-</button>
-
-</div>
-
-</div>
-
-<!-- LAPORAN -->
-
-<div id="laporan" class="hidden">
-
+</div></div><div id="laporan" class="hidden">
 <div class="card table-wrapper">
-
 <table class="table">
-
 <thead>
 <tr>
 <th>Tanggal</th>
@@ -510,23 +273,11 @@ Input Data Sales
 <th>Aksi</th>
 </tr>
 </thead>
-
 <tbody id="table"></tbody>
-
 </table>
-
 </div>
-
-</div>
-
-</div>
-</div>
-
-<script>
-
-/* =========================
-FIREBASE
-========================= */
+</div></div>
+</div><script>
 
 const firebaseConfig = {
 apiKey: "AIzaSyC-dtWEgB6FcHeVqD5PfzC_AFZoZ0eXRtI",
@@ -542,203 +293,151 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-/* =========================
-GLOBAL
-========================= */
-
 let data = [];
 let salesList = [];
-let hasilOCR = [];
 let monthlyTarget = 0;
+let currentUser = null;
 
 let chartInstance = null;
 let chartSalesInstance = null;
 
-let currentUser = null;
-
-/* =========================
-INIT
-========================= */
-
-window.onload = () => {
-
+window.onload = ()=>{
 document.getElementById("tanggal").value =
 new Date().toISOString().split("T")[0];
-
 };
-
-/* =========================
-UTILS
-========================= */
 
 function rp(n){
 return "Rp " + Number(n || 0).toLocaleString("id-ID");
 }
 
 function userSales(){
-
 if(!currentUser) return null;
 
 return db
 .collection("users")
 .doc(currentUser.uid)
 .collection("sales");
-
 }
-
-function userTargets(){
-
-if(!currentUser) return null;
-
-return db
-.collection("users")
-.doc(currentUser.uid)
-.collection("targets");
-
-}
-
-/* =========================
-MENU
-========================= */
 
 function showPage(id,el){
 
 ["dashboard","input","laporan"]
 .forEach(page=>{
-
-document
-.getElementById(page)
-.classList.add("hidden");
-
+document.getElementById(page).classList.add("hidden");
 });
 
-document
-.getElementById(id)
-.classList.remove("hidden");
+document.getElementById(id).classList.remove("hidden");
 
-document
-.querySelectorAll(".menu")
+document.querySelectorAll(".menu")
 .forEach(m=>m.classList.remove("active"));
 
 el.classList.add("active");
-
 }
-
-/* =========================
-AUTH
-========================= */
 
 async function login(){
 
-const email = document
-.getElementById("email")
-.value
-.trim();
-
-const password = document
-.getElementById("password")
-.value
-.trim();
+const email = email.value?.trim() || document.getElementById("email").value.trim();
+const password = document.getElementById("password").value.trim();
 
 if(!email || !password){
-
 alert("Lengkapi email & password");
 return;
-
 }
 
 try{
-
-await auth.signInWithEmailAndPassword(
-email,
-password
-);
-
+await auth.signInWithEmailAndPassword(email,password);
 }catch(err){
-
 alert(err.message);
-console.log(err);
-
 }
-
 }
 
 async function register(){
 
-const email = document
-.getElementById("email")
-.value
-.trim();
-
-const password = document
-.getElementById("password")
-.value
-.trim();
-
-if(!email || !password){
-
-alert("Lengkapi email & password");
-return;
-
-}
+const email = document.getElementById("email").value.trim();
+const password = document.getElementById("password").value.trim();
 
 if(password.length < 6){
-
 alert("Password minimal 6 karakter");
 return;
-
 }
 
 try{
-
 const userCredential =
-await auth.createUserWithEmailAndPassword(
-email,
-password
-);
+await auth.createUserWithEmailAndPassword(email,password);
 
-await db
-.collection("users")
+await db.collection("users")
 .doc(userCredential.user.uid)
 .set({
-email:email,
+email,
 createdAt:new Date()
 });
 
 alert("Register berhasil");
 
 }catch(err){
-
 alert(err.message);
-console.log(err);
-
 }
-
 }
 
 function logout(){
-
 auth.signOut();
+}
+
+async function migrateOldData(){
+
+if(!currentUser) return;
+
+try{
+
+const migratedCheck =
+await db
+.collection("users")
+.doc(currentUser.uid)
+.collection("sales")
+.where("migrated","==",true)
+.limit(1)
+.get();
+
+if(!migratedCheck.empty) return;
+
+const oldSnapshot =
+await db.collection("sales").get();
+
+for(const doc of oldSnapshot.docs){
+
+const d = doc.data();
+
+await userSales().add({
+
+toko:d.toko || "",
+tanggal:d.tanggal || "",
+omset:Number(d.omset || 0),
+sales:d.sales || "Sales 1",
+uid:currentUser.uid,
+migrated:true,
+createdAt:new Date()
+
+});
 
 }
 
-/* =========================
-AUTH STATE
-========================= */
+console.log("Migrasi selesai");
 
-auth.onAuthStateChanged(user=>{
+}catch(err){
+console.log(err);
+}
+}
+
+auth.onAuthStateChanged(async user=>{
 
 if(user){
 
 currentUser = user;
 
-document
-.getElementById("loginPage")
-.classList.add("hidden");
+loginPage.classList.add("hidden");
+app.classList.add("show");
 
-document
-.getElementById("app")
-.classList.add("show");
+await migrateOldData();
 
 loadData();
 
@@ -746,556 +445,214 @@ loadData();
 
 currentUser = null;
 
-document
-.getElementById("loginPage")
-.classList.remove("hidden");
-
-document
-.getElementById("app")
-.classList.remove("show");
+loginPage.classList.remove("hidden");
+app.classList.remove("show");
 
 }
 
 });
 
-/* =========================
-LOAD DATA
-========================= */
-
 function loadData(){
 
-if(!currentUser) return;
-
-userSales()
-.onSnapshot(snapshot=>{
+userSales().onSnapshot(snapshot=>{
 
 data = snapshot.docs.map(doc=>({
-
 id:doc.id,
 ...doc.data()
-
 }));
 
 loadSales();
 render();
 
 });
-
-userTargets()
-.onSnapshot(snapshot=>{
-
-monthlyTarget = 0;
-
-const bulanSekarang = new Date()
-.toISOString()
-.slice(0,7);
-
-snapshot.docs.forEach(doc=>{
-
-const d = doc.data();
-
-if(d.bulan === bulanSekarang){
-
-monthlyTarget = Number(d.target || 0);
-
 }
-
-});
-
-render();
-
-});
-
-}
-
-/* =========================
-LOAD SALES
-========================= */
 
 function loadSales(){
 
 salesList = [
-...new Set(
-data.map(d=>(d.sales || "Sales 1").trim())
-)
+...new Set(data.map(d=>(d.sales || "Sales 1").trim()))
 ];
 
 if(salesList.length === 0){
-
-salesList = [
-"Sales 1",
-"Sales 2"
-];
-
+salesList = ["Sales 1","Sales 2"];
 }
 
-document.getElementById("inputSales").innerHTML =
-salesList.map(s=>`
-<option value="${s}">
-${s}
-</option>
-`).join("");
+inputSales.innerHTML =
+salesList.map(s=>`<option value="${s}">${s}</option>`).join("");
 
-document.getElementById("filterCabang").innerHTML =
+filterCabang.innerHTML =
 `<option value="">Semua Sales</option>` +
-salesList.map(s=>`
-<option value="${s}">
-${s}
-</option>
-`).join("");
-
+salesList.map(s=>`<option value="${s}">${s}</option>`).join("");
 }
-
-/* =========================
-SIMPAN
-========================= */
 
 async function simpan(){
 
-if(
-!toko.value ||
-!tanggal.value ||
-!omset.value
-){
-
+if(!toko.value || !tanggal.value || !omset.value){
 alert("Lengkapi data");
 return;
-
 }
 
 await userSales().add({
-
 toko:toko.value,
 tanggal:tanggal.value,
 omset:Number(omset.value),
 sales:inputSales.value,
 uid:currentUser.uid,
 createdAt:new Date()
-
 });
-
-toko.value = "";
-omset.value = "";
 
 alert("Data berhasil disimpan");
 
+toko.value = "";
+omset.value = "";
 }
-
-/* =========================
-DELETE
-========================= */
 
 async function del(id){
-
-if(!confirm("Hapus data ini?"))
-return;
-
-await userSales()
-.doc(id)
-.delete();
-
+if(!confirm("Hapus data ini?")) return;
+await userSales().doc(id).delete();
 }
-
-/* =========================
-OCR NOTA
-========================= */
 
 async function scanNota(){
 
-const file =
-document.getElementById("notaFile").files[0];
+const file = notaFile.files[0];
 
 if(!file){
-
 alert("Pilih gambar nota");
 return;
-
 }
 
 scanStatus.innerHTML = "Scanning OCR...";
 
 try{
 
-const result =
-await Tesseract.recognize(
-file,
-'ind'
-);
+const result = await Tesseract.recognize(file,'ind');
 
-const text =
-result.data.text;
-
-let angka =
-text.match(/\d[\d.,]+/g);
+const text = result.data.text;
+let angka = text.match(/\d[\d.,]+/g);
 
 if(angka && angka.length){
 
 let terbesar = 0;
 
 angka.forEach(a=>{
-
-let num = Number(
-a.replace(/[^\d]/g,'')
-);
-
-if(num > terbesar)
-terbesar = num;
-
+const num = Number(a.replace(/[^\d]/g,''));
+if(num > terbesar) terbesar = num;
 });
 
 omset.value = terbesar;
-
 }
 
-scanStatus.innerHTML =
-"✅ OCR berhasil";
+scanStatus.innerHTML = "✅ OCR berhasil";
 
 }catch(err){
-
-console.log(err);
-
-scanStatus.innerHTML =
-"❌ OCR gagal";
-
+scanStatus.innerHTML = "❌ OCR gagal";
 }
-
 }
-
-/* =========================
-OCR REKAP
-========================= */
-
-async function scanRekap(){
-
-const file =
-document.getElementById("rekapFile").files[0];
-
-if(!file){
-
-alert("Pilih gambar rekap");
-return;
-
-}
-
-rekapStatus.innerHTML =
-"Scanning rekap...";
-
-try{
-
-const result =
-await Tesseract.recognize(
-file,
-'ind'
-);
-
-const text =
-result.data.text;
-
-const lines =
-text.split("\n");
-
-hasilOCR = [];
-
-lines.forEach(line=>{
-
-let angka =
-line.match(/\d[\d.,]+/g);
-
-if(angka){
-
-let nominal =
-Number(
-angka[angka.length-1]
-.replace(/[^\d]/g,'')
-);
-
-if(nominal > 0){
-
-hasilOCR.push({
-
-tanggal:new Date()
-.toISOString()
-.split("T")[0],
-
-toko:"OCR Store",
-
-sales:"Sales 1",
-
-omset:nominal
-
-});
-
-}
-
-}
-
-});
-
-previewBox.innerHTML =
-hasilOCR.map(d=>`
-
-<div style="
-padding:12px;
-margin-bottom:10px;
-border-radius:14px;
-background:rgba(255,255,255,.06);
-">
-
-${d.toko} - ${rp(d.omset)}
-
-</div>
-
-`).join("");
-
-saveMassBtn.classList.remove("hidden");
-
-rekapStatus.innerHTML =
-"✅ Rekap berhasil dibaca";
-
-}catch(err){
-
-console.log(err);
-
-rekapStatus.innerHTML =
-"❌ OCR gagal";
-
-}
-
-}
-
-/* =========================
-SAVE MASSAL
-========================= */
-
-async function saveMassal(){
-
-if(!hasilOCR.length){
-
-alert("Data kosong");
-return;
-
-}
-
-for(const d of hasilOCR){
-
-await userSales().add({
-...d,
-uid:currentUser.uid,
-createdAt:new Date()
-});
-
-}
-
-alert("Semua data berhasil disimpan");
-
-hasilOCR = [];
-
-previewBox.innerHTML = "";
-
-saveMassBtn.classList.add("hidden");
-
-}
-
-/* =========================
-RENDER
-========================= */
 
 function render(){
 
-if(!data) return;
-
-let sales =
-document.getElementById("filterCabang").value;
+let sales = filterCabang.value;
 
 let filtered = data.filter(d=>{
-
-let salesData =
-(d.sales || "Sales 1").trim();
-
-if(sales && salesData !== sales)
-return false;
-
+let salesData = (d.sales || "Sales 1").trim();
+if(sales && salesData !== sales) return false;
 return true;
-
 });
 
-filtered.sort((a,b)=>
-new Date(b.tanggal)
-- new Date(a.tanggal)
+filtered.sort((a,b)=> new Date(b.tanggal)-new Date(a.tanggal));
+
+let totalVal = filtered.reduce((a,b)=>a + Number(b.omset || 0),0);
+
+total.innerText = rp(totalVal);
+trx.innerText = filtered.length;
+
+avg.innerText = rp(
+filtered.length ? totalVal / filtered.length : 0
 );
 
-let totalVal = filtered.reduce((a,b)=>
-a + Number(b.omset || 0)
-,0);
+targetCard.innerText = rp(monthlyTarget);
 
-document.getElementById("total").innerText =
-rp(totalVal);
-
-document.getElementById("trx").innerText =
-filtered.length;
-
-document.getElementById("avg").innerText =
-rp(
-filtered.length
-? totalVal / filtered.length
-: 0
-);
-
-let gap = monthlyTarget - totalVal;
-
-if(gap < 0)
-gap = 0;
+gapCard.innerText = rp(Math.max(monthlyTarget-totalVal,0));
 
 let progress = monthlyTarget
-? Math.round((totalVal / monthlyTarget) * 100)
-: 0;
+? Math.round((totalVal/monthlyTarget)*100)
+:0;
 
-document.getElementById("targetCard").innerText =
-rp(monthlyTarget);
+progressCard.innerText = progress + "%";
 
-document.getElementById("gapCard").innerText =
-rp(gap);
-
-document.getElementById("progressCard").innerText =
-progress + "%";
-
-const progressFill =
-document.getElementById("progressFill");
-
-progressFill.className =
-"progress-fill";
+progressFill.className = "progress-fill";
 
 if(progress < 50){
-
 progressFill.classList.add("progress-red");
-
 }else if(progress < 80){
-
 progressFill.classList.add("progress-yellow");
-
 }else{
-
 progressFill.classList.add("progress-green");
-
 }
 
-progressFill.style.width =
-Math.min(progress,100) + "%";
-
-/* =========================
-CHART HARIAN
-========================= */
+progressFill.style.width = Math.min(progress,100)+"%";
 
 let perHari = {};
 
 filtered.forEach(d=>{
-
-perHari[d.tanggal] =
-(perHari[d.tanggal] || 0)
-+ Number(d.omset || 0);
-
+perHari[d.tanggal] = (perHari[d.tanggal] || 0) + Number(d.omset || 0);
 });
 
-let sortedTanggal = Object.keys(perHari)
-.sort((a,b)=>new Date(a)-new Date(b));
-
-let sortedValues =
-sortedTanggal.map(t=>perHari[t]);
-
-if(chartInstance)
-chartInstance.destroy();
+if(chartInstance) chartInstance.destroy();
 
 chartInstance = new Chart(chart,{
-
 type:'bar',
-
 data:{
-labels:sortedTanggal,
+labels:Object.keys(perHari),
 datasets:[{
-data:sortedValues,
-borderRadius:12,
-backgroundColor:'#3b82f6'
+data:Object.values(perHari),
+backgroundColor:'#3b82f6',
+borderRadius:12
 }]
 },
-
 options:{
 responsive:true,
 maintainAspectRatio:false,
-plugins:{
-legend:{display:false}
+plugins:{legend:{display:false}}
 }
-}
-
 });
-
-/* =========================
-CHART SALES
-========================= */
 
 let perSales = {};
 
 filtered.forEach(d=>{
-
-let s =
-(d.sales || "Sales 1").trim();
-
-perSales[s] =
-(perSales[s] || 0)
-+ Number(d.omset || 0);
-
+let s = (d.sales || "Sales 1").trim();
+perSales[s] = (perSales[s] || 0) + Number(d.omset || 0);
 });
 
-if(chartSalesInstance)
-chartSalesInstance.destroy();
+if(chartSalesInstance) chartSalesInstance.destroy();
 
-chartSalesInstance =
-new Chart(chartSales,{
-
+chartSalesInstance = new Chart(chartSales,{
 type:'bar',
-
 data:{
 labels:Object.keys(perSales),
 datasets:[{
 data:Object.values(perSales),
-borderRadius:12,
-backgroundColor:'#06b6d4'
+backgroundColor:'#06b6d4',
+borderRadius:12
 }]
 },
-
 options:{
 responsive:true,
 maintainAspectRatio:false,
-plugins:{
-legend:{display:false}
+plugins:{legend:{display:false}}
 }
-}
-
 });
 
-/* =========================
-TABLE
-========================= */
-
-document.getElementById("table").innerHTML =
-filtered.map(d=>`
-
+table.innerHTML = filtered.map(d=>`
 <tr>
 <td>${d.tanggal}</td>
 <td>${d.toko}</td>
 <td>${d.sales}</td>
 <td>${rp(d.omset)}</td>
-<td>
-<button onclick="del('${d.id}')">
-Hapus
-</button>
-</td>
+<td><button onclick="del('${d.id}')">Hapus</button></td>
 </tr>
-
 `).join("");
-
 }
 
-</script>
-
-</body>
+</script></body>
 </html>
