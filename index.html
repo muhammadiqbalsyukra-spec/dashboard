@@ -383,31 +383,52 @@ function logout(){
 auth.signOut();
 }
 
-async function migrateOldData(){
+ async function migrateOldData(){
 
 if(!currentUser) return;
 
 try{
 
-const migratedCheck =
+console.log("Mulai migrasi full...");
+
+/* AMBIL SEMUA DATA LAMA */
+
+const oldSnapshot =
+await db.collection("sales").get();
+
+if(oldSnapshot.empty){
+
+console.log("Tidak ada data lama");
+return;
+
+}
+
+/* HAPUS DATA USER LAMA */
+
+const existing =
 await db
 .collection("users")
 .doc(currentUser.uid)
 .collection("sales")
-.where("migrated","==",true)
-.limit(1)
 .get();
 
-if(!migratedCheck.empty) return;
+for(const doc of existing.docs){
 
-const oldSnapshot =
-await db.collection("sales").get();
+await doc.ref.delete();
+
+}
+
+/* PINDAHKAN SEMUA DATA */
 
 for(const doc of oldSnapshot.docs){
 
 const d = doc.data();
 
-await userSales().add({
+await db
+.collection("users")
+.doc(currentUser.uid)
+.collection("sales")
+.add({
 
 toko:d.toko || "",
 tanggal:d.tanggal || "",
@@ -421,8 +442,21 @@ createdAt:new Date()
 
 }
 
-console.log("Migrasi selesai");
+console.log("Migrasi FULL selesai");
 
+alert("Semua data lama berhasil dipindahkan");
+
+loadData();
+
+}catch(err){
+
+console.log(err);
+
+alert("Migrasi gagal");
+
+}
+   
+}
 }catch(err){
 console.log(err);
 }
