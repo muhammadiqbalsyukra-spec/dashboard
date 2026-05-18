@@ -544,7 +544,8 @@ await db.collection("sales")
 }
 
 function render(){
-
+  
+if(!filterCabang) return;
 let sales = filterCabang.value;
 
 let filtered = data.filter(d=>{
