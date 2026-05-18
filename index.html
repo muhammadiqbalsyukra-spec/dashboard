@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8" />
+<meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Sales Dashboard Pro</title>
 
@@ -23,26 +23,18 @@ box-sizing:border-box;
 }
 
 body{
-
 font-family:'Inter',sans-serif;
-
+background:#000;
 background-image:url("wallpaper.jpg");
-
 background-size:cover;
-
 background-position:center;
-
 background-repeat:no-repeat;
-
 background-attachment:fixed;
-
 min-height:100vh;
-
 overflow-x:hidden;
-
 color:white;
-
 }
+
 .hidden{
 display:none !important;
 }
@@ -63,11 +55,12 @@ padding:20px;
 
 .login-card,
 .card{
-background:rgba(15,20,35,.50);
+background:rgba(15,20,35,.55);
 border:1px solid rgba(255,255,255,.08);
 border-radius:24px;
 padding:24px;
 box-shadow:0 20px 40px rgba(0,0,0,.35);
+backdrop-filter:blur(14px);
 }
 
 .login-card{
@@ -79,6 +72,7 @@ max-width:420px;
 font-size:28px;
 font-weight:700;
 margin-bottom:20px;
+text-align:center;
 }
 
 input,
@@ -135,7 +129,6 @@ padding:24px 18px;
 background:rgba(15,23,42,.78);
 border-right:1px solid rgba(255,255,255,.08);
 backdrop-filter:blur(16px);
--webkit-backdrop-filter:blur(16px);
 }
 
 .logo{
@@ -161,14 +154,11 @@ background:linear-gradient(135deg,#2563eb,#06b6d4);
 }
 
 .main{
-    flex:1;
-    padding:24px;
-
-    background:rgba(0,0,0,.12);
-    backdrop-filter:blur(2px);
-
-    border-radius:24px;
-    margin:12px;
+flex:1;
+padding:24px;
+background:rgba(0,0,0,.05);
+border-radius:24px;
+margin:12px;
 }
 
 .grid{
@@ -183,26 +173,11 @@ padding:24px;
 border-radius:24px;
 background:rgba(15,20,35,.55);
 border:1px solid rgba(255,255,255,.08);
-transition:.25s ease;
-}
-
-.stat:hover{
-transform:translateY(-2px);
-box-shadow:0 20px 35px rgba(0,0,0,.25);
 }
 
 .stat h2{
-font-size:30px;
+font-size:28px;
 margin-bottom:8px;
-}
-
-.card{
-transition:.25s ease;
-}
-
-.card:hover{
-transform:translateY(-2px);
-box-shadow:0 20px 35px rgba(0,0,0,.25);
 }
 
 .chart-box{
@@ -233,7 +208,7 @@ border-bottom:1px solid rgba(255,255,255,.06);
 }
 
 .table th{
-background:rgba(255,255,255,.04);
+background:rgba(255,255,255,.05);
 }
 
 .progress-bar{
@@ -276,27 +251,6 @@ overflow:auto;
 max-height:400px;
 }
 
-input:focus,
-select:focus{
-outline:none;
-border:1px solid rgba(59,130,246,.5);
-box-shadow:0 0 0 3px rgba(59,130,246,.15);
-}
-
-::-webkit-scrollbar{
-height:8px;
-width:8px;
-}
-
-::-webkit-scrollbar-track{
-background:rgba(255,255,255,.05);
-}
-
-::-webkit-scrollbar-thumb{
-background:rgba(255,255,255,.18);
-border-radius:999px;
-}
-
 @media(max-width:900px){
 
 #app{
@@ -324,10 +278,6 @@ display:none;
 .menu{
 min-width:max-content;
 margin-bottom:0;
-font-size:14px;
-padding:12px 16px;
-white-space:nowrap;
-flex-shrink:0;
 }
 
 .main{
@@ -336,122 +286,14 @@ padding:14px;
 
 .grid{
 grid-template-columns:1fr;
-gap:14px;
-}
-
-.stat{
-padding:20px;
-border-radius:22px;
-}
-
-.stat h2{
-font-size:24px;
-}
-
-.card{
-padding:18px;
-border-radius:22px;
 }
 
 .chart-box{
-height:260px;
-}
-
-input,
-select,
-button{
-font-size:16px;
-padding:16px;
-}
-
-.table{
-min-width:650px;
-}
-
-.table th,
-.table td{
-padding:12px;
-font-size:13px;
-}
-
-.login-card{
-padding:22px;
-border-radius:24px;
+height:250px;
 }
 
 }
 
-@media(max-width:480px){
-
-body{
-font-size:14px;
-}
-
-.login-card,
-.card,
-.stat{
-border-radius:20px;
-}
-
-.login-title{
-font-size:24px;
-}
-
-.stat h2{
-font-size:22px;
-}
-
-.chart-box{
-height:220px;
-}
-
-button{
-font-size:15px;
-}
-
-.main{
-padding:12px;
-}
-
-.sidebar{
-padding:10px;
-gap:8px;
-}
-
-.menu{
-padding:10px 14px;
-font-size:13px;
-}
-
-.table th,
-.table td{
-font-size:12px;
-padding:10px;
-}
-
-}
-html,
-body{
-background-color:#000;
-}
-
-#app{
-background:transparent !important;
-}
-
-.main{
-    flex:1;
-    padding:24px;
-
-    background:rgba(0,0,0,.05);
-
-    border-radius:24px;
-    margin:12px;
-}
-
-#dashboard{
-background:transparent !important;
-}
 </style>
 </head>
 
@@ -712,15 +554,16 @@ let monthlyTarget = 0;
 let chartInstance = null;
 let chartSalesInstance = null;
 
+let currentUser = null;
+
 /* =========================
 INIT
 ========================= */
 
 window.onload = () => {
 
-tanggal.value = new Date()
-.toISOString()
-.split("T")[0];
+document.getElementById("tanggal").value =
+new Date().toISOString().split("T")[0];
 
 };
 
@@ -729,15 +572,28 @@ UTILS
 ========================= */
 
 function rp(n){
-
-return "Rp " + Number(n || 0)
-.toLocaleString("id-ID");
-
+return "Rp " + Number(n || 0).toLocaleString("id-ID");
 }
 
 function userSales(){
 
-return db.collection("sales");
+if(!currentUser) return null;
+
+return db
+.collection("users")
+.doc(currentUser.uid)
+.collection("sales");
+
+}
+
+function userTargets(){
+
+if(!currentUser) return null;
+
+return db
+.collection("users")
+.doc(currentUser.uid)
+.collection("targets");
 
 }
 
@@ -798,8 +654,6 @@ email,
 password
 );
 
-alert("Login berhasil");
-
 }catch(err){
 
 alert(err.message);
@@ -828,12 +682,28 @@ return;
 
 }
 
+if(password.length < 6){
+
+alert("Password minimal 6 karakter");
+return;
+
+}
+
 try{
 
+const userCredential =
 await auth.createUserWithEmailAndPassword(
 email,
 password
 );
+
+await db
+.collection("users")
+.doc(userCredential.user.uid)
+.set({
+email:email,
+createdAt:new Date()
+});
 
 alert("Register berhasil");
 
@@ -860,26 +730,41 @@ auth.onAuthStateChanged(user=>{
 
 if(user){
 
-loginPage.classList.add("hidden");
-app.classList.add("show");
+currentUser = user;
+
+document
+.getElementById("loginPage")
+.classList.add("hidden");
+
+document
+.getElementById("app")
+.classList.add("show");
 
 loadData();
 
 }else{
 
-loginPage.classList.remove("hidden");
-app.classList.remove("show");
+currentUser = null;
+
+document
+.getElementById("loginPage")
+.classList.remove("hidden");
+
+document
+.getElementById("app")
+.classList.remove("show");
 
 }
 
 });
 
-/* LANJUTKAN SCRIPT LAMA KAMU DI SINI TANPA DIUBAH */
 /* =========================
 LOAD DATA
 ========================= */
 
 function loadData(){
+
+if(!currentUser) return;
 
 userSales()
 .onSnapshot(snapshot=>{
@@ -896,7 +781,7 @@ render();
 
 });
 
-db.collection("targets")
+userTargets()
 .onSnapshot(snapshot=>{
 
 monthlyTarget = 0;
@@ -944,14 +829,14 @@ salesList = [
 
 }
 
-inputSales.innerHTML =
+document.getElementById("inputSales").innerHTML =
 salesList.map(s=>`
 <option value="${s}">
 ${s}
 </option>
 `).join("");
 
-filterCabang.innerHTML =
+document.getElementById("filterCabang").innerHTML =
 `<option value="">Semua Sales</option>` +
 salesList.map(s=>`
 <option value="${s}">
@@ -983,7 +868,9 @@ await userSales().add({
 toko:toko.value,
 tanggal:tanggal.value,
 omset:Number(omset.value),
-sales:inputSales.value
+sales:inputSales.value,
+uid:currentUser.uid,
+createdAt:new Date()
 
 });
 
@@ -1010,12 +897,215 @@ await userSales()
 }
 
 /* =========================
+OCR NOTA
+========================= */
+
+async function scanNota(){
+
+const file =
+document.getElementById("notaFile").files[0];
+
+if(!file){
+
+alert("Pilih gambar nota");
+return;
+
+}
+
+scanStatus.innerHTML = "Scanning OCR...";
+
+try{
+
+const result =
+await Tesseract.recognize(
+file,
+'ind'
+);
+
+const text =
+result.data.text;
+
+let angka =
+text.match(/\d[\d.,]+/g);
+
+if(angka && angka.length){
+
+let terbesar = 0;
+
+angka.forEach(a=>{
+
+let num = Number(
+a.replace(/[^\d]/g,'')
+);
+
+if(num > terbesar)
+terbesar = num;
+
+});
+
+omset.value = terbesar;
+
+}
+
+scanStatus.innerHTML =
+"✅ OCR berhasil";
+
+}catch(err){
+
+console.log(err);
+
+scanStatus.innerHTML =
+"❌ OCR gagal";
+
+}
+
+}
+
+/* =========================
+OCR REKAP
+========================= */
+
+async function scanRekap(){
+
+const file =
+document.getElementById("rekapFile").files[0];
+
+if(!file){
+
+alert("Pilih gambar rekap");
+return;
+
+}
+
+rekapStatus.innerHTML =
+"Scanning rekap...";
+
+try{
+
+const result =
+await Tesseract.recognize(
+file,
+'ind'
+);
+
+const text =
+result.data.text;
+
+const lines =
+text.split("\n");
+
+hasilOCR = [];
+
+lines.forEach(line=>{
+
+let angka =
+line.match(/\d[\d.,]+/g);
+
+if(angka){
+
+let nominal =
+Number(
+angka[angka.length-1]
+.replace(/[^\d]/g,'')
+);
+
+if(nominal > 0){
+
+hasilOCR.push({
+
+tanggal:new Date()
+.toISOString()
+.split("T")[0],
+
+toko:"OCR Store",
+
+sales:"Sales 1",
+
+omset:nominal
+
+});
+
+}
+
+}
+
+});
+
+previewBox.innerHTML =
+hasilOCR.map(d=>`
+
+<div style="
+padding:12px;
+margin-bottom:10px;
+border-radius:14px;
+background:rgba(255,255,255,.06);
+">
+
+${d.toko} - ${rp(d.omset)}
+
+</div>
+
+`).join("");
+
+saveMassBtn.classList.remove("hidden");
+
+rekapStatus.innerHTML =
+"✅ Rekap berhasil dibaca";
+
+}catch(err){
+
+console.log(err);
+
+rekapStatus.innerHTML =
+"❌ OCR gagal";
+
+}
+
+}
+
+/* =========================
+SAVE MASSAL
+========================= */
+
+async function saveMassal(){
+
+if(!hasilOCR.length){
+
+alert("Data kosong");
+return;
+
+}
+
+for(const d of hasilOCR){
+
+await userSales().add({
+...d,
+uid:currentUser.uid,
+createdAt:new Date()
+});
+
+}
+
+alert("Semua data berhasil disimpan");
+
+hasilOCR = [];
+
+previewBox.innerHTML = "";
+
+saveMassBtn.classList.add("hidden");
+
+}
+
+/* =========================
 RENDER
 ========================= */
 
 function render(){
 
-let sales = filterCabang.value;
+if(!data) return;
+
+let sales =
+document.getElementById("filterCabang").value;
 
 let filtered = data.filter(d=>{
 
@@ -1038,10 +1128,14 @@ let totalVal = filtered.reduce((a,b)=>
 a + Number(b.omset || 0)
 ,0);
 
-total.innerText = rp(totalVal);
-trx.innerText = filtered.length;
+document.getElementById("total").innerText =
+rp(totalVal);
 
-avg.innerText = rp(
+document.getElementById("trx").innerText =
+filtered.length;
+
+document.getElementById("avg").innerText =
+rp(
 filtered.length
 ? totalVal / filtered.length
 : 0
@@ -1056,11 +1150,20 @@ let progress = monthlyTarget
 ? Math.round((totalVal / monthlyTarget) * 100)
 : 0;
 
-targetCard.innerText = rp(monthlyTarget);
-gapCard.innerText = rp(gap);
-progressCard.innerText = progress + "%";
+document.getElementById("targetCard").innerText =
+rp(monthlyTarget);
 
-progressFill.className = "progress-fill";
+document.getElementById("gapCard").innerText =
+rp(gap);
+
+document.getElementById("progressCard").innerText =
+progress + "%";
+
+const progressFill =
+document.getElementById("progressFill");
+
+progressFill.className =
+"progress-fill";
 
 if(progress < 50){
 
@@ -1111,21 +1214,7 @@ labels:sortedTanggal,
 datasets:[{
 data:sortedValues,
 borderRadius:12,
-backgroundColor:
-sortedValues.map(v=>{
-
-if(v >= 10000000)
-return '#22c55e';
-
-if(v >= 5000000)
-return '#3b82f6';
-
-if(v >= 1000000)
-return '#f59e0b';
-
-return '#ef4444';
-
-})
+backgroundColor:'#3b82f6'
 }]
 },
 
@@ -1169,22 +1258,7 @@ labels:Object.keys(perSales),
 datasets:[{
 data:Object.values(perSales),
 borderRadius:12,
-backgroundColor:
-Object.values(perSales)
-.map(v=>{
-
-if(v >= 10000000)
-return '#22c55e';
-
-if(v >= 5000000)
-return '#3b82f6';
-
-if(v >= 1000000)
-return '#f59e0b';
-
-return '#ef4444';
-
-})
+backgroundColor:'#06b6d4'
 }]
 },
 
@@ -1202,7 +1276,7 @@ legend:{display:false}
 TABLE
 ========================= */
 
-table.innerHTML =
+document.getElementById("table").innerHTML =
 filtered.map(d=>`
 
 <tr>
@@ -1219,7 +1293,8 @@ Hapus
 
 `).join("");
 
-  }
+}
+
 </script>
 
 </body>
