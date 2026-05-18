@@ -1052,17 +1052,18 @@ let filtered = data.filter(d=>{
   let salesData =
   (d.sales || "Sales 1").trim();
 
-  // admin lihat semua
+  // ADMIN lihat semua
   if(currentRole === "admin"){
 
-    if(sales && salesData !== sales)
-    return false;
+    if(!sales){
+      return true;
+    }
 
-    return true;
+    return salesData === sales;
 
   }
 
-  // sales hanya lihat miliknya
+  // USER biasa
   return salesData === currentSales;
 
 });
