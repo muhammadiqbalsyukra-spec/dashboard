@@ -451,12 +451,12 @@ app.classList.remove("show");
 
 function loadData(){
 
+const user = auth.currentUser;
+
 if(!user) return;
 
 db.collection("sales")
 .onSnapshot(snapshot=>{
-
-const user = auth.currentUser;
 
 data = snapshot.docs
 .map(doc=>({
@@ -476,6 +476,8 @@ render();
 
 });
 
+}
+  
 function loadSales(){
 
 salesList = [
