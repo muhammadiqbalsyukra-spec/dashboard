@@ -234,7 +234,11 @@ canvas{
 <div class="menu" onclick="showPage('laporan',this)">
   📑 Laporan
 </div>
-
+<div
+  id="adminBadge"
+  class="menu hidden">
+  👑 ADMIN MODE
+</div>
 <div class="menu" onclick="logout()">
   🚪 Logout
 </div>
@@ -327,7 +331,12 @@ canvas{
 
     <input id="omset" type="number" placeholder="Nominal Omset">
 
-    <select id="inputSales"></select>
+  <select id="inputSales"></select>
+
+<div class="small">
+Admin bisa memilih sales.
+User biasa otomatis memakai akun sendiri.
+</div>
 
     <input type="file" id="notaFile" accept="image/*">
 
@@ -468,8 +477,9 @@ let salesList = [];
 let monthlyTarget = 0;
 let hasilOCR = [];
 
-let chartInstance;
-let chartSalesInstance;
+let currentUser = null;
+let currentRole = "sales";
+let currentSales = "Sales 1";
 
 window.onload = ()=>{
 
@@ -522,10 +532,22 @@ async function register(){
 
   try{
 
+    const cred =
     await auth.createUserWithEmailAndPassword(
       email.value,
       password.value
     );
+
+    await db.collection("users")
+    .doc(cred.user.uid)
+    .set({
+
+      nama: email.value.split('@')[0],
+      email: email.value,
+      role: "sales",
+      sales: "Sales 1"
+
+    });
 
     alert("Register berhasil");
 
@@ -541,13 +563,37 @@ function logout(){
   auth.signOut();
 }
 
-auth.onAuthStateChanged(user=>{
+auth.onAuthStateChanged(async user=>{
 
   if(user){
 
+    currentUser = user;
+
+    const userDoc =
+    await db.collection("users")
+    .doc(user.uid)
+    .get();
+
+    if(userDoc.exists){
+
+      const u = userDoc.data();
+
+      currentRole = u.role || "sales";
+      currentSales = u.sales || "Sales 1";
+
+    }
+
     loginPage.classList.add("hidden");
     app.classList.add("show");
+if(currentRole === "admin"){
 
+  adminBadge.classList.remove("hidden");
+
+}else{
+
+  adminBadge.classList.add("hidden");
+
+}
     render();
 
   }else{
@@ -558,7 +604,6 @@ auth.onAuthStateChanged(user=>{
   }
 
 });
-
 db.collection("salesList")
 .onSnapshot(async snap=>{
 
@@ -946,7 +991,10 @@ async function saveMassal(){
       toko:d.toko,
       tanggal:tanggalHariIni,
       omset:d.omset,
-      sales:inputSales.value
+     sales:
+currentRole === "admin"
+? inputSales.value
+: currentSales
     });
 
   }
@@ -982,8 +1030,10 @@ async function simpan(){
     toko:toko.value,
     tanggal:tanggal.value,
     omset:Number(omset.value),
-    sales:inputSales.value
-
+   sales:
+currentRole === "admin"
+? inputSales.value
+: currentSales
   });
 
   toko.value = "";
@@ -997,18 +1047,25 @@ function render(){
 
   let sales = filterCabang.value;
 
- let filtered = data.filter(d=>{
+let filtered = data.filter(d=>{
 
   let salesData =
   (d.sales || "Sales 1").trim();
 
-  if(sales && salesData !== sales)
-  return false;
+  // admin lihat semua
+  if(currentRole === "admin"){
 
-  return true;
+    if(sales && salesData !== sales)
+    return false;
+
+    return true;
+
+  }
+
+  // sales hanya lihat miliknya
+  return salesData === currentSales;
 
 });
-
   filtered.sort((a,b)=>
     new Date(b.tanggal)
     - new Date(a.tanggal)
