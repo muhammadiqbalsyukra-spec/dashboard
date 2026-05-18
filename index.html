@@ -15,7 +15,6 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
 <style>
-
 *{
 margin:0;
 padding:0;
@@ -23,26 +22,17 @@ box-sizing:border-box;
 }
 
 body{
-
 font-family:'Inter',sans-serif;
-
 background-image:url("wallpaper.jpg");
-
 background-size:cover;
-
 background-position:center;
-
 background-repeat:no-repeat;
-
 background-attachment:fixed;
-
 min-height:100vh;
-
 overflow-x:hidden;
-
 color:white;
-
 }
+
 .hidden{
 display:none !important;
 }
@@ -116,10 +106,6 @@ transform:translateY(-1px);
 opacity:.95;
 }
 
-button:active{
-transform:scale(.98);
-}
-
 #app{
 display:none;
 }
@@ -135,7 +121,6 @@ padding:24px 18px;
 background:rgba(15,23,42,.78);
 border-right:1px solid rgba(255,255,255,.08);
 backdrop-filter:blur(16px);
--webkit-backdrop-filter:blur(16px);
 }
 
 .logo{
@@ -161,14 +146,11 @@ background:linear-gradient(135deg,#2563eb,#06b6d4);
 }
 
 .main{
-    flex:1;
-    padding:24px;
-
-    background:rgba(0,0,0,.12);
-    backdrop-filter:blur(2px);
-
-    border-radius:24px;
-    margin:12px;
+flex:1;
+padding:24px;
+background:rgba(0,0,0,.05);
+border-radius:24px;
+margin:12px;
 }
 
 .grid{
@@ -183,26 +165,6 @@ padding:24px;
 border-radius:24px;
 background:rgba(15,20,35,.55);
 border:1px solid rgba(255,255,255,.08);
-transition:.25s ease;
-}
-
-.stat:hover{
-transform:translateY(-2px);
-box-shadow:0 20px 35px rgba(0,0,0,.25);
-}
-
-.stat h2{
-font-size:30px;
-margin-bottom:8px;
-}
-
-.card{
-transition:.25s ease;
-}
-
-.card:hover{
-transform:translateY(-2px);
-box-shadow:0 20px 35px rgba(0,0,0,.25);
 }
 
 .chart-box{
@@ -214,26 +176,15 @@ width:100% !important;
 height:100% !important;
 }
 
-.table-wrapper{
-overflow:auto;
-border-radius:20px;
-}
-
 .table{
 width:100%;
 border-collapse:collapse;
-min-width:700px;
 }
 
 .table th,
 .table td{
 padding:14px;
-text-align:left;
 border-bottom:1px solid rgba(255,255,255,.06);
-}
-
-.table th{
-background:rgba(255,255,255,.04);
 }
 
 .progress-bar{
@@ -252,215 +203,15 @@ transition:1s;
 border-radius:999px;
 }
 
-.progress-red{
-background:#ef4444;
-}
-
-.progress-yellow{
-background:#f59e0b;
-}
-
-.progress-green{
-background:#22c55e;
-}
-
-.small{
-margin-top:12px;
-font-size:13px;
-opacity:.8;
-}
-
-#previewBox{
-margin-top:20px;
-overflow:auto;
-max-height:400px;
-}
-
-input:focus,
-select:focus{
-outline:none;
-border:1px solid rgba(59,130,246,.5);
-box-shadow:0 0 0 3px rgba(59,130,246,.15);
-}
-
-::-webkit-scrollbar{
-height:8px;
-width:8px;
-}
-
-::-webkit-scrollbar-track{
-background:rgba(255,255,255,.05);
-}
-
-::-webkit-scrollbar-thumb{
-background:rgba(255,255,255,.18);
-border-radius:999px;
-}
-
-@media(max-width:900px){
-
-#app{
-flex-direction:column;
-}
-
-.sidebar{
-width:100%;
-min-height:auto;
-padding:12px;
-display:flex;
-gap:10px;
-overflow-x:auto;
-position:sticky;
-top:0;
-z-index:999;
-border-right:none;
-border-bottom:1px solid rgba(255,255,255,.08);
-}
-
-.logo{
-display:none;
-}
-
-.menu{
-min-width:max-content;
-margin-bottom:0;
-font-size:14px;
-padding:12px 16px;
-white-space:nowrap;
-flex-shrink:0;
-}
-
-.main{
-padding:14px;
-}
-
-.grid{
-grid-template-columns:1fr;
-gap:14px;
-}
-
-.stat{
-padding:20px;
-border-radius:22px;
-}
-
-.stat h2{
-font-size:24px;
-}
-
-.card{
-padding:18px;
-border-radius:22px;
-}
-
-.chart-box{
-height:260px;
-}
-
-input,
-select,
-button{
-font-size:16px;
-padding:16px;
-}
-
-.table{
-min-width:650px;
-}
-
-.table th,
-.table td{
-padding:12px;
-font-size:13px;
-}
-
-.login-card{
-padding:22px;
-border-radius:24px;
-}
-
-}
-
-@media(max-width:480px){
-
-body{
-font-size:14px;
-}
-
-.login-card,
-.card,
-.stat{
-border-radius:20px;
-}
-
-.login-title{
-font-size:24px;
-}
-
-.stat h2{
-font-size:22px;
-}
-
-.chart-box{
-height:220px;
-}
-
-button{
-font-size:15px;
-}
-
-.main{
-padding:12px;
-}
-
-.sidebar{
-padding:10px;
-gap:8px;
-}
-
-.menu{
-padding:10px 14px;
-font-size:13px;
-}
-
-.table th,
-.table td{
-font-size:12px;
-padding:10px;
-}
-
-}
-html,
-body{
-background-color:#000;
-}
-
-#app{
-background:transparent !important;
-}
-
-.main{
-    flex:1;
-    padding:24px;
-
-    background:rgba(0,0,0,.05);
-
-    border-radius:24px;
-    margin:12px;
-}
-
-#dashboard{
-background:transparent !important;
-}
+.progress-red{background:#ef4444;}
+.progress-yellow{background:#f59e0b;}
+.progress-green{background:#22c55e;}
 </style>
 </head>
 
 <body>
 
-<!-- LOGIN -->
-
 <div id="loginPage">
-
 <form class="login-card" onsubmit="event.preventDefault(); login();">
 
 <div class="login-title">
@@ -468,32 +219,18 @@ Sales Dashboard
 </div>
 
 <input id="email" type="email" placeholder="Email">
-
 <input id="password" type="password" placeholder="Password">
 
-<button type="submit">
-Login
-</button>
-
-<button type="button" onclick="register()">
-Register
-</button>
+<button type="submit">Login</button>
+<button type="button" onclick="register()">Register</button>
 
 </form>
-
 </div>
-
-<!-- APP -->
 
 <div id="app">
 
-<!-- SIDEBAR -->
-
 <div class="sidebar">
-
-<div class="logo">
-IQBAL
-</div>
+<div class="logo">IQBAL</div>
 
 <div class="menu active" onclick="showPage('dashboard',this)">
 📊 Dashboard
@@ -510,14 +247,9 @@ IQBAL
 <div class="menu" onclick="logout()">
 🚪 Logout
 </div>
-
 </div>
 
-<!-- MAIN -->
-
 <div class="main">
-
-<!-- DASHBOARD -->
 
 <div id="dashboard">
 
@@ -553,14 +285,11 @@ IQBAL
 </div>
 
 <div class="stat">
-
 <h2 id="progressCard">0%</h2>
 <p>Progress Target</p>
-
 <div class="progress-bar">
 <div id="progressFill" class="progress-fill"></div>
 </div>
-
 </div>
 
 </div>
@@ -568,97 +297,38 @@ IQBAL
 <div class="grid">
 
 <div class="card">
-
-<h3 style="margin-bottom:20px;">
-📊 Omset Harian
-</h3>
-
+<h3 style="margin-bottom:20px;">📊 Omset Harian</h3>
 <div class="chart-box">
 <canvas id="chart"></canvas>
 </div>
-
 </div>
 
 <div class="card">
-
-<h3 style="margin-bottom:20px;">
-👤 Per Sales
-</h3>
-
+<h3 style="margin-bottom:20px;">👤 Per Sales</h3>
 <div class="chart-box">
 <canvas id="chartSales"></canvas>
 </div>
-
 </div>
 
 </div>
-
 </div>
-
-<!-- INPUT -->
 
 <div id="input" class="hidden">
-
-<div class="card" style="margin-bottom:20px;">
-
-<h3 style="margin-bottom:20px;">
-Input Data Sales
-</h3>
+<div class="card">
+<h3 style="margin-bottom:20px;">Input Data Sales</h3>
 
 <input id="toko" placeholder="Nama Toko">
-
 <input type="date" id="tanggal">
-
 <input id="omset" type="number" placeholder="Nominal Omset">
-
 <select id="inputSales"></select>
 
-<input type="file" id="notaFile" accept="image/*">
-
-<button onclick="scanNota()">
-📷 Scan Nota
-</button>
-
-<div id="scanStatus" class="small"></div>
-
-<button onclick="simpan()">
-💾 Simpan Data
-</button>
-
+<button onclick="simpan()">💾 Simpan Data</button>
 </div>
-
-<div class="card">
-
-<h3 style="margin-bottom:20px;">
-📄 OCR Rekap Multi Toko
-</h3>
-
-<input type="file" id="rekapFile" accept="image/*">
-
-<button onclick="scanRekap()">
-🚀 Scan Rekap Sales
-</button>
-
-<div id="rekapStatus" class="small"></div>
-
-<div id="previewBox"></div>
-
-<button id="saveMassBtn" class="hidden" onclick="saveMassal()">
-💾 Simpan Semua Data
-</button>
-
 </div>
-
-</div>
-
-<!-- LAPORAN -->
 
 <div id="laporan" class="hidden">
-
-<div class="card table-wrapper">
-
+<div class="card">
 <table class="table">
-
 <thead>
 <tr>
 <th>Tanggal</th>
@@ -668,23 +338,15 @@ Input Data Sales
 <th>Aksi</th>
 </tr>
 </thead>
-
 <tbody id="table"></tbody>
-
 </table>
-
 </div>
-
 </div>
 
 </div>
 </div>
 
 <script>
-
-/* =========================
-FIREBASE
-========================= */
 
 const firebaseConfig = {
 apiKey: "AIzaSyC-dtWEgB6FcHeVqD5PfzC_AFZoZ0eXRtI",
@@ -700,21 +362,12 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-/* =========================
-GLOBAL
-========================= */
-
 let data = [];
 let salesList = [];
-let hasilOCR = [];
 let monthlyTarget = 0;
 
 let chartInstance = null;
 let chartSalesInstance = null;
-
-/* =========================
-INIT
-========================= */
 
 window.onload = () => {
 
@@ -724,171 +377,91 @@ tanggal.value = new Date()
 
 };
 
-/* =========================
-UTILS
-========================= */
-
 function rp(n){
-
-return "Rp " + Number(n || 0)
-.toLocaleString("id-ID");
-
+return "Rp " + Number(n || 0).toLocaleString("id-ID");
 }
-
-function userSales(){
-
-return db.collection("sales");
-
-}
-
-/* =========================
-MENU
-========================= */
 
 function showPage(id,el){
 
 ["dashboard","input","laporan"]
 .forEach(page=>{
-
-document
-.getElementById(page)
-.classList.add("hidden");
-
+document.getElementById(page).classList.add("hidden");
 });
 
-document
-.getElementById(id)
-.classList.remove("hidden");
+document.getElementById(id).classList.remove("hidden");
 
-document
-.querySelectorAll(".menu")
+document.querySelectorAll(".menu")
 .forEach(m=>m.classList.remove("active"));
 
 el.classList.add("active");
-
 }
-
-/* =========================
-AUTH
-========================= */
 
 async function login(){
 
-const email = document
-.getElementById("email")
-.value
-.trim();
-
-const password = document
-.getElementById("password")
-.value
-.trim();
+const email = document.getElementById("email").value.trim();
+const password = document.getElementById("password").value.trim();
 
 if(!email || !password){
-
 alert("Lengkapi email & password");
 return;
-
 }
 
 try{
-
-await auth.signInWithEmailAndPassword(
-email,
-password
-);
-
+await auth.signInWithEmailAndPassword(email,password);
 alert("Login berhasil");
-
 }catch(err){
-
 alert(err.message);
-console.log(err);
-
 }
-
 }
 
 async function register(){
 
-const email = document
-.getElementById("email")
-.value
-.trim();
-
-const password = document
-.getElementById("password")
-.value
-.trim();
+const email = document.getElementById("email").value.trim();
+const password = document.getElementById("password").value.trim();
 
 if(!email || !password){
-
 alert("Lengkapi email & password");
 return;
-
 }
 
 try{
-
-await auth.createUserWithEmailAndPassword(
-email,
-password
-);
-
+await auth.createUserWithEmailAndPassword(email,password);
 alert("Register berhasil");
-
 }catch(err){
-
 alert(err.message);
-console.log(err);
-
 }
-
 }
 
 function logout(){
-
 auth.signOut();
-
 }
-
-/* =========================
-AUTH STATE
-========================= */
 
 auth.onAuthStateChanged(user=>{
 
 if(user){
-
 loginPage.classList.add("hidden");
 app.classList.add("show");
-
 loadData();
-
 }else{
-
 loginPage.classList.remove("hidden");
 app.classList.remove("show");
-
 }
 
 });
 
-/* LANJUTKAN SCRIPT LAMA KAMU DI SINI TANPA DIUBAH */
-/* =========================
-LOAD DATA
-========================= */
-
 function loadData(){
 
-userSales()
+const user = auth.currentUser;
+
+if(!user) return;
+
+db.collection("sales")
+.where("uid","==",user.uid)
 .onSnapshot(snapshot=>{
 
 data = snapshot.docs.map(doc=>({
-
 id:doc.id,
 ...doc.data()
-
 }));
 
 loadSales();
@@ -896,36 +469,7 @@ render();
 
 });
 
-db.collection("targets")
-.onSnapshot(snapshot=>{
-
-monthlyTarget = 0;
-
-const bulanSekarang = new Date()
-.toISOString()
-.slice(0,7);
-
-snapshot.docs.forEach(doc=>{
-
-const d = doc.data();
-
-if(d.bulan === bulanSekarang){
-
-monthlyTarget = Number(d.target || 0);
-
 }
-
-});
-
-render();
-
-});
-
-}
-
-/* =========================
-LOAD SALES
-========================= */
 
 function loadSales(){
 
@@ -936,161 +480,107 @@ data.map(d=>(d.sales || "Sales 1").trim())
 ];
 
 if(salesList.length === 0){
-
-salesList = [
-"Sales 1",
-"Sales 2"
-];
-
+salesList = ["Sales 1","Sales 2"];
 }
 
 inputSales.innerHTML =
 salesList.map(s=>`
-<option value="${s}">
-${s}
-</option>
+<option value="${s}">${s}</option>
 `).join("");
 
 filterCabang.innerHTML =
 `<option value="">Semua Sales</option>` +
 salesList.map(s=>`
-<option value="${s}">
-${s}
-</option>
+<option value="${s}">${s}</option>
 `).join("");
 
 }
 
-/* =========================
-SIMPAN
-========================= */
-
 async function simpan(){
 
-if(
-!toko.value ||
-!tanggal.value ||
-!omset.value
-){
-
+if(!toko.value || !tanggal.value || !omset.value){
 alert("Lengkapi data");
 return;
-
 }
 
-await userSales().add({
+const user = auth.currentUser;
 
+await db.collection("sales").add({
+uid:user.uid,
+email:user.email,
 toko:toko.value,
 tanggal:tanggal.value,
 omset:Number(omset.value),
 sales:inputSales.value
-
 });
 
 toko.value = "";
 omset.value = "";
 
 alert("Data berhasil disimpan");
-
 }
-
-/* =========================
-DELETE
-========================= */
 
 async function del(id){
 
-if(!confirm("Hapus data ini?"))
-return;
+if(!confirm("Hapus data ini?")) return;
 
-await userSales()
+await db.collection("sales")
 .doc(id)
 .delete();
 
 }
-
-/* =========================
-RENDER
-========================= */
 
 function render(){
 
 let sales = filterCabang.value;
 
 let filtered = data.filter(d=>{
-
-let salesData =
-(d.sales || "Sales 1").trim();
-
-if(sales && salesData !== sales)
-return false;
-
+let salesData = (d.sales || "Sales 1").trim();
+if(sales && salesData !== sales) return false;
 return true;
-
 });
 
 filtered.sort((a,b)=>
-new Date(b.tanggal)
-- new Date(a.tanggal)
+new Date(b.tanggal)-new Date(a.tanggal)
 );
 
 let totalVal = filtered.reduce((a,b)=>
-a + Number(b.omset || 0)
-,0);
+a + Number(b.omset || 0),0
+);
 
 total.innerText = rp(totalVal);
 trx.innerText = filtered.length;
 
 avg.innerText = rp(
-filtered.length
-? totalVal / filtered.length
-: 0
+filtered.length ? totalVal / filtered.length : 0
 );
-
-let gap = monthlyTarget - totalVal;
-
-if(gap < 0)
-gap = 0;
 
 let progress = monthlyTarget
 ? Math.round((totalVal / monthlyTarget) * 100)
 : 0;
 
 targetCard.innerText = rp(monthlyTarget);
-gapCard.innerText = rp(gap);
 progressCard.innerText = progress + "%";
 
 progressFill.className = "progress-fill";
 
 if(progress < 50){
-
 progressFill.classList.add("progress-red");
-
 }else if(progress < 80){
-
 progressFill.classList.add("progress-yellow");
-
 }else{
-
 progressFill.classList.add("progress-green");
-
 }
 
 progressFill.style.width =
 Math.min(progress,100) + "%";
 
-/* =========================
-CHART HARIAN
-========================= */
-
 let perHari = {};
 
 filtered.forEach(d=>{
-
 perHari[d.tanggal] =
 (perHari[d.tanggal] || 0)
 + Number(d.omset || 0);
-
 });
 
 let sortedTanggal = Object.keys(perHari)
@@ -1103,32 +593,15 @@ if(chartInstance)
 chartInstance.destroy();
 
 chartInstance = new Chart(chart,{
-
 type:'bar',
-
 data:{
 labels:sortedTanggal,
 datasets:[{
 data:sortedValues,
 borderRadius:12,
-backgroundColor:
-sortedValues.map(v=>{
-
-if(v >= 10000000)
-return '#22c55e';
-
-if(v >= 5000000)
-return '#3b82f6';
-
-if(v >= 1000000)
-return '#f59e0b';
-
-return '#ef4444';
-
-})
+backgroundColor:'#3b82f6'
 }]
 },
-
 options:{
 responsive:true,
 maintainAspectRatio:false,
@@ -1136,58 +609,30 @@ plugins:{
 legend:{display:false}
 }
 }
-
 });
-
-/* =========================
-CHART SALES
-========================= */
 
 let perSales = {};
 
 filtered.forEach(d=>{
-
-let s =
-(d.sales || "Sales 1").trim();
-
+let s = (d.sales || "Sales 1").trim();
 perSales[s] =
 (perSales[s] || 0)
 + Number(d.omset || 0);
-
 });
 
 if(chartSalesInstance)
 chartSalesInstance.destroy();
 
-chartSalesInstance =
-new Chart(chartSales,{
-
+chartSalesInstance = new Chart(chartSales,{
 type:'bar',
-
 data:{
 labels:Object.keys(perSales),
 datasets:[{
 data:Object.values(perSales),
 borderRadius:12,
-backgroundColor:
-Object.values(perSales)
-.map(v=>{
-
-if(v >= 10000000)
-return '#22c55e';
-
-if(v >= 5000000)
-return '#3b82f6';
-
-if(v >= 1000000)
-return '#f59e0b';
-
-return '#ef4444';
-
-})
+backgroundColor:'#22c55e'
 }]
 },
-
 options:{
 responsive:true,
 maintainAspectRatio:false,
@@ -1195,16 +640,10 @@ plugins:{
 legend:{display:false}
 }
 }
-
 });
-
-/* =========================
-TABLE
-========================= */
 
 table.innerHTML =
 filtered.map(d=>`
-
 <tr>
 <td>${d.tanggal}</td>
 <td>${d.toko}</td>
@@ -1216,10 +655,10 @@ Hapus
 </button>
 </td>
 </tr>
-
 `).join("");
 
-  }
+}
+
 </script>
 
 </body>
