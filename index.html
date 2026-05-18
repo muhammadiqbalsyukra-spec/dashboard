@@ -1,126 +1,256 @@
-<!DOCTYPE html><html lang="id">
+<!DOCTYPE html>
+<html lang="id">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Sales Dashboard Pro</title><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"><script src="https://cdn.jsdelivr.net/npm/chart.js"></script><script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script><script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script><script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script><script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script><style>
-*{margin:0;padding:0;box-sizing:border-box;}
+<title>Sales Dashboard Pro</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
 body{
 font-family:'Inter',sans-serif;
-background:#000 url('wallpaper.jpg') center/cover fixed no-repeat;
+background:#000;
+color:#fff;
 min-height:100vh;
 overflow-x:hidden;
+}
+.hidden{display:none!important}
+button,input,select{
+width:100%;
+padding:14px;
+margin-top:12px;
+border:none;
+border-radius:14px;
+font-family:'Inter',sans-serif;
+}
+button{
+background:linear-gradient(135deg,#2563eb,#06b6d4);
+color:#fff;
+font-weight:600;
+cursor:pointer;
+}
+input,select{
+background:rgba(255,255,255,.08);
 color:#fff;
 }
-.hidden{display:none!important;}
-button,input,select{font-family:'Inter',sans-serif;}
-#loginPage{min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px;}
+#loginPage{
+min-height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+padding:20px;
+}
 .login-card,.card{
 background:rgba(15,20,35,.55);
-border:1px solid rgba(255,255,255,.08);
 border-radius:24px;
 padding:24px;
-box-shadow:0 20px 40px rgba(0,0,0,.35);
-backdrop-filter:blur(14px);
+border:1px solid rgba(255,255,255,.08);
 }
-.login-card{width:100%;max-width:420px;}
-.login-title{font-size:28px;font-weight:700;margin-bottom:20px;text-align:center;}
-input,select,button{
-width:100%;padding:14px;border:none;border-radius:14px;margin-top:12px;font-size:15px;
+.login-card{
+width:100%;
+max-width:420px;
 }
-input,select{background:rgba(255,255,255,.08);color:#fff;outline:none;}
-button{
-cursor:pointer;font-weight:600;color:#fff;
+#app{display:none}
+#app.show{display:flex}
+.sidebar{
+width:250px;
+background:#111827;
+padding:20px;
+min-height:100vh;
+}
+.menu{
+padding:14px;
+border-radius:12px;
+margin-bottom:10px;
+cursor:pointer;
+}
+.menu.active{
 background:linear-gradient(135deg,#2563eb,#06b6d4);
 }
-#app{display:none;}
-#app.show{display:flex;}
-.sidebar{
-width:260px;min-height:100vh;padding:24px 18px;
-background:rgba(15,23,42,.78);
-border-right:1px solid rgba(255,255,255,.08);
+.main{
+flex:1;
+padding:20px;
 }
-.logo{font-size:24px;font-weight:700;margin-bottom:30px;}
-.menu{padding:14px;border-radius:14px;margin-bottom:10px;cursor:pointer;}
-.menu.active{background:linear-gradient(135deg,#2563eb,#06b6d4);}
-.main{flex:1;padding:24px;background:rgba(0,0,0,.05);border-radius:24px;margin:12px;}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;margin-bottom:20px;}
-.stat{padding:24px;border-radius:24px;background:rgba(15,20,35,.55);border:1px solid rgba(255,255,255,.08);}
-.stat h2{font-size:28px;margin-bottom:8px;}
-.chart-box{height:340px;}
-canvas{width:100%!important;height:100%!important;}
-.table-wrapper{overflow:auto;border-radius:20px;}
-.table{width:100%;border-collapse:collapse;min-width:700px;}
-.table th,.table td{padding:14px;text-align:left;border-bottom:1px solid rgba(255,255,255,.06);}
-.progress-bar{width:100%;height:12px;background:rgba(255,255,255,.12);border-radius:999px;overflow:hidden;margin-top:12px;}
-.progress-fill{height:100%;width:0%;transition:1s;border-radius:999px;}
-.progress-red{background:#ef4444;}
-.progress-yellow{background:#f59e0b;}
-.progress-green{background:#22c55e;}
-.small{margin-top:12px;font-size:13px;opacity:.8;}
-@media(max-width:900px){
-#app{flex-direction:column;}
-.sidebar{width:100%;min-height:auto;display:flex;overflow:auto;gap:10px;}
-.logo{display:none;}
-.grid{grid-template-columns:1fr;}
+.grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:20px;
+margin-bottom:20px;
 }
-</style></head>
-<body><div id="loginPage">
-<form class="login-card" onsubmit="event.preventDefault(); login();">
-<div class="login-title">Sales Dashboard</div>
+.stat{
+padding:20px;
+border-radius:20px;
+background:rgba(255,255,255,.05);
+}
+.chart-box{
+height:300px;
+}
+.table{
+width:100%;
+border-collapse:collapse;
+}
+.table th,.table td{
+padding:12px;
+border-bottom:1px solid rgba(255,255,255,.08);
+}
+.progress-bar{
+width:100%;
+height:12px;
+background:rgba(255,255,255,.1);
+border-radius:999px;
+overflow:hidden;
+margin-top:10px;
+}
+.progress-fill{
+height:100%;
+width:0%;
+background:#22c55e;
+}
+</style>
+</head>
+
+<body>
+
+<div id="loginPage">
+<form class="login-card" onsubmit="event.preventDefault();login();">
+<h2>Sales Dashboard</h2>
+
 <input id="email" type="email" placeholder="Email">
 <input id="password" type="password" placeholder="Password">
+
 <button type="submit">Login</button>
 <button type="button" onclick="register()">Register</button>
 </form>
-</div><div id="app">
+</div>
+
+<div id="app">
+
 <div class="sidebar">
-<div class="logo">IQBAL</div>
-<div class="menu active" onclick="showPage('dashboard',this)">📊 Dashboard</div>
-<div class="menu" onclick="showPage('input',this)">➕ Input</div>
-<div class="menu" onclick="showPage('laporan',this)">📑 Laporan</div>
-<div class="menu" onclick="logout()">🚪 Logout</div>
-</div><div class="main"><div id="dashboard"><div class="card" style="margin-bottom:20px;">
-<h3 style="margin-bottom:15px;">🎯 Target Bulanan</h3>
-<input type="number" id="targetInput" placeholder="Masukkan target bulanan">
-<button onclick="saveTarget()">💾 Simpan Target</button>
-</div><div class="card" style="margin-bottom:20px;">
-<select id="filterCabang" onchange="render()"></select>
-</div><div class="grid">
-<div class="stat"><h2 id="total">Rp 0</h2><p>Total Omset</p></div>
-<div class="stat"><h2 id="trx">0</h2><p>Total Transaksi</p></div>
-<div class="stat"><h2 id="avg">Rp 0</h2><p>Rata-rata Omset</p></div>
-<div class="stat"><h2 id="targetCard">Rp 0</h2><p>Target Bulanan</p></div>
-<div class="stat"><h2 id="gapCard">Rp 0</h2><p>Sisa Target</p></div>
+
+<div class="menu active" onclick="showPage('dashboard',this)">
+📊 Dashboard
+</div>
+
+<div class="menu" onclick="showPage('input',this)">
+➕ Input
+</div>
+
+<div class="menu" onclick="showPage('laporan',this)">
+📑 Laporan
+</div>
+
+<div class="menu" onclick="logout()">
+🚪 Logout
+</div>
+
+</div>
+
+<div class="main">
+
+<div id="dashboard">
+
+<div class="grid">
+
+<div class="stat">
+<h2 id="total">Rp 0</h2>
+<p>Total Omset</p>
+</div>
+
+<div class="stat">
+<h2 id="trx">0</h2>
+<p>Total Transaksi</p>
+</div>
+
+<div class="stat">
+<h2 id="targetCard">Rp 0</h2>
+<p>Target Bulanan</p>
+</div>
+
+<div class="stat">
+<h2 id="gapCard">Rp 0</h2>
+<p>Sisa Target</p>
+</div>
+
 <div class="stat">
 <h2 id="progressCard">0%</h2>
 <p>Progress Target</p>
-<div class="progress-bar"><div id="progressFill" class="progress-fill"></div></div>
+
+<div class="progress-bar">
+<div id="progressFill" class="progress-fill"></div>
 </div>
-</div><div class="grid">
+
+</div>
+
+</div>
+
+<div class="grid">
+
 <div class="card">
-<h3 style="margin-bottom:20px;">📊 Omset Harian</h3>
-<div class="chart-box"><canvas id="chart"></canvas></div>
+<h3>📊 Omset Harian</h3>
+<div class="chart-box">
+<canvas id="chart"></canvas>
 </div>
+</div>
+
+</div>
+
+</div>
+
+<div id="input" class="hidden">
+
 <div class="card">
-<h3 style="margin-bottom:20px;">👤 Per Sales</h3>
-<div class="chart-box"><canvas id="chartSales"></canvas></div>
-</div>
-</div>
-</div><div id="input" class="hidden">
-<div class="card">
-<h3 style="margin-bottom:20px;">Input Data Sales</h3>
+
+<h3>🎯 Target Bulanan</h3>
+
+<input type="number" id="targetInput" placeholder="Masukkan target bulanan">
+
+<button onclick="saveTarget()">
+💾 Simpan Target
+</button>
+
+<hr style="margin:25px 0;opacity:.2">
+
+<h3>Input Data Sales</h3>
+
 <input id="toko" placeholder="Nama Toko">
+
 <input type="date" id="tanggal">
+
 <input id="omset" type="number" placeholder="Nominal Omset">
+
 <select id="inputSales"></select>
+
 <input type="file" id="notaFile" accept="image/*">
-<button onclick="scanNota()">📷 Scan Nota</button>
-<div id="scanStatus" class="small"></div>
-<button onclick="simpan()">💾 Simpan Data</button>
+
+<button onclick="scanNota()">
+📷 Scan Nota
+</button>
+
+<div id="scanStatus"></div>
+
+<button onclick="simpan()">
+💾 Simpan Data
+</button>
+
 </div>
-</div><div id="laporan" class="hidden">
-<div class="card table-wrapper">
+
+</div>
+
+<div id="laporan" class="hidden">
+
+<div class="card">
+
 <table class="table">
+
 <thead>
 <tr>
 <th>Tanggal</th>
@@ -130,12 +260,22 @@ canvas{width:100%!important;height:100%!important;}
 <th>Aksi</th>
 </tr>
 </thead>
+
 <tbody id="table"></tbody>
+
 </table>
+
 </div>
-</div></div>
-</div><script>
-const firebaseConfig={
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+const firebaseConfig = {
 apiKey:"AIzaSyC-dtWEgB6FcHeVqD5PfzC_AFZoZ0eXRtI",
 authDomain:"gudang-app-pro.firebaseapp.com",
 projectId:"gudang-app-pro",
@@ -146,74 +286,97 @@ appId:"1:795043382766:web:9d908c909fb6a2774dfaff"
 
 firebase.initializeApp(firebaseConfig);
 
-const auth=firebase.auth();
-const db=firebase.firestore();
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-let data=[];
-let salesList=[];
-let monthlyTarget=0;
-let currentUser=null;
-let chartInstance=null;
-let chartSalesInstance=null;
+let currentUser = null;
+let data = [];
+let monthlyTarget = 0;
+let chartInstance = null;
 
-window.onload=()=>{
-document.getElementById('tanggal').value=new Date().toISOString().split('T')[0];
+window.onload = ()=>{
+tanggal.value = new Date().toISOString().split("T")[0];
 };
 
 function rp(n){
-return 'Rp '+Number(n||0).toLocaleString('id-ID');
+return "Rp " + Number(n || 0).toLocaleString("id-ID");
 }
 
 function userSales(){
 if(!currentUser) return null;
-return db.collection('users').doc(currentUser.uid).collection('sales');
+
+return db
+.collection("users")
+.doc(currentUser.uid)
+.collection("sales");
 }
 
 function userTargets(){
 if(!currentUser) return null;
-return db.collection('users').doc(currentUser.uid).collection('targets');
+
+return db
+.collection("users")
+.doc(currentUser.uid)
+.collection("targets");
 }
 
 function showPage(id,el){
-['dashboard','input','laporan'].forEach(page=>{
-document.getElementById(page).classList.add('hidden');
+
+["dashboard","input","laporan"].forEach(page=>{
+document.getElementById(page).classList.add("hidden");
 });
-document.getElementById(id).classList.remove('hidden');
-document.querySelectorAll('.menu').forEach(m=>m.classList.remove('active'));
-el.classList.add('active');
+
+document.getElementById(id).classList.remove("hidden");
+
+document.querySelectorAll(".menu").forEach(m=>{
+m.classList.remove("active");
+});
+
+el.classList.add("active");
+
 }
 
 async function login(){
-const emailValue=document.getElementById('email').value.trim();
-const passwordValue=document.getElementById('password').value.trim();
-if(!emailValue||!passwordValue){
-alert('Lengkapi email & password');
+
+const emailValue = email.value.trim();
+const passwordValue = password.value.trim();
+
+if(!emailValue || !passwordValue){
+alert("Lengkapi email & password");
 return;
 }
+
 try{
-await auth.signInWithEmailAndPassword(emailValue,passwordValue);
+await auth.signInWithEmailAndPassword(
+emailValue,
+passwordValue
+);
 }catch(err){
 alert(err.message);
 }
+
 }
 
 async function register(){
-const emailValue=document.getElementById('email').value.trim();
-const passwordValue=document.getElementById('password').value.trim();
-if(passwordValue.length<6){
-alert('Password minimal 6 karakter');
-return;
-}
+
+const emailValue = email.value.trim();
+const passwordValue = password.value.trim();
+
 try{
-const userCredential=await auth.createUserWithEmailAndPassword(emailValue,passwordValue);
-await db.collection('users').doc(userCredential.user.uid).set({
-email:emailValue,
-createdAt:new Date()
-});
-alert('Register berhasil');
+
+await auth.createUserWithEmailAndPassword(
+emailValue,
+passwordValue
+);
+
+alert("Register berhasil");
+
 }catch(err){
+
 alert(err.message);
+
 }
+
 }
 
 function logout(){
@@ -221,210 +384,252 @@ auth.signOut();
 }
 
 async function saveTarget(){
-const value=Number(document.getElementById('targetInput').value);
+
+const value = Number(targetInput.value);
+
 if(!value){
-alert('Masukkan target');
+alert("Masukkan target");
 return;
 }
-const bulan=new Date().toISOString().slice(0,7);
-await userTargets().doc(bulan).set({
+
+const bulan = new Date()
+.toISOString()
+.slice(0,7);
+
+await userTargets()
+.doc(bulan)
+.set({
 bulan,
-target:value,
-updatedAt:new Date()
+target:value
 });
-alert('Target berhasil disimpan');
+
+alert("Target berhasil disimpan");
+
 }
 
 async function migrateOldData(){
+
 if(!currentUser) return;
-try{
-const userSnapshot=await userSales().get();
+
+const userSnapshot = await userSales().get();
+
 if(!userSnapshot.empty) return;
-const oldSnapshot=await db.collection('sales').get();
+
+const oldSnapshot =
+await db.collection("sales").get();
+
 for(const doc of oldSnapshot.docs){
-const d=doc.data();
+
+const d = doc.data();
+
 await userSales().add({
-toko:d.toko||'',
-tanggal:d.tanggal||'',
-omset:Number(d.omset||0),
-sales:d.sales||'Sales 1',
-uid:currentUser.uid,
-createdAt:new Date()
+toko:d.toko || "",
+tanggal:d.tanggal || "",
+omset:Number(d.omset || 0),
+sales:d.sales || "Sales 1",
+uid:currentUser.uid
 });
+
 }
-console.log('Migrasi selesai');
-}catch(err){
-console.log(err);
-}
+
 }
 
 auth.onAuthStateChanged(async user=>{
+
 if(user){
-currentUser=user;
-loginPage.classList.add('hidden');
-app.classList.add('show');
+
+currentUser = user;
+
+loginPage.classList.add("hidden");
+app.classList.add("show");
+
 await migrateOldData();
+
 loadData();
+
 }else{
-currentUser=null;
-loginPage.classList.remove('hidden');
-app.classList.remove('show');
+
+currentUser = null;
+
+loginPage.classList.remove("hidden");
+app.classList.remove("show");
+
 }
+
 });
 
 function loadData(){
+
 if(!currentUser) return;
 
 userSales().onSnapshot(snapshot=>{
-data=snapshot.docs.map(doc=>({id:doc.id,...doc.data()}));
-loadSales();
+
+data = snapshot.docs.map(doc=>({
+id:doc.id,
+...doc.data()
+}));
+
 render();
+
 });
 
 userTargets().onSnapshot(snapshot=>{
-monthlyTarget=0;
-const bulanSekarang=new Date().toISOString().slice(0,7);
-snapshot.docs.forEach(doc=>{
-const d=doc.data();
-if(d.bulan===bulanSekarang){
-monthlyTarget=Number(d.target||0);
-document.getElementById('targetInput').value=monthlyTarget;
-}
-});
-render();
-});
-}
 
-function loadSales(){
-salesList=[...new Set(data.map(d=>(d.sales||'Sales 1').trim()))];
-if(salesList.length===0) salesList=['Sales 1','Sales 2'];
-inputSales.innerHTML=salesList.map(s=>`<option value="${s}">${s}</option>`).join('');
-filterCabang.innerHTML=`<option value="">Semua Sales</option>`+salesList.map(s=>`<option value="${s}">${s}</option>`).join('');
+snapshot.docs.forEach(doc=>{
+
+const d = doc.data();
+
+monthlyTarget = Number(d.target || 0);
+
+targetInput.value = monthlyTarget;
+
+});
+
+render();
+
+});
+
 }
 
 async function simpan(){
-if(!toko.value||!tanggal.value||!omset.value){
-alert('Lengkapi data');
-return;
-}
+
 await userSales().add({
 toko:toko.value,
 tanggal:tanggal.value,
 omset:Number(omset.value),
-sales:inputSales.value,
-uid:currentUser.uid,
-createdAt:new Date()
+sales:inputSales.value || "Sales 1",
+uid:currentUser.uid
 });
-alert('Data berhasil disimpan');
-toko.value='';
-omset.value='';
+
+alert("Data berhasil disimpan");
+
 }
 
 async function del(id){
-if(!confirm('Hapus data ini?')) return;
-await userSales().doc(id).delete();
+
+await userSales()
+.doc(id)
+.delete();
+
 }
 
 async function scanNota(){
-const file=notaFile.files[0];
-if(!file){
-alert('Pilih gambar nota');
-return;
-}
-scanStatus.innerHTML='Scanning OCR...';
+
+const file = notaFile.files[0];
+
+if(!file) return;
+
+scanStatus.innerHTML = "Scanning OCR...";
+
 try{
-const result=await Tesseract.recognize(file,'ind');
-const text=result.data.text;
-let angka=text.match(/\d[\d.,]+/g);
-if(angka&&angka.length){
-let terbesar=0;
+
+const result =
+await Tesseract.recognize(file,'ind');
+
+const text = result.data.text;
+
+let angka = text.match(/\d[\d.,]+/g);
+
+if(angka && angka.length){
+
+let terbesar = 0;
+
 angka.forEach(a=>{
-const num=Number(a.replace(/[^\d]/g,''));
-if(num>terbesar) terbesar=num;
+
+const num =
+Number(a.replace(/[^\d]/g,''));
+
+if(num > terbesar)
+terbesar = num;
+
 });
-omset.value=terbesar;
+
+omset.value = terbesar;
+
 }
-scanStatus.innerHTML='✅ OCR berhasil';
+
+scanStatus.innerHTML = "✅ OCR berhasil";
+
 }catch(err){
-scanStatus.innerHTML='❌ OCR gagal';
+
+scanStatus.innerHTML = "❌ OCR gagal";
+
 }
+
 }
 
 function render(){
-let sales=filterCabang.value;
-let filtered=data.filter(d=>{
-let salesData=(d.sales||'Sales 1').trim();
-if(sales&&salesData!==sales) return false;
-return true;
+
+let totalVal =
+data.reduce((a,b)=>
+a + Number(b.omset || 0)
+,0);
+
+total.innerText = rp(totalVal);
+
+trx.innerText = data.length;
+
+targetCard.innerText = rp(monthlyTarget);
+
+let gap = monthlyTarget-totalVal;
+
+if(gap < 0) gap = 0;
+
+gapCard.innerText = rp(gap);
+
+let progress = monthlyTarget
+? Math.round((totalVal/monthlyTarget)*100)
+:0;
+
+progressCard.innerText = progress + "%";
+
+progressFill.style.width =
+Math.min(progress,100)+"%";
+
+let perHari = {};
+
+data.forEach(d=>{
+perHari[d.tanggal] =
+(perHari[d.tanggal] || 0)
++ Number(d.omset || 0);
 });
 
-filtered.sort((a,b)=>new Date(b.tanggal)-new Date(a.tanggal));
+if(chartInstance)
+chartInstance.destroy();
 
-let totalVal=filtered.reduce((a,b)=>a+Number(b.omset||0),0);
-
-total.innerText=rp(totalVal);
-trx.innerText=filtered.length;
-avg.innerText=rp(filtered.length?totalVal/filtered.length:0);
-
-targetCard.innerText=rp(monthlyTarget);
-
-let gap=monthlyTarget-totalVal;
-if(gap<0) gap=0;
-gapCard.innerText=rp(gap);
-
-let progress=monthlyTarget?Math.round((totalVal/monthlyTarget)*100):0;
-progressCard.innerText=progress+'%';
-
-progressFill.className='progress-fill';
-if(progress<50){
-progressFill.classList.add('progress-red');
-}else if(progress<80){
-progressFill.classList.add('progress-yellow');
-}else{
-progressFill.classList.add('progress-green');
-}
-progressFill.style.width=Math.min(progress,100)+'%';
-
-let perHari={};
-filtered.forEach(d=>{
-perHari[d.tanggal]=(perHari[d.tanggal]||0)+Number(d.omset||0);
-});
-
-if(chartInstance) chartInstance.destroy();
-chartInstance=new Chart(chart,{
+chartInstance = new Chart(chart,{
 type:'bar',
 data:{
 labels:Object.keys(perHari),
-datasets:[{data:Object.values(perHari),backgroundColor:'#3b82f6',borderRadius:12}]
+datasets:[{
+data:Object.values(perHari),
+backgroundColor:'#3b82f6'
+}]
 },
-options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}
+options:{
+responsive:true,
+maintainAspectRatio:false
+}
 });
 
-let perSales={};
-filtered.forEach(d=>{
-let s=(d.sales||'Sales 1').trim();
-perSales[s]=(perSales[s]||0)+Number(d.omset||0);
-});
-
-if(chartSalesInstance) chartSalesInstance.destroy();
-chartSalesInstance=new Chart(chartSales,{
-type:'bar',
-data:{
-labels:Object.keys(perSales),
-datasets:[{data:Object.values(perSales),backgroundColor:'#06b6d4',borderRadius:12}]
-},
-options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}
-});
-
-table.innerHTML=filtered.map(d=>`
+table.innerHTML =
+data.map(d=>`
 <tr>
 <td>${d.tanggal}</td>
 <td>${d.toko}</td>
 <td>${d.sales}</td>
 <td>${rp(d.omset)}</td>
-<td><button onclick="del('${d.id}')">Hapus</button></td>
+<td>
+<button onclick="del('${d.id}')">
+Hapus
+</button>
+</td>
 </tr>
-`).join('');
+`).join("");
+
 }
-</script></body>
+
+</script>
+
+</body>
 </html>
