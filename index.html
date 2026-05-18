@@ -339,7 +339,7 @@ async function login(){
 const emailValue = document.getElementById("email").value.trim();
 const password = document.getElementById("password").value.trim();
 
-if(!email || !password){
+if(!emailValue || !password){
 alert("Lengkapi email & password");
 return;
 }
@@ -383,52 +383,31 @@ function logout(){
 auth.signOut();
 }
 
- async function migrateOldData(){
+async function migrateOldData(){
 
 if(!currentUser) return;
 
 try{
 
-console.log("Mulai migrasi full...");
-
-/* AMBIL SEMUA DATA LAMA */
-
-const oldSnapshot =
-await db.collection("sales").get();
-
-if(oldSnapshot.empty){
-
-console.log("Tidak ada data lama");
-return;
-
-}
-
-/* HAPUS DATA USER LAMA */
-
-const existing =
+const migratedCheck =
 await db
 .collection("users")
 .doc(currentUser.uid)
 .collection("sales")
+.where("migrated","==",true)
+.limit(1)
 .get();
 
-for(const doc of existing.docs){
+if(!migratedCheck.empty) return;
 
-await doc.ref.delete();
-
-}
-
-/* PINDAHKAN SEMUA DATA */
+const oldSnapshot =
+await db.collection("sales").get();
 
 for(const doc of oldSnapshot.docs){
 
 const d = doc.data();
 
-await db
-.collection("users")
-.doc(currentUser.uid)
-.collection("sales")
-.add({
+await userSales().add({
 
 toko:d.toko || "",
 tanggal:d.tanggal || "",
@@ -442,20 +421,8 @@ createdAt:new Date()
 
 }
 
-console.log("Migrasi FULL selesai");
+console.log("Migrasi selesai");
 
-alert("Semua data lama berhasil dipindahkan");
-
-loadData();
-
-}catch(err){
-
-console.log(err);
-
-alert("Migrasi gagal");
-
-}
-   
 }catch(err){
 console.log(err);
 }
