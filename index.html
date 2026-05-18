@@ -1059,12 +1059,23 @@ let filtered = data.filter(d=>{
       return true;
     }
 
-    return salesData === sales;
-
-  }
+   return salesData
+.toLowerCase()
+.trim()
+===
+sales
+.toLowerCase()
+.trim();
 
   // USER biasa
-  return salesData === currentSales;
+ return salesData
+.toLowerCase()
+.trim()
+===
+
+currentSales
+.toLowerCase()
+.trim();
 
 });
   filtered.sort((a,b)=>
