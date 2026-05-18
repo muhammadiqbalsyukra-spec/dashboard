@@ -610,9 +610,14 @@ db.collection("targets")
 
     let d = doc.data();
 
-    if(d.bulan === bulanSekarang){
-      monthlyTarget = Number(d.target || 0);
-    }
+   if(String(d.bulan).trim() === bulanSekarang){
+
+  monthlyTarget =
+  Number(d.target || 0);
+
+}
+
+console.log("TARGET:", monthlyTarget);
 
   });
 
