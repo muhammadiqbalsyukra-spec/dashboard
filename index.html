@@ -451,25 +451,30 @@ app.classList.remove("show");
 
 function loadData(){
 
-const user = auth.currentUser;
-
 if(!user) return;
 
 db.collection("sales")
-.where("uid","==",user.uid)
 .onSnapshot(snapshot=>{
 
-data = snapshot.docs.map(doc=>({
+const user = auth.currentUser;
+
+data = snapshot.docs
+.map(doc=>({
 id:doc.id,
 ...doc.data()
-}));
+}))
+.filter(d=>{
+
+if(!d.uid) return true;
+
+return d.uid === user.uid;
+
+});
 
 loadSales();
 render();
 
 });
-
-}
 
 function loadSales(){
 
