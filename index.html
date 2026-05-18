@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8"/>
+<meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Sales Dashboard Pro</title>
 
@@ -15,33 +15,44 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
 body{
+
 font-family:'Inter',sans-serif;
-background:#000;
-color:#fff;
+
+background-image:url("wallpaper.jpg");
+
+background-size:cover;
+
+background-position:center;
+
+background-repeat:no-repeat;
+
+background-attachment:fixed;
+
 min-height:100vh;
+
 overflow-x:hidden;
+
+color:white;
+
 }
-.hidden{display:none!important}
-button,input,select{
-width:100%;
-padding:14px;
-margin-top:12px;
-border:none;
-border-radius:14px;
+.hidden{
+display:none !important;
+}
+
+button,
+input,
+select{
 font-family:'Inter',sans-serif;
 }
-button{
-background:linear-gradient(135deg,#2563eb,#06b6d4);
-color:#fff;
-font-weight:600;
-cursor:pointer;
-}
-input,select{
-background:rgba(255,255,255,.08);
-color:#fff;
-}
+
 #loginPage{
 min-height:100vh;
 display:flex;
@@ -49,92 +60,440 @@ justify-content:center;
 align-items:center;
 padding:20px;
 }
-.login-card,.card{
-background:rgba(15,20,35,.55);
+
+.login-card,
+.card{
+background:rgba(15,20,35,.50);
+border:1px solid rgba(255,255,255,.08);
 border-radius:24px;
 padding:24px;
-border:1px solid rgba(255,255,255,.08);
+box-shadow:0 20px 40px rgba(0,0,0,.35);
 }
+
 .login-card{
 width:100%;
 max-width:420px;
 }
-#app{display:none}
-#app.show{display:flex}
-.sidebar{
-width:250px;
-background:#111827;
-padding:20px;
-min-height:100vh;
+
+.login-title{
+font-size:28px;
+font-weight:700;
+margin-bottom:20px;
 }
+
+input,
+select,
+button{
+width:100%;
+padding:14px;
+border:none;
+border-radius:14px;
+margin-top:12px;
+font-size:15px;
+}
+
+input,
+select{
+background:rgba(255,255,255,.08);
+color:white;
+outline:none;
+}
+
+input::placeholder{
+color:#cbd5e1;
+}
+
+button{
+cursor:pointer;
+font-weight:600;
+color:white;
+background:linear-gradient(135deg,#2563eb,#06b6d4);
+transition:.2s;
+}
+
+button:hover{
+transform:translateY(-1px);
+opacity:.95;
+}
+
+button:active{
+transform:scale(.98);
+}
+
+#app{
+display:none;
+}
+
+#app.show{
+display:flex;
+}
+
+.sidebar{
+width:260px;
+min-height:100vh;
+padding:24px 18px;
+background:rgba(15,23,42,.78);
+border-right:1px solid rgba(255,255,255,.08);
+backdrop-filter:blur(16px);
+-webkit-backdrop-filter:blur(16px);
+}
+
+.logo{
+font-size:24px;
+font-weight:700;
+margin-bottom:30px;
+}
+
 .menu{
 padding:14px;
-border-radius:12px;
+border-radius:14px;
 margin-bottom:10px;
 cursor:pointer;
+transition:.25s ease;
 }
+
+.menu:hover{
+background:rgba(255,255,255,.06);
+}
+
 .menu.active{
 background:linear-gradient(135deg,#2563eb,#06b6d4);
 }
+
 .main{
-flex:1;
-padding:20px;
+    flex:1;
+    padding:24px;
+
+    background:rgba(0,0,0,.12);
+    backdrop-filter:blur(2px);
+
+    border-radius:24px;
+    margin:12px;
 }
+
 .grid{
 display:grid;
-grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
 gap:20px;
 margin-bottom:20px;
 }
+
 .stat{
-padding:20px;
-border-radius:20px;
-background:rgba(255,255,255,.05);
+padding:24px;
+border-radius:24px;
+background:rgba(15,20,35,.55);
+border:1px solid rgba(255,255,255,.08);
+transition:.25s ease;
 }
+
+.stat:hover{
+transform:translateY(-2px);
+box-shadow:0 20px 35px rgba(0,0,0,.25);
+}
+
+.stat h2{
+font-size:30px;
+margin-bottom:8px;
+}
+
+.card{
+transition:.25s ease;
+}
+
+.card:hover{
+transform:translateY(-2px);
+box-shadow:0 20px 35px rgba(0,0,0,.25);
+}
+
 .chart-box{
-height:300px;
+height:340px;
 }
+
+canvas{
+width:100% !important;
+height:100% !important;
+}
+
+.table-wrapper{
+overflow:auto;
+border-radius:20px;
+}
+
 .table{
 width:100%;
 border-collapse:collapse;
+min-width:700px;
 }
-.table th,.table td{
-padding:12px;
-border-bottom:1px solid rgba(255,255,255,.08);
+
+.table th,
+.table td{
+padding:14px;
+text-align:left;
+border-bottom:1px solid rgba(255,255,255,.06);
 }
+
+.table th{
+background:rgba(255,255,255,.04);
+}
+
 .progress-bar{
 width:100%;
 height:12px;
-background:rgba(255,255,255,.1);
+background:rgba(255,255,255,.12);
 border-radius:999px;
 overflow:hidden;
-margin-top:10px;
+margin-top:12px;
 }
+
 .progress-fill{
 height:100%;
 width:0%;
+transition:1s;
+border-radius:999px;
+}
+
+.progress-red{
+background:#ef4444;
+}
+
+.progress-yellow{
+background:#f59e0b;
+}
+
+.progress-green{
 background:#22c55e;
+}
+
+.small{
+margin-top:12px;
+font-size:13px;
+opacity:.8;
+}
+
+#previewBox{
+margin-top:20px;
+overflow:auto;
+max-height:400px;
+}
+
+input:focus,
+select:focus{
+outline:none;
+border:1px solid rgba(59,130,246,.5);
+box-shadow:0 0 0 3px rgba(59,130,246,.15);
+}
+
+::-webkit-scrollbar{
+height:8px;
+width:8px;
+}
+
+::-webkit-scrollbar-track{
+background:rgba(255,255,255,.05);
+}
+
+::-webkit-scrollbar-thumb{
+background:rgba(255,255,255,.18);
+border-radius:999px;
+}
+
+@media(max-width:900px){
+
+#app{
+flex-direction:column;
+}
+
+.sidebar{
+width:100%;
+min-height:auto;
+padding:12px;
+display:flex;
+gap:10px;
+overflow-x:auto;
+position:sticky;
+top:0;
+z-index:999;
+border-right:none;
+border-bottom:1px solid rgba(255,255,255,.08);
+}
+
+.logo{
+display:none;
+}
+
+.menu{
+min-width:max-content;
+margin-bottom:0;
+font-size:14px;
+padding:12px 16px;
+white-space:nowrap;
+flex-shrink:0;
+}
+
+.main{
+padding:14px;
+}
+
+.grid{
+grid-template-columns:1fr;
+gap:14px;
+}
+
+.stat{
+padding:20px;
+border-radius:22px;
+}
+
+.stat h2{
+font-size:24px;
+}
+
+.card{
+padding:18px;
+border-radius:22px;
+}
+
+.chart-box{
+height:260px;
+}
+
+input,
+select,
+button{
+font-size:16px;
+padding:16px;
+}
+
+.table{
+min-width:650px;
+}
+
+.table th,
+.table td{
+padding:12px;
+font-size:13px;
+}
+
+.login-card{
+padding:22px;
+border-radius:24px;
+}
+
+}
+
+@media(max-width:480px){
+
+body{
+font-size:14px;
+}
+
+.login-card,
+.card,
+.stat{
+border-radius:20px;
+}
+
+.login-title{
+font-size:24px;
+}
+
+.stat h2{
+font-size:22px;
+}
+
+.chart-box{
+height:220px;
+}
+
+button{
+font-size:15px;
+}
+
+.main{
+padding:12px;
+}
+
+.sidebar{
+padding:10px;
+gap:8px;
+}
+
+.menu{
+padding:10px 14px;
+font-size:13px;
+}
+
+.table th,
+.table td{
+font-size:12px;
+padding:10px;
+}
+
+}
+html,
+body{
+background-color:#000;
+}
+
+#app{
+background:transparent !important;
+}
+
+.main{
+    flex:1;
+    padding:24px;
+
+    background:rgba(0,0,0,.05);
+
+    border-radius:24px;
+    margin:12px;
+}
+
+#dashboard{
+background:transparent !important;
 }
 </style>
 </head>
 
 <body>
 
+<!-- LOGIN -->
+
 <div id="loginPage">
-<form class="login-card" onsubmit="event.preventDefault();login();">
-<h2>Sales Dashboard</h2>
+
+<form class="login-card" onsubmit="event.preventDefault(); login();">
+
+<div class="login-title">
+Sales Dashboard
+</div>
 
 <input id="email" type="email" placeholder="Email">
+
 <input id="password" type="password" placeholder="Password">
 
-<button type="submit">Login</button>
-<button type="button" onclick="register()">Register</button>
+<button type="submit">
+Login
+</button>
+
+<button type="button" onclick="register()">
+Register
+</button>
+
 </form>
+
 </div>
+
+<!-- APP -->
 
 <div id="app">
 
+<!-- SIDEBAR -->
+
 <div class="sidebar">
+
+<div class="logo">
+IQBAL
+</div>
 
 <div class="menu active" onclick="showPage('dashboard',this)">
 📊 Dashboard
@@ -154,9 +513,17 @@ background:#22c55e;
 
 </div>
 
+<!-- MAIN -->
+
 <div class="main">
 
+<!-- DASHBOARD -->
+
 <div id="dashboard">
+
+<div class="card" style="margin-bottom:20px;">
+<select id="filterCabang" onchange="render()"></select>
+</div>
 
 <div class="grid">
 
@@ -171,6 +538,11 @@ background:#22c55e;
 </div>
 
 <div class="stat">
+<h2 id="avg">Rp 0</h2>
+<p>Rata-rata Omset</p>
+</div>
+
+<div class="stat">
 <h2 id="targetCard">Rp 0</h2>
 <p>Target Bulanan</p>
 </div>
@@ -181,6 +553,7 @@ background:#22c55e;
 </div>
 
 <div class="stat">
+
 <h2 id="progressCard">0%</h2>
 <p>Progress Target</p>
 
@@ -195,31 +568,42 @@ background:#22c55e;
 <div class="grid">
 
 <div class="card">
-<h3>📊 Omset Harian</h3>
+
+<h3 style="margin-bottom:20px;">
+📊 Omset Harian
+</h3>
+
 <div class="chart-box">
 <canvas id="chart"></canvas>
 </div>
-</div>
 
 </div>
-
-</div>
-
-<div id="input" class="hidden">
 
 <div class="card">
 
-<h3>🎯 Target Bulanan</h3>
+<h3 style="margin-bottom:20px;">
+👤 Per Sales
+</h3>
 
-<input type="number" id="targetInput" placeholder="Masukkan target bulanan">
+<div class="chart-box">
+<canvas id="chartSales"></canvas>
+</div>
 
-<button onclick="saveTarget()">
-💾 Simpan Target
-</button>
+</div>
 
-<hr style="margin:25px 0;opacity:.2">
+</div>
 
-<h3>Input Data Sales</h3>
+</div>
+
+<!-- INPUT -->
+
+<div id="input" class="hidden">
+
+<div class="card" style="margin-bottom:20px;">
+
+<h3 style="margin-bottom:20px;">
+Input Data Sales
+</h3>
 
 <input id="toko" placeholder="Nama Toko">
 
@@ -235,7 +619,7 @@ background:#22c55e;
 📷 Scan Nota
 </button>
 
-<div id="scanStatus"></div>
+<div id="scanStatus" class="small"></div>
 
 <button onclick="simpan()">
 💾 Simpan Data
@@ -243,11 +627,35 @@ background:#22c55e;
 
 </div>
 
+<div class="card">
+
+<h3 style="margin-bottom:20px;">
+📄 OCR Rekap Multi Toko
+</h3>
+
+<input type="file" id="rekapFile" accept="image/*">
+
+<button onclick="scanRekap()">
+🚀 Scan Rekap Sales
+</button>
+
+<div id="rekapStatus" class="small"></div>
+
+<div id="previewBox"></div>
+
+<button id="saveMassBtn" class="hidden" onclick="saveMassal()">
+💾 Simpan Semua Data
+</button>
+
 </div>
+
+</div>
+
+<!-- LAPORAN -->
 
 <div id="laporan" class="hidden">
 
-<div class="card">
+<div class="card table-wrapper">
 
 <table class="table">
 
@@ -270,18 +678,21 @@ background:#22c55e;
 </div>
 
 </div>
-
 </div>
 
 <script>
 
+/* =========================
+FIREBASE
+========================= */
+
 const firebaseConfig = {
-apiKey:"AIzaSyC-dtWEgB6FcHeVqD5PfzC_AFZoZ0eXRtI",
-authDomain:"gudang-app-pro.firebaseapp.com",
-projectId:"gudang-app-pro",
-storageBucket:"gudang-app-pro.appspot.com",
-messagingSenderId:"795043382766",
-appId:"1:795043382766:web:9d908c909fb6a2774dfaff"
+apiKey: "AIzaSyC-dtWEgB6FcHeVqD5PfzC_AFZoZ0eXRtI",
+authDomain: "gudang-app-pro.firebaseapp.com",
+projectId: "gudang-app-pro",
+storageBucket: "gudang-app-pro.appspot.com",
+messagingSenderId: "795043382766",
+appId: "1:795043382766:web:9d908c909fb6a2774dfaff"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -289,84 +700,139 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-let currentUser = null;
-let data = [];
-let monthlyTarget = 0;
-let chartInstance = null;
+/* =========================
+GLOBAL
+========================= */
 
-window.onload = ()=>{
-tanggal.value = new Date().toISOString().split("T")[0];
+let data = [];
+let salesList = [];
+let hasilOCR = [];
+let monthlyTarget = 0;
+
+let chartInstance = null;
+let chartSalesInstance = null;
+
+/* =========================
+INIT
+========================= */
+
+window.onload = () => {
+
+tanggal.value = new Date()
+.toISOString()
+.split("T")[0];
+
 };
 
+/* =========================
+UTILS
+========================= */
+
 function rp(n){
-return "Rp " + Number(n || 0).toLocaleString("id-ID");
+
+return "Rp " + Number(n || 0)
+.toLocaleString("id-ID");
+
 }
 
 function userSales(){
-if(!currentUser) return null;
 
-return db
-.collection("users")
-.doc(currentUser.uid)
-.collection("sales");
+return db.collection("sales");
+
 }
 
-function userTargets(){
-if(!currentUser) return null;
-
-return db
-.collection("users")
-.doc(currentUser.uid)
-.collection("targets");
-}
+/* =========================
+MENU
+========================= */
 
 function showPage(id,el){
 
-["dashboard","input","laporan"].forEach(page=>{
-document.getElementById(page).classList.add("hidden");
+["dashboard","input","laporan"]
+.forEach(page=>{
+
+document
+.getElementById(page)
+.classList.add("hidden");
+
 });
 
-document.getElementById(id).classList.remove("hidden");
+document
+.getElementById(id)
+.classList.remove("hidden");
 
-document.querySelectorAll(".menu").forEach(m=>{
-m.classList.remove("active");
-});
+document
+.querySelectorAll(".menu")
+.forEach(m=>m.classList.remove("active"));
 
 el.classList.add("active");
 
 }
 
+/* =========================
+AUTH
+========================= */
+
 async function login(){
 
-const emailValue = email.value.trim();
-const passwordValue = password.value.trim();
+const email = document
+.getElementById("email")
+.value
+.trim();
 
-if(!emailValue || !passwordValue){
+const password = document
+.getElementById("password")
+.value
+.trim();
+
+if(!email || !password){
+
 alert("Lengkapi email & password");
 return;
+
 }
 
 try{
+
 await auth.signInWithEmailAndPassword(
-emailValue,
-passwordValue
+email,
+password
 );
+
+alert("Login berhasil");
+
 }catch(err){
+
 alert(err.message);
+console.log(err);
+
 }
 
 }
 
 async function register(){
 
-const emailValue = email.value.trim();
-const passwordValue = password.value.trim();
+const email = document
+.getElementById("email")
+.value
+.trim();
+
+const password = document
+.getElementById("password")
+.value
+.trim();
+
+if(!email || !password){
+
+alert("Lengkapi email & password");
+return;
+
+}
 
 try{
 
 await auth.createUserWithEmailAndPassword(
-emailValue,
-passwordValue
+email,
+password
 );
 
 alert("Register berhasil");
@@ -374,82 +840,32 @@ alert("Register berhasil");
 }catch(err){
 
 alert(err.message);
+console.log(err);
 
 }
 
 }
 
 function logout(){
+
 auth.signOut();
-}
-
-async function saveTarget(){
-
-const value = Number(targetInput.value);
-
-if(!value){
-alert("Masukkan target");
-return;
-}
-
-const bulan = new Date()
-.toISOString()
-.slice(0,7);
-
-await userTargets()
-.doc(bulan)
-.set({
-bulan,
-target:value
-});
-
-alert("Target berhasil disimpan");
 
 }
 
-async function migrateOldData(){
+/* =========================
+AUTH STATE
+========================= */
 
-if(!currentUser) return;
-
-const userSnapshot = await userSales().get();
-
-if(!userSnapshot.empty) return;
-
-const oldSnapshot =
-await db.collection("sales").get();
-
-for(const doc of oldSnapshot.docs){
-
-const d = doc.data();
-
-await userSales().add({
-toko:d.toko || "",
-tanggal:d.tanggal || "",
-omset:Number(d.omset || 0),
-sales:d.sales || "Sales 1",
-uid:currentUser.uid
-});
-
-}
-
-}
-
-auth.onAuthStateChanged(async user=>{
+auth.onAuthStateChanged(user=>{
 
 if(user){
-
-currentUser = user;
 
 loginPage.classList.add("hidden");
 app.classList.add("show");
 
-await migrateOldData();
-
 loadData();
 
 }else{
-
-currentUser = null;
 
 loginPage.classList.remove("hidden");
 app.classList.remove("show");
@@ -458,30 +874,46 @@ app.classList.remove("show");
 
 });
 
+/* LANJUTKAN SCRIPT LAMA KAMU DI SINI TANPA DIUBAH */
+/* =========================
+LOAD DATA
+========================= */
+
 function loadData(){
 
-if(!currentUser) return;
-
-userSales().onSnapshot(snapshot=>{
+userSales()
+.onSnapshot(snapshot=>{
 
 data = snapshot.docs.map(doc=>({
+
 id:doc.id,
 ...doc.data()
+
 }));
 
+loadSales();
 render();
 
 });
 
-userTargets().onSnapshot(snapshot=>{
+db.collection("targets")
+.onSnapshot(snapshot=>{
+
+monthlyTarget = 0;
+
+const bulanSekarang = new Date()
+.toISOString()
+.slice(0,7);
 
 snapshot.docs.forEach(doc=>{
 
 const d = doc.data();
 
+if(d.bulan === bulanSekarang){
+
 monthlyTarget = Number(d.target || 0);
 
-targetInput.value = monthlyTarget;
+}
 
 });
 
@@ -491,21 +923,85 @@ render();
 
 }
 
+/* =========================
+LOAD SALES
+========================= */
+
+function loadSales(){
+
+salesList = [
+...new Set(
+data.map(d=>(d.sales || "Sales 1").trim())
+)
+];
+
+if(salesList.length === 0){
+
+salesList = [
+"Sales 1",
+"Sales 2"
+];
+
+}
+
+inputSales.innerHTML =
+salesList.map(s=>`
+<option value="${s}">
+${s}
+</option>
+`).join("");
+
+filterCabang.innerHTML =
+`<option value="">Semua Sales</option>` +
+salesList.map(s=>`
+<option value="${s}">
+${s}
+</option>
+`).join("");
+
+}
+
+/* =========================
+SIMPAN
+========================= */
+
 async function simpan(){
 
+if(
+!toko.value ||
+!tanggal.value ||
+!omset.value
+){
+
+alert("Lengkapi data");
+return;
+
+}
+
 await userSales().add({
+
 toko:toko.value,
 tanggal:tanggal.value,
 omset:Number(omset.value),
-sales:inputSales.value || "Sales 1",
-uid:currentUser.uid
+sales:inputSales.value
+
 });
+
+toko.value = "";
+omset.value = "";
 
 alert("Data berhasil disimpan");
 
 }
 
+/* =========================
+DELETE
+========================= */
+
 async function del(id){
+
+if(!confirm("Hapus data ini?"))
+return;
 
 await userSales()
 .doc(id)
@@ -513,107 +1009,202 @@ await userSales()
 
 }
 
-async function scanNota(){
-
-const file = notaFile.files[0];
-
-if(!file) return;
-
-scanStatus.innerHTML = "Scanning OCR...";
-
-try{
-
-const result =
-await Tesseract.recognize(file,'ind');
-
-const text = result.data.text;
-
-let angka = text.match(/\d[\d.,]+/g);
-
-if(angka && angka.length){
-
-let terbesar = 0;
-
-angka.forEach(a=>{
-
-const num =
-Number(a.replace(/[^\d]/g,''));
-
-if(num > terbesar)
-terbesar = num;
-
-});
-
-omset.value = terbesar;
-
-}
-
-scanStatus.innerHTML = "✅ OCR berhasil";
-
-}catch(err){
-
-scanStatus.innerHTML = "❌ OCR gagal";
-
-}
-
-}
+/* =========================
+RENDER
+========================= */
 
 function render(){
 
-let totalVal =
-data.reduce((a,b)=>
+let sales = filterCabang.value;
+
+let filtered = data.filter(d=>{
+
+let salesData =
+(d.sales || "Sales 1").trim();
+
+if(sales && salesData !== sales)
+return false;
+
+return true;
+
+});
+
+filtered.sort((a,b)=>
+new Date(b.tanggal)
+- new Date(a.tanggal)
+);
+
+let totalVal = filtered.reduce((a,b)=>
 a + Number(b.omset || 0)
 ,0);
 
 total.innerText = rp(totalVal);
+trx.innerText = filtered.length;
 
-trx.innerText = data.length;
+avg.innerText = rp(
+filtered.length
+? totalVal / filtered.length
+: 0
+);
 
-targetCard.innerText = rp(monthlyTarget);
+let gap = monthlyTarget - totalVal;
 
-let gap = monthlyTarget-totalVal;
-
-if(gap < 0) gap = 0;
-
-gapCard.innerText = rp(gap);
+if(gap < 0)
+gap = 0;
 
 let progress = monthlyTarget
-? Math.round((totalVal/monthlyTarget)*100)
-:0;
+? Math.round((totalVal / monthlyTarget) * 100)
+: 0;
 
+targetCard.innerText = rp(monthlyTarget);
+gapCard.innerText = rp(gap);
 progressCard.innerText = progress + "%";
 
+progressFill.className = "progress-fill";
+
+if(progress < 50){
+
+progressFill.classList.add("progress-red");
+
+}else if(progress < 80){
+
+progressFill.classList.add("progress-yellow");
+
+}else{
+
+progressFill.classList.add("progress-green");
+
+}
+
 progressFill.style.width =
-Math.min(progress,100)+"%";
+Math.min(progress,100) + "%";
+
+/* =========================
+CHART HARIAN
+========================= */
 
 let perHari = {};
 
-data.forEach(d=>{
+filtered.forEach(d=>{
+
 perHari[d.tanggal] =
 (perHari[d.tanggal] || 0)
 + Number(d.omset || 0);
+
 });
+
+let sortedTanggal = Object.keys(perHari)
+.sort((a,b)=>new Date(a)-new Date(b));
+
+let sortedValues =
+sortedTanggal.map(t=>perHari[t]);
 
 if(chartInstance)
 chartInstance.destroy();
 
 chartInstance = new Chart(chart,{
+
 type:'bar',
+
 data:{
-labels:Object.keys(perHari),
+labels:sortedTanggal,
 datasets:[{
-data:Object.values(perHari),
-backgroundColor:'#3b82f6'
+data:sortedValues,
+borderRadius:12,
+backgroundColor:
+sortedValues.map(v=>{
+
+if(v >= 10000000)
+return '#22c55e';
+
+if(v >= 5000000)
+return '#3b82f6';
+
+if(v >= 1000000)
+return '#f59e0b';
+
+return '#ef4444';
+
+})
 }]
 },
+
 options:{
 responsive:true,
-maintainAspectRatio:false
+maintainAspectRatio:false,
+plugins:{
+legend:{display:false}
 }
+}
+
 });
 
+/* =========================
+CHART SALES
+========================= */
+
+let perSales = {};
+
+filtered.forEach(d=>{
+
+let s =
+(d.sales || "Sales 1").trim();
+
+perSales[s] =
+(perSales[s] || 0)
++ Number(d.omset || 0);
+
+});
+
+if(chartSalesInstance)
+chartSalesInstance.destroy();
+
+chartSalesInstance =
+new Chart(chartSales,{
+
+type:'bar',
+
+data:{
+labels:Object.keys(perSales),
+datasets:[{
+data:Object.values(perSales),
+borderRadius:12,
+backgroundColor:
+Object.values(perSales)
+.map(v=>{
+
+if(v >= 10000000)
+return '#22c55e';
+
+if(v >= 5000000)
+return '#3b82f6';
+
+if(v >= 1000000)
+return '#f59e0b';
+
+return '#ef4444';
+
+})
+}]
+},
+
+options:{
+responsive:true,
+maintainAspectRatio:false,
+plugins:{
+legend:{display:false}
+}
+}
+
+});
+
+/* =========================
+TABLE
+========================= */
+
 table.innerHTML =
-data.map(d=>`
+filtered.map(d=>`
+
 <tr>
 <td>${d.tanggal}</td>
 <td>${d.toko}</td>
@@ -625,10 +1216,10 @@ Hapus
 </button>
 </td>
 </tr>
+
 `).join("");
 
-}
-
+  }
 </script>
 
 </body>
