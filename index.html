@@ -460,16 +460,22 @@ db.collection("sales")
 
 data = snapshot.docs
 .map(doc=>({
+
 id:doc.id,
 ...doc.data()
+
 }))
 .filter(d=>{
 
+/* tampilkan data lama yg belum punya uid */
 if(!d.uid) return true;
 
+/* tampilkan data milik user login */
 return d.uid === user.uid;
 
 });
+
+console.log("DATA:",data);
 
 loadSales();
 render();
