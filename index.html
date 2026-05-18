@@ -336,7 +336,7 @@ el.classList.add("active");
 
 async function login(){
 
-const email = email.value?.trim() || document.getElementById("email").value.trim();
+const emailValue = document.getElementById("email").value.trim();
 const password = document.getElementById("password").value.trim();
 
 if(!email || !password){
@@ -345,7 +345,7 @@ return;
 }
 
 try{
-await auth.signInWithEmailAndPassword(email,password);
+await auth.signInWithEmailAndPassword(emailValue,password);
 }catch(err){
 alert(err.message);
 }
