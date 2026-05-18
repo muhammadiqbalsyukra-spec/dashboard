@@ -336,7 +336,18 @@ canvas{
     </button>
 
     <div id="scanStatus" class="small"></div>
+<hr style="margin:20px 0;border:none;border-top:1px solid rgba(255,255,255,.1);">
 
+<h3>🎯 Setting Target Bulanan</h3>
+
+<input
+  id="targetBulanan"
+  type="number"
+  placeholder="Masukkan Target Bulanan">
+
+<button onclick="saveTarget()">
+  Simpan Target
+</button>
     <button onclick="simpan()">
       Simpan Data
     </button>
@@ -390,6 +401,52 @@ canvas{
 </div>
 
   </div></div><script>
+    async function saveTarget(){
+
+  let target =
+  Number(targetBulanan.value);
+
+  if(!target){
+
+    alert("Isi target dulu");
+    return;
+
+  }
+
+  let bulanSekarang =
+  new Date()
+  .toISOString()
+  .slice(0,7);
+
+  // cek apakah target bulan ini sudah ada
+  let snap =
+  await db.collection("targets")
+  .where("bulan","==",bulanSekarang)
+  .get();
+
+  // hapus target lama
+  for(let doc of snap.docs){
+
+    await db.collection("targets")
+    .doc(doc.id)
+    .delete();
+
+  }
+
+  // simpan target baru
+  await db.collection("targets")
+  .add({
+
+    bulan:bulanSekarang,
+    target:target
+
+  });
+
+  alert("Target berhasil disimpan");
+
+  targetBulanan.value = "";
+
+}
 
 const firebaseConfig = {
   apiKey: "AIzaSyC-dtWEgB6FcHeVqD5PfzC_AFZoZ0eXRtI",
