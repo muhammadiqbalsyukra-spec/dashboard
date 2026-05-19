@@ -594,8 +594,8 @@ if(currentRole === "admin"){
   adminBadge.classList.add("hidden");
 
 }
-    render();
-
+    loadSalesData();
+render();
   }else{
 
     loginPage.classList.remove("hidden");
@@ -670,17 +670,38 @@ console.log("TARGET:", monthlyTarget);
 
 });
 
-db.collection("sales")
-.onSnapshot(snap=>{
+function loadSalesData(){
 
-  data = snap.docs.map(d=>({
-    ...d.data(),
-    id:d.id
-  }));
+  let query =
+  db.collection("sales");
 
-  render();
+  // kalau bukan admin
+  // hanya ambil data miliknya
+  if(currentRole !== "admin"){
 
-});
+    query =
+    query.where(
+      "sales",
+      "==",
+      currentSales
+    );
+
+  }
+
+  query.onSnapshot(snap=>{
+
+    data = snap.docs.map(d=>({
+
+      ...d.data(),
+      id:d.id
+
+    }));
+
+    render();
+
+  });
+
+}
 
 async function scanNota(){
 
