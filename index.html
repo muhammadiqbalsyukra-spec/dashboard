@@ -1042,42 +1042,45 @@ currentRole === "admin"
   alert("Data berhasil disimpan");
 
 }
-
+let chartInstance = null;
+let chartSalesInstance = null;
 function render(){
 
   let sales = filterCabang.value;
 
-let filtered = data.filter(d=>{
+  let filtered = data.filter(d=>{
 
-  let salesData =
-  (d.sales || "Sales 1").trim();
+    let salesData =
+    (d.sales || "Sales 1").trim();
 
-  // ADMIN lihat semua
-  if(currentRole === "admin"){
+    // ADMIN lihat semua
+    if(currentRole === "admin"){
 
-    if(!sales){
-      return true;
+      if(!sales){
+        return true;
+      }
+
+      return salesData
+      .toLowerCase()
+      .trim()
+      ===
+      sales
+      .toLowerCase()
+      .trim();
+
     }
 
-   return salesData
-.toLowerCase()
-.trim()
-===
-sales
-.toLowerCase()
-.trim();
+    // USER biasa
+    return salesData
+    .toLowerCase()
+    .trim()
+    ===
+    currentSales
+    .toLowerCase()
+    .trim();
 
-  // USER biasa
- return salesData
-.toLowerCase()
-.trim()
-===
+  });
 
-currentSales
-.toLowerCase()
-.trim();
-
-});
   filtered.sort((a,b)=>
     new Date(b.tanggal)
     - new Date(a.tanggal)
@@ -1188,19 +1191,18 @@ currentSales
 
   });
 
- let perSales = {};
+  let perSales = {};
 
-filtered.forEach(d=>{
+  filtered.forEach(d=>{
 
-  let salesName =
-  (d.sales || "Sales 1").trim();
+    let salesName =
+    (d.sales || "Sales 1").trim();
 
-  perSales[salesName] =
-  (perSales[salesName] || 0)
-  + d.omset;
+    perSales[salesName] =
+    (perSales[salesName] || 0)
+    + d.omset;
 
-});
-  
+  });
 
   if(chartSalesInstance)
   chartSalesInstance.destroy();
@@ -1267,7 +1269,7 @@ filtered.forEach(d=>{
 
   `).join('');
 
-}
+} 
 
 function rp(a){
 
