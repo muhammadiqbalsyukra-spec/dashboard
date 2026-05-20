@@ -741,21 +741,25 @@ window.onload = ()=>{
 
 function showPage(id,el){
 
-  // sembunyikan semua halaman
+  // DASHBOARD
   document
-  .querySelectorAll(
-    "#dashboard,#input,#laporan"
-  )
-  .forEach(page=>{
+  .getElementById("dashboard")
+  .style.display = "none";
 
-    page.classList.add("hidden");
+  // INPUT
+  document
+  .getElementById("input")
+  .style.display = "none";
 
-  });
+  // LAPORAN
+  document
+  .getElementById("laporan")
+  .style.display = "none";
 
-  // tampilkan halaman dipilih
+  // tampilkan yg dipilih
   document
   .getElementById(id)
-  .classList.remove("hidden");
+  .style.display = "block";
 
   // reset active menu
   document
@@ -766,7 +770,7 @@ function showPage(id,el){
 
   });
 
-  // aktifkan menu dipilih
+  // active menu baru
   if(el){
 
     el.classList.add("active");
@@ -849,6 +853,7 @@ auth.onAuthStateChanged(async user=>{
 
     loginPage.classList.add("hidden");
     app.classList.add("show");
+    showPage("dashboard");
 if(currentRole === "admin"){
 
   adminBadge.classList.remove("hidden");
