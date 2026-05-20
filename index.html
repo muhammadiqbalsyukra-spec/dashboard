@@ -741,22 +741,37 @@ window.onload = ()=>{
 
 function showPage(id,el){
 
-  ["dashboard","input","laporan"]
-  .forEach(x=>{
-    document
-    .getElementById(x)
-    .classList.add("hidden");
+  // sembunyikan semua halaman
+  document
+  .querySelectorAll(
+    "#dashboard,#input,#laporan"
+  )
+  .forEach(page=>{
+
+    page.classList.add("hidden");
+
   });
 
+  // tampilkan halaman dipilih
   document
   .getElementById(id)
   .classList.remove("hidden");
 
+  // reset active menu
   document
   .querySelectorAll(".menu")
-  .forEach(m=>m.classList.remove("active"));
+  .forEach(menu=>{
 
-  el.classList.add("active");
+    menu.classList.remove("active");
+
+  });
+
+  // aktifkan menu dipilih
+  if(el){
+
+    el.classList.add("active");
+
+  }
 
 }
 
